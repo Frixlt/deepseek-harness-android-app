@@ -683,7 +683,7 @@ public class OverlayService extends Service {
             // 老系统 Action.Builder(null, ...) 不吃图标时退化：不显示动作也不影响主流程
         }
         return b.setContentTitle(I18n.tr("🐋 DeepSeek Harness 运行中"))
-                .setContentText(I18n.tr("引擎状态：" + (engineUp ? "运行中（端口 " + enginePort + "）" : "未运行")))
+                .setContentText(I18n.tr("引擎状态：") + (engineUp ? I18n.tr("运行中（端口 ") + enginePort + "）" : I18n.tr("未运行")))
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(pi)
                 .setOngoing(true)

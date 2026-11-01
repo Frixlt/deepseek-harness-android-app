@@ -36,6 +36,7 @@ public final class I18n {
     private static final Pattern PAT_PORT_EXTRACT = Pattern.compile("^解压完成后可启动\\s*·\\s*端口\\s*(\\d+)$");
     private static final Pattern PAT_SESSIONS_RUNNING = Pattern.compile("^(\\d+)\\s*个会话运行中…$");
     private static final Pattern PAT_CALLING_TOOL = Pattern.compile("^正在调用\\s*(.+?)…$");
+    private static final Pattern PAT_ENGINE_STATUS_NOTIF = Pattern.compile("^引擎状态：(运行中（端口\\s*(\\d+)）|未运行)$");
     private static final Pattern PAT_SELFCHECK_SUMMARY = Pattern.compile("^清单文件\\s*(\\d+)\\s*·\\s*树上文件\\s*(\\d+)\\s*·\\s*已校验内容\\s*(\\d+)\\s*·\\s*用时\\s*(\\d+)s(.*)$");
     private static final Pattern PAT_SELFCHECK_DONE = Pattern.compile("^自检完成：(.+?)（缺失\\s*(\\d+)\\s*/\\s*不符\\s*(\\d+)）$");
     private static final Pattern PAT_WORKSPACE_SET = Pattern.compile("^已设置：(.+?)（点此更改或恢复默认）$");
@@ -201,8 +202,8 @@ public final class I18n {
 
         m = PAT_PORT_READY.matcher(s);
         if (m.matches()) {
-            return ru ? ("Нажмите «Запустить движок» для старта · Порт " + m.group(1))
-                      : ("Tap 'Start Engine' to begin · Port " + m.group(1));
+            return ru ? ("Нажмите «Запустить» для старта · Порт " + m.group(1))
+                      : ("Tap 'Start' to begin · Port " + m.group(1));
         }
 
         m = PAT_PORT_EXTRACT.matcher(s);
@@ -227,6 +228,16 @@ public final class I18n {
         m = PAT_CALLING_TOOL.matcher(s);
         if (m.matches()) {
             return ru ? ("Вызов " + m.group(1) + "…") : ("Calling " + m.group(1) + "…");
+        }
+
+        m = PAT_ENGINE_STATUS_NOTIF.matcher(s);
+        if (m.matches()) {
+            if (m.group(2) != null) {
+                return ru ? ("Состояние движка: выполняется (порт " + m.group(2) + ")")
+                          : ("Engine status: running (port " + m.group(2) + ")");
+            } else {
+                return ru ? "Состояние движка: не запущен" : "Engine status: not running";
+            }
         }
 
         m = PAT_SELFCHECK_SUMMARY.matcher(s);
@@ -255,7 +266,7 @@ public final class I18n {
 
         m = PAT_SAVED_THEMES.matcher(s);
         if (m.matches()) {
-            return (ru ? "Сохраненные темы (" : "Saved Themes (") + m.group(2) + ")";
+            return (ru ? "Сохранённые темы (" : "Saved Themes (") + m.group(2) + ")";
         }
 
         m = PAT_TRASH_COUNT.matcher(s);
