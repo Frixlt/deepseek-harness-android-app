@@ -71,6 +71,8 @@ mark() {  # $1=阶段名
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    --variant)  shift 2 ;;
+    --upstream) shift 2 ;;
     --keystore) KEYSTORE="${2:?}"; shift 2 ;;
     --android-jar) ANDROID_JAR_OPT="${2:?}"; shift 2 ;;
     --out)      OUT="${2:?}"; OUT_SET=1; shift 2 ;;

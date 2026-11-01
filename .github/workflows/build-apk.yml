@@ -10,19 +10,13 @@ name: build-apk (manual)
 on:
   workflow_dispatch:
     inputs:
-      variant:
-        description: '变体（community 用仓库内公开密钥，可直接构建）'
-        required: true
-        default: community
-        type: choice
-        options: [community, official, lite, compat]
-      upstream:
-        description: '上游 Release tag（默认见脚本顶部）'
+      original_look:
+        description: 'Оригинальный дизайн синего кита (--original-look)'
         required: false
-        default: v1.17.3
-        type: string
+        default: false
+        type: boolean
       emulator:
-        description: '额外适配 x86_64 模拟器（ndk_translation）'
+        description: 'Сборка для эмулятора x86_64 (--emulator)'
         required: false
         default: false
         type: boolean
@@ -62,13 +56,9 @@ jobs:
         id: build
         run: |
           set -o pipefail
-          ARGS="--variant ${{ inputs.variant }}"
-          if [ -n "${{ inputs.upstream }}" ]; then ARGS="$ARGS --upstream ${{ inputs.upstream }}"; fi
-          if [ "${{ inputs.emulator }}" = "true" ]; then
-            # 模拟器适配需要 x86_64 的 libz/libssl/libcrypto：CI 里没有设备可 pull，
-            # 这里跳过（真机/PC 本地按 tools/LOCAL-BUILD.md 第四节做）。只做兼容性提示。
-            echo "::warning::CI 未启用 --emulator（需要从设备取 x86_64 裸名库）"
-          fi
+          ARGS=""
+          if [ "${{ inputs.original_look }}" = "true" ]; then ARGS="$ARGS --original-look"; fi
+          if [ "${{ inputs.emulator }}" = "true" ]; then ARGS="$ARGS --emulator"; fi
           bash tools/build-apk.sh $ARGS
           echo "apk=$(ls -1 android-app/DeepSeekHarness*.apk | head -1)" >> "$GITHUB_OUTPUT"
 
@@ -84,7 +74,7 @@ jobs:
       - name: Upload APK + hash + build info
         uses: actions/upload-artifact@v4
         with:
-          name: dsh-apk-${{ inputs.variant }}-${{ github.sha }}
+          name: dsh-apk-${{ github.sha }}
           if-no-files-found: error
           path: |
             android-app/DeepSeekHarness*.apk
