@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeepSeek Harness</string>
+    <string name="accessibility_service_label">DeepSeek Harness Помощник экрана</string>
+    <!-- v1.7 Служба специальных возможностей: описание в системных настройках -->
+    <string name="accessibility_service_description">Позволяет ИИ считывать содержимое текущего экрана (текст и расположение элементов) и нажимать, вводить текст и прокручивать экран за вас. После включения ИИ сможет выполнять задачи по управлению экраном; все действия выполняются только по вашему запросу в диалоге, никакие данные не собираются.</string>
+</resources>

@@ -27,20 +27,22 @@ public class EngineService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        I18n.init(this);
         // v1.21：正在「完全退出」→ 立刻自停。否则 START_STICKY 会在进程被杀后重建本服务，
         // 常驻通知又冒出来，用户会觉得"没关干净"。
         if (MainActivity.shutdownPending(this)) { stopSelf(); return; }
         createChannel();
-        startForeground(NOTIF_ID, buildNotification("DeepSeek Harness 正在运行", "AI 引擎保活中，后台任务持续执行"));
+        startForeground(NOTIF_ID, buildNotification(I18n.tr("DeepSeek Harness 正在运行"), I18n.tr("AI 引擎保活中，后台任务持续执行")));
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        I18n.init(this);
         // v1.21：完全退出期间被系统重建 → 不自启动（返回 NOT_STICKY，避免反复重建）
         if (MainActivity.shutdownPending(this)) { stopSelf(); return START_NOT_STICKY; }
         // 每次收到启动/重启意图都刷新通知（系统杀进程后 START_STICKY 重建也会走到这里）
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm != null) nm.notify(NOTIF_ID, buildNotification("DeepSeek Harness 正在运行", "AI 引擎保活中，后台任务持续执行"));
+        if (nm != null) nm.notify(NOTIF_ID, buildNotification(I18n.tr("DeepSeek Harness 正在运行"), I18n.tr("AI 引擎保活中，后台任务持续执行")));
         return START_STICKY;
     }
 
@@ -87,7 +89,7 @@ public class EngineService extends Service {
                 .setOngoing(true)   // 常驻不可滑动删除
                 .setPriority(Notification.PRIORITY_LOW);
         if (Build.VERSION.SDK_INT >= 20) {
-            b.addAction(new Notification.Action.Builder(null, "打开界面", uiPi).build());
+            b.addAction(new Notification.Action.Builder(null, I18n.tr("打开界面"), uiPi).build());
         }
         return b.build();
     }
@@ -96,9 +98,9 @@ public class EngineService extends Service {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (nm == null) return;
-            NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "引擎保活",
+            NotificationChannel ch = new NotificationChannel(CHANNEL_ID, I18n.tr("引擎保活"),
                     NotificationManager.IMPORTANCE_LOW);
-            ch.setDescription("DeepSeek Harness 引擎运行状态");
+            ch.setDescription(I18n.tr("DeepSeek Harness 引擎运行状态"));
             nm.createNotificationChannel(ch);
         }
     }

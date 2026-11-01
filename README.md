@@ -7,10 +7,11 @@
 
 **📚 文档区：[`docs/`](docs/README.md) —— 新 agent 请从这里开始。**
 
-## 特性
+## 特性 / Features / Возможности
 
-| 方面 | 说明 |
+| 方面 / Aspect | 说明 / Description / Описание |
 |---|---|
+| 🌐 多语言 / Localization / Локализация | **Full English & Russian Localization / Полная русская и английская локализация**: автоопределение языка системы (`ru` / `zh` / `en`) + мгновенный переключатель языка в консоли (`Auto`, `English`, `Русский`, `中文`). Полностью переведены консоль управления, мастер первичной настройки, плавающее окно (Floating Whale Overlay), службы (`EngineService`, `OverlayService`, `AccessibilityService`, `VsreenBridgeService`), системные уведомления и bundled remote-плагин (`locale/ru.json`). |
 | 🐟 卡通形象 | 悬浮球/头像换成卡通大肥鱼立绘，配套应用图标与启动页 |
 | 🫧 悬浮窗 | 小人常驻屏幕边缘，头顶状态气泡（思考中 / 正在调用工具 / 任务已完成 / 摸鱼中…）；面板精简为「打开 / 控制台 / 退出」 |
 | 🖥️ 终端可用 | 打包 Android 预编译的 node-pty，换用真 bash，终端端到端可用 |

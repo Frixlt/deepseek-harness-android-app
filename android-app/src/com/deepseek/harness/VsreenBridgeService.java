@@ -135,7 +135,7 @@ public class VsreenBridgeService extends Service {
      */
     /** v1.25（控制台「功能 → 虚拟屏」）：给控制台读的状态文本。 */
     public static volatile String stateText = "未开启";
-    public static String publicState() { return stateText != null ? stateText : "未开启"; }
+    public static String publicState() { return I18n.tr(stateText != null ? stateText : "未开启"); }
 
     public static void showPreviewFromWhale() {
         VsreenBridgeService s = instance;
@@ -528,7 +528,7 @@ public class VsreenBridgeService extends Service {
     /** 浮层上的短提示（预览窗是 FLAG_NOT_FOCUSABLE，弹不出对话框）。 */
     private void toast(String msg) {
         try {
-            android.widget.Toast.makeText(getApplicationContext(), msg, android.widget.Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(getApplicationContext(), I18n.tr(msg), android.widget.Toast.LENGTH_SHORT).show();
         } catch (Throwable ignored) {}
     }
 
@@ -672,6 +672,7 @@ public class VsreenBridgeService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        I18n.init(this);
         instance = this;   // v1.13.11：供小鲸鱼面板回调「重新打开预览窗」
         running = true;
         new Thread(new Runnable() {

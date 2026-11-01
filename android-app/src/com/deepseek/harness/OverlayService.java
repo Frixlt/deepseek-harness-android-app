@@ -307,10 +307,10 @@ public class OverlayService extends Service {
     private static volatile String msgTool = DEF_MSG_TOOL;
     private static volatile String msgDone = DEF_MSG_DONE;
 
-    static String msgIdle()  { return msgIdle; }
-    static String msgThink() { return msgThink; }
-    static String msgTool()  { return msgTool; }
-    static String msgDone()  { return msgDone; }
+    static String msgIdle()  { return DEF_MSG_IDLE.equals(msgIdle) ? I18n.tr(DEF_MSG_IDLE) : msgIdle; }
+    static String msgThink() { return DEF_MSG_THINK.equals(msgThink) ? I18n.tr(DEF_MSG_THINK) : msgThink; }
+    static String msgTool()  { return DEF_MSG_TOOL.equals(msgTool) ? I18n.tr(DEF_MSG_TOOL) : msgTool; }
+    static String msgDone()  { return DEF_MSG_DONE.equals(msgDone) ? I18n.tr(DEF_MSG_DONE) : msgDone; }
 
     /** 读一条模板：空/异常 → 默认值（"留空 = 用默认"是给用户看的规则）。 */
     private static String readMsg(Context ctx, String key, String def) {
@@ -376,14 +376,14 @@ public class OverlayService extends Service {
     /** 按类别渲染模板（支持 {tool} / {工具} / {name} 占位符）。 */
     static String renderBubble(String raw, int kind, String tool) {
         switch (kind) {
-            case KIND_IDLE:  return msgIdle;
-            case KIND_THINK: return msgThink;
-            case KIND_DONE:  return msgDone;
+            case KIND_IDLE:  return msgIdle();
+            case KIND_THINK: return msgThink();
+            case KIND_DONE:  return msgDone();
             case KIND_TOOL: {
                 String name = tool == null ? "" : tool;
-                return msgTool.replace("{tool}", name).replace("{工具}", name).replace("{name}", name);
+                return msgTool().replace("{tool}", name).replace("{工具}", name).replace("{name}", name);
             }
-            default: return raw == null ? "" : raw;
+            default: return raw == null ? "" : I18n.tr(raw);
         }
     }
 
@@ -543,7 +543,9 @@ public class OverlayService extends Service {
                             if (up && System.currentTimeMillis() - lastAgentStatusAt > IDLE_FISH_MS) {
                                 String cur = (statusBubble != null && statusBubble.getText() != null)
                                         ? statusBubble.getText().toString() : "";
-                                if (!cur.startsWith("正在向用户提问")) applyBubble(msgIdle, true, 0L, KIND_IDLE);
+                                if (!cur.startsWith("正在向用户提问") && !cur.startsWith("Asking user") && !cur.startsWith("Вопрос пользователю")) {
+                                    applyBubble(msgIdle(), true, 0L, KIND_IDLE);
+                                }
                             }
                         }
                     });
@@ -556,6 +558,7 @@ public class OverlayService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        I18n.init(this);
         // v1.21：正在「完全退出」→ 立刻自停。本服务是 START_STICKY，进程被杀后系统会重建它
         // （悬浮窗又冒出来）；退出期间必须挡住，否则用户会觉得"没关干净"。
         if (MainActivity.shutdownPending(this)) { stopSelf(); return; }
@@ -648,9 +651,9 @@ public class OverlayService extends Service {
     private void startForegroundCompat() {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel ch = new NotificationChannel(CHANNEL_ID, "黑鲸鱼悬浮窗",
+            NotificationChannel ch = new NotificationChannel(CHANNEL_ID, I18n.tr("黑鲸鱼悬浮窗"),
                     NotificationManager.IMPORTANCE_LOW);
-            ch.setDescription("黑鲸鱼悬浮窗运行中（引擎状态指示）");
+            ch.setDescription(I18n.tr("黑鲸鱼悬浮窗运行中（引擎状态指示）"));
             nm.createNotificationChannel(ch);
         }
         startForeground(NOTIF_ID, buildNotification());
@@ -675,12 +678,12 @@ public class OverlayService extends Service {
         show.setAction(ACTION_SHOW);
         PendingIntent showPi = PendingIntent.getService(this, 1, show,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        try { b.addAction(new Notification.Action.Builder(null, "显示悬浮窗", showPi).build()); }
+        try { b.addAction(new Notification.Action.Builder(null, I18n.tr("显示悬浮窗"), showPi).build()); }
         catch (Throwable ignored) {
             // 老系统 Action.Builder(null, ...) 不吃图标时退化：不显示动作也不影响主流程
         }
-        return b.setContentTitle("🐋 DeepSeek Harness 运行中")
-                .setContentText("引擎状态：" + (engineUp ? "运行中（端口 " + enginePort + "）" : "未运行"))
+        return b.setContentTitle(I18n.tr("🐋 DeepSeek Harness 运行中"))
+                .setContentText(I18n.tr("引擎状态：" + (engineUp ? "运行中（端口 " + enginePort + "）" : "未运行")))
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(pi)
                 .setOngoing(true)
@@ -772,7 +775,7 @@ public class OverlayService extends Service {
         // v1.21 调整（用户反馈"AI：…"读着别扭）：不再把两件事挤在一行并加"AI："前缀，
         // 改成两行直白的话 —— 引擎一行、会话数一行（见下面 sessionText）。
         statusText = new TextView(this);
-        statusText.setText("○ 引擎状态检测中…");
+        statusText.setText(I18n.tr("○ 引擎状态检测中…"));
         statusText.setTextColor(getColor(R.color.panel_text_bright));
         statusText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_caption));
         statusText.setLayoutParams(new LinearLayout.LayoutParams(
@@ -790,7 +793,7 @@ public class OverlayService extends Service {
 
         // 第三行：agent 任务状态（与头像上方气泡同源；气泡被点掉后这里仍看得到）
         agentText = new TextView(this);
-        agentText.setText("任务：—");
+        agentText.setText(I18n.tr("任务：—"));
         agentText.setTextColor(getColor(R.color.panel_text_dim));
         agentText.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_caption));
         agentText.setLayoutParams(new LinearLayout.LayoutParams(
@@ -923,7 +926,7 @@ public class OverlayService extends Service {
     /** 面板里的小胶囊按钮（v1.13.12 重做：小、轻、不抢眼）。 */
     private Button pillButton(String text, final Runnable action) {
         Button b = new Button(this);
-        b.setText(text);
+        b.setText(I18n.tr(text));
         b.setAllCaps(false);
         b.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_caption));
         b.setTextColor(getColor(R.color.accent_brand));
@@ -1365,7 +1368,8 @@ public class OverlayService extends Service {
         if (!show) {
             try {
                 boolean dyed = statusBubble != null && statusBubble.getText() != null
-                        && "下班啦".contentEquals(statusBubble.getText());
+                        && ("下班啦".contentEquals(statusBubble.getText())
+                            || I18n.tr("下班啦").contentEquals(statusBubble.getText()));
                 if (exitArmed) setExitArmed(false);
                 if (dyed && !MainActivity.shutdownPending(this)) hideBubble();
             } catch (Throwable ignored) {}
@@ -1476,7 +1480,7 @@ public class OverlayService extends Service {
             //（见 setPanelVisible(false, …)：面板一关，气泡消失、按钮变回普通「退出」）。
             // 所以气泡这里用 sticky（不自动收），避免没关面板就先自己消失了。
             setExitArmed(true);
-            applyBubble("下班啦", true, 0L, KIND_PLAIN);
+            applyBubble(I18n.tr("下班啦"), true, 0L, KIND_PLAIN);
             handler.removeCallbacks(exitDisarm);      // 不再排 TTL 定时器
             // v1.21（用户要求）：**不再弹**"再点一次「确认退出」…"的 Toast。
             // 按钮变红 + 头顶「下班啦」已经足够表达"已进入待确认"，底部反复弹提示条很打扰。
@@ -1485,10 +1489,10 @@ public class OverlayService extends Service {
         // 点红色「确认退出」：真正退出。
         // 这里不改按钮、不撤气泡（保持红色 + 「下班啦」），一直留到 App 整体关闭。
         handler.removeCallbacks(exitDisarm);
-        applyBubble("下班啦", true, 0L, KIND_PLAIN);
+        applyBubble(I18n.tr("下班啦"), true, 0L, KIND_PLAIN);
         try {
             android.widget.Toast.makeText(getApplicationContext(),
-                    "正在退出…", android.widget.Toast.LENGTH_SHORT).show();
+                    I18n.tr("正在退出…"), android.widget.Toast.LENGTH_SHORT).show();
         } catch (Throwable ignored) {}
         MainActivity.shutdownEverything(this, "悬浮窗面板「退出」按钮");
     }
@@ -1498,7 +1502,7 @@ public class OverlayService extends Service {
         exitArmed = armed;
         if (exitBtn == null) return;
         try {
-            exitBtn.setText(armed ? "确认退出" : "退出");
+            exitBtn.setText(I18n.tr(armed ? "确认退出" : "退出"));
             GradientDrawable bg = new GradientDrawable();
             bg.setColor(armed ? 0xFFE5484D : 0xFFFFFFFF);
             bg.setCornerRadius(dp(11));
@@ -1577,8 +1581,8 @@ public class OverlayService extends Service {
         }
         try {
             android.widget.Toast.makeText(getApplicationContext(),
-                    "悬浮窗已隐藏：在「控制台 → 悬浮窗消息」里点「显示悬浮窗」即可恢复"
-                            + "（也可展开本通知点『显示悬浮窗』）", android.widget.Toast.LENGTH_LONG).show();
+                    I18n.tr("悬浮窗已隐藏：在「控制台 → 悬浮窗消息」里点「显示悬浮窗」即可恢复（也可展开本通知点『显示悬浮窗』）"),
+                    android.widget.Toast.LENGTH_LONG).show();
         } catch (Throwable ignored) {}
     }
 
@@ -1739,7 +1743,7 @@ public class OverlayService extends Service {
         if (statusBubble == null) return;
         if (text == null || text.isEmpty()) { hideBubble(); return; }
         // 面板里的"任务"行与气泡同源：气泡被点掉/超时收起后，展开面板仍能看到最近状态。
-        if (agentText != null) agentText.setText("任务：" + text);
+        if (agentText != null) agentText.setText(I18n.tr("任务：—").replace("—", I18n.tr(text)));
         // v1.21（ANR 修正）：文案与当前显示完全相同时**不重绘**。
         // 内核侧已按事件节流，这里再兜一道：悬浮窗每次 setText/显隐都会让窗口重排重绘，
         // 模拟器软件渲染下高频重绘会把主线程卡在出帧（实测 ANR：nSyncAndDrawFrame）。
@@ -1852,10 +1856,10 @@ public class OverlayService extends Service {
             // v1.22.5（维护者实测）：首次打开面板时探测还没回来，engineUp 还是初值 false
         // → 会闪一下「未运行」。没探测过就显示「检测中」，不下结论。
         if (lastProbeAt <= 0L) {
-            statusText.setText("○ 引擎状态检测中…");
+            statusText.setText(I18n.tr("○ 引擎状态检测中…"));
             return;
         }
-        statusText.setText(engineUp ? "● 引擎运行中…" : "○ 引擎未运行");
+        statusText.setText(I18n.tr(engineUp ? "● 引擎运行中…" : "○ 引擎未运行"));
         }
         if (sessionText != null) {
             sessionText.setText(sessionStatusText());
@@ -1884,16 +1888,16 @@ public class OverlayService extends Service {
         if (n > 0) {
             lastSessionsHadWork = true;   // 边沿触发源：从"有会话工作"变"没有"时报已完成
             finishedAt = 0L;
-            return n + " 个会话运行中…";
+            return I18n.tr(n + " 个会话运行中…");
         }
         if (finishedAt == 0L && lastSessionsHadWork) {
             finishedAt = now;
         }
         if (finishedAt > 0L && now - finishedAt < FINISHED_TTL_MS) {
-            return "会话已完成 ✓";
+            return I18n.tr("会话已完成 ✓");
         }
         lastSessionsHadWork = false;
-        return "暂无会话运行";
+        return I18n.tr("暂无会话运行");
     }
     /** 上次扫描是否看到过工作中的会话（用于"已完成"的边沿触发）。 */
     private volatile boolean lastSessionsHadWork = false;

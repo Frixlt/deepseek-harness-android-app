@@ -387,6 +387,7 @@ public class MainActivity extends Activity {
         // v1.13.12 起主题可在控制台选「跟随系统/浅色/深色」，不再只能跟系统。
         setTheme(themePrefersDark() ? R.style.AppTheme : R.style.AppTheme_Light);
         super.onCreate(savedInstanceState);
+        I18n.init(this);
         // v1.20.2（用户反馈）：DSH 在思考/长任务时屏幕会超时息屏 —— 前台常亮。
         //
         // 用**窗口标记**而不是 WakeLock：
@@ -769,7 +770,7 @@ public class MainActivity extends Activity {
         });
 
         statusView = new TextView(this);
-        statusView.setText("正在启动 DeepSeek Harness…");
+        statusView.setText(I18n.tr("正在启动 DeepSeek Harness…"));
         statusView.setTextColor(cText());   // v1.21（UI 统一）：主状态用主文字色，副提示才用 cSub()
         statusView.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_body));
         statusView.setGravity(Gravity.CENTER);
@@ -1473,7 +1474,7 @@ public class MainActivity extends Activity {
         // v1.21（用户反馈）：原文案写的是"首次启动需要多等一会儿" —— 不准确，
         // 事实上**任何时候重新启动引擎都要等**（引擎是独立 node 进程）。改成中性表述。
         splashHint = new TextView(this);
-        splashHint.setText("启动引擎需要一点时间，请稍候");
+        splashHint.setText(I18n.tr("启动引擎需要一点时间，请稍候"));
         splashHint.setTextColor(cSub());
         splashHint.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11.5f);
         splashHint.setGravity(Gravity.CENTER);
@@ -2045,7 +2046,7 @@ public class MainActivity extends Activity {
         int cur = themeMode();
         for (int i = 0; i <= 2; i++) {
             final int mode = i;
-            TextView row = cText(themeModeLabel(i) + (i == cur ? "  ✓" : ""), 14f, cText(), false);
+            TextView row = cText(I18n.tr(themeModeLabel(i)) + (i == cur ? "  ✓" : ""), 14f, cText(), false);
             row.setPadding(0, dp(12), 0, dp(12));
             row.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
@@ -2071,6 +2072,33 @@ public class MainActivity extends Activity {
         // 不再提供"回到旧卡片版"的入口（用户 2026-10-05：「就是完整版」= 新版就是完整版）。
         // 旧偏好 console_ui_style 与主题 layout.style 都不再被读取（见 consoleUiStyle()）。
         conDialogView("界面主题", box, null, null, "关闭");
+    }
+
+    private void conLanguageDialog() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        final String[] keys = {I18n.LANG_AUTO, I18n.LANG_EN, I18n.LANG_RU, I18n.LANG_ZH};
+        final String[] labels = {I18n.tr("系统默认"), "English", "Русский", "中文"};
+        String cur = I18n.getLanguagePref();
+        for (int i = 0; i < keys.length; i++) {
+            final String k = keys[i];
+            TextView row = cText(labels[i] + (k.equals(cur) ? "  ✓" : ""), 14f, cText(), false);
+            row.setPadding(0, dp(12), 0, dp(12));
+            row.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    closeDialogOverlay();
+                    I18n.setLanguage(MainActivity.this, k);
+                    applyShellPalette();
+                    if (consoleVisible && consoleBody != null) {
+                        try { renderConsole(); } catch (Throwable ignored) {}
+                    } else {
+                        refreshConsole();
+                    }
+                }
+            });
+            box.addView(row);
+        }
+        conDialogView(I18n.tr("语言"), box, null, null, I18n.tr("关闭"));
     }
     // v1.17.4：这 9 个 c*() 是控制台配色的「唯一出口」，主题包只在这里覆盖；
     // 没配置 / 该项没写时返回的仍是原来那套内置色（视觉与旧版一致）。
@@ -2650,15 +2678,15 @@ public class MainActivity extends Activity {
         boolean lastPage = guideIndex >= guidePages.size() - 1;          // 最后一项权限页 = 收尾页
 
         guideDots.setText(finishPage
-                ? "准备完成 · 最后一步"
-                : "第 " + (guideIndex + 1) + " / " + total + " 步");
+                ? I18n.tr("准备完成 · 最后一步")
+                : I18n.tr("第 " + (guideIndex + 1) + " / " + total + " 步"));
         guidePrevBtn.setEnabled(guideIndex > 0);
-        guideNextBtn.setText(finishPage || lastPage ? "开始使用" : "下一步");
+        guideNextBtn.setText(I18n.tr(finishPage || lastPage ? "开始使用" : "下一步"));
         // v1.24（维护者要求）：「跳过这页」按钮已下线（见 showPermissionScreen 里的注释）。
         // 这里保留判空：按钮恢复时这两行照旧生效，不恢复时也不会 NPE。
         if (guideSkipBtn != null) {
             guideSkipBtn.setVisibility(finishPage ? View.GONE : View.VISIBLE);
-            guideSkipBtn.setText(lastPage ? "跳过" : "跳过这页");
+            guideSkipBtn.setText(I18n.tr(lastPage ? "跳过" : "跳过这页"));
         }
 
         // v1.21（UI 统一）：细进度条跟着步数走（v1.24：最后一项权限页 = 满格）
@@ -2779,7 +2807,7 @@ public class MainActivity extends Activity {
             try { pg.action.onClick(v); } catch (Throwable ignored) {}
         }});
         act.setEnabled(!granted);
-        if (granted) act.setText("已授权 ✓");
+        if (granted) act.setText(I18n.tr("已授权 ✓"));
         card.addView(act);
         guideBody.addView(card);
         guideActionBtn = act;
@@ -2794,7 +2822,7 @@ public class MainActivity extends Activity {
         GuidePage pg = guidePages.get(guideIndex);
         boolean granted = false;
         try { granted = pg.provider.granted(); } catch (Throwable ignored) {}
-        guideActionBtn.setText(granted ? "已授权 ✓" : pg.actionLabel);
+        guideActionBtn.setText(I18n.tr(granted ? "已授权 ✓" : pg.actionLabel));
         guideActionBtn.setEnabled(!granted);
     }
 
@@ -2809,7 +2837,7 @@ public class MainActivity extends Activity {
         for (PermRow pr : permRows) {
             boolean g = false;
             try { g = pr.provider.granted(); } catch (Throwable ignored) {}
-            pr.status.setText(g ? "已授权" : "未授权");
+            pr.status.setText(I18n.tr(g ? "已授权" : "未授权"));
             pr.status.setTextColor(g ? cGreen() : cRed());
         }
         // 工作区行状态（非权限，显示已设置/未设置）——引导完成页与控制台「权限」页共用同一份状态
@@ -2817,12 +2845,12 @@ public class MainActivity extends Activity {
             String p = workspacePath();
             boolean unset = (p == null || p.isEmpty());
             if (workspaceDescView != null) {
-                workspaceDescView.setText(unset
+                workspaceDescView.setText(I18n.tr(unset
                         ? "未设置：AI 文件操作在内部目录。点此选择外部文件夹（如 /sdcard/Documents）。"
-                        : "已设置：" + p + "（点此更改或恢复默认）");
+                        : "已设置：" + p + "（点此更改或恢复默认）"));
             }
             if (conWorkspaceDesc != null) {
-                conWorkspaceDesc.setText(unset ? "未设置（AI 文件操作在内部目录）" : p);
+                conWorkspaceDesc.setText(unset ? I18n.tr("未设置（AI 文件操作在内部目录）") : p);
             }
         }
         // 翻页式引导：当前页的授权按钮状态跟着"是否已授权"走（从系统设置授权回来时刷新）
@@ -6613,8 +6641,9 @@ public class MainActivity extends Activity {
     private void setStatus(final String s) {
         ui.post(new Runnable() {
             @Override public void run() {
-                statusView.setText(s);
-                if (consoleVisible) conSay(s);
+                String tr = uiPlain(s);
+                statusView.setText(tr);
+                if (consoleVisible) conSay(tr);
             }
         });
     }
@@ -6627,11 +6656,12 @@ public class MainActivity extends Activity {
                     progressBar.setVisibility(View.VISIBLE);
                     progressBar.setProgress(percent);
                 }
-                if (s != null) statusView.setText(s);
+                String tr = s != null ? uiPlain(s) : null;
+                if (tr != null) statusView.setText(tr);
                 if (consoleVisible) {
                     if (conBar != null) conBar.setVisibility(View.VISIBLE);
                     conSetProgress(percent);
-                    conSay(s);
+                    conSay(tr);
                 }
             }
         });
@@ -6644,8 +6674,9 @@ public class MainActivity extends Activity {
                     progressBar.setIndeterminate(true);
                     progressBar.setVisibility(View.VISIBLE);
                 }
-                if (s != null) statusView.setText(s);
-                if (consoleVisible) conSay(s);
+                String tr = s != null ? uiPlain(s) : null;
+                if (tr != null) statusView.setText(tr);
+                if (consoleVisible) conSay(tr);
             }
         });
     }
@@ -6908,8 +6939,9 @@ public class MainActivity extends Activity {
     /** 控制台里显示一句状态：解压阶段进解压块，否则进引擎块。 */
     private void conSay(String s) {
         if (s == null) return;
-        if (extracting) { conExtractMsg = s; if (conExMeta != null) conExMeta.setText(s); }
-        else if (conEnMeta != null) conEnMeta.setText(s);
+        String tr = uiPlain(s);
+        if (extracting) { conExtractMsg = tr; if (conExMeta != null) conExMeta.setText(tr); }
+        else if (conEnMeta != null) conEnMeta.setText(tr);
     }
 
     // ---------- 通用控件 ----------
@@ -7596,7 +7628,7 @@ public class MainActivity extends Activity {
             final String key = keys[i];
             final boolean on = key.equals(cur);
             TextView b = new TextView(this);
-            b.setText(labels[i]);
+            b.setText(I18n.tr(labels[i]));
             b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13 * conFontScale());
             b.setGravity(Gravity.CENTER);
             b.setPadding(dp(12), dp(9), dp(12), dp(9));
@@ -7617,10 +7649,58 @@ public class MainActivity extends Activity {
         return box;
     }
 
+    private View shellLanguageRow() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(16), dp(14), dp(16), dp(14));
+        box.setBackground(cShape(cCard(), cLine(), 1, 12));
+
+        box.addView(cText("语言 / Language / Язык", 15f, cText(), true));
+        box.addView(cText(I18n.isRu() ? "Выберите язык интерфейса приложения (применяется мгновенно)."
+                : (I18n.isZh() ? "选择应用界面语言（立即生效，无需重启）。" : "Choose application interface language (applies immediately)."),
+                12.5f, cSub(), false), cTop(dp(4)));
+
+        final String[] keys = {I18n.LANG_AUTO, I18n.LANG_EN, I18n.LANG_RU, I18n.LANG_ZH};
+        final String[] labels = {I18n.tr("系统默认"), "English", "Русский", "中文"};
+        final String cur = I18n.getLanguagePref();
+        LinearLayout seg = new LinearLayout(this);
+        seg.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < keys.length; i++) {
+            final String key = keys[i];
+            final boolean on = key.equals(cur);
+            TextView b = new TextView(this);
+            b.setText(labels[i]);
+            b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12.5f * conFontScale());
+            b.setGravity(Gravity.CENTER);
+            b.setPadding(dp(8), dp(9), dp(8), dp(9));
+            b.setTextColor(on ? cAccent() : cSub());
+            b.setBackground(cShape(on ? shellTintFill() : cTrack(),
+                    on ? shellTintStroke() : cLine(), 1, 10));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            if (i > 0) lp.leftMargin = dp(6);
+            b.setLayoutParams(lp);
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    I18n.setLanguage(MainActivity.this, key);
+                    applyShellPalette();
+                    if (consoleVisible && consoleBody != null) {
+                        try { renderConsole(); } catch (Throwable ignored) {}
+                    } else {
+                        refreshConsole();
+                    }
+                }
+            });
+            seg.addView(b);
+        }
+        box.addView(seg, cTop(dp(12)));
+        return box;
+    }
+
     private Button cButton(String label, boolean primary) {
         Button b = new Button(this);
         b.setAllCaps(false);
-        b.setText(label);
+        b.setText(uiPlain(label));
         b.setTextSize(TypedValue.COMPLEX_UNIT_SP, (primary ? 13.5f : 12.5f) * conFontScale());   // v1.17.4：fontScale
         b.setSingleLine(true);
         b.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -7750,7 +7830,7 @@ public class MainActivity extends Activity {
 
     private void conToast(final String s) {
         ui.post(new Runnable() { @Override public void run() {
-            try { android.widget.Toast.makeText(MainActivity.this, s, android.widget.Toast.LENGTH_SHORT).show(); } catch (Throwable ignored) {}
+            try { android.widget.Toast.makeText(MainActivity.this, uiPlain(s), android.widget.Toast.LENGTH_SHORT).show(); } catch (Throwable ignored) {}
         }});
     }
 
@@ -7967,6 +8047,14 @@ public class MainActivity extends Activity {
         LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         tlp.leftMargin = dp(8);
         foot.addView(th, tlp);
+        Button langBtn = cButton(I18n.tr("语言"), false);
+        langBtn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f);
+        langBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { conLanguageDialog(); }
+        });
+        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        llp.leftMargin = dp(8);
+        foot.addView(langBtn, llp);
         col.addView(foot, cTop(cGap(10)));
 
         refreshConsole();
@@ -8310,9 +8398,11 @@ public class MainActivity extends Activity {
      */
     private String t(String key, String def) {
         ConsoleTheme ct = conTheme;
-        if (ct == null) return def;
-        String v = ct.text(key);
-        return (v == null || v.length() == 0) ? def : v;
+        if (ct != null) {
+            String v = ct.text(key);
+            if (v != null && v.length() > 0) return v;
+        }
+        return I18n.t(key, def);
     }
 
     /**
@@ -9371,6 +9461,7 @@ public class MainActivity extends Activity {
         // 默认「跟随页面」= 跟着 DSH 页面实测底色走，从而与网页同一色调。
         col.addView(cGrpTitle(t("title.grpShellScheme", "界面外观（壳）")), cTop(cGap(20)));
         col.addView(shellSchemeRow(), cTop(cGap(8)));
+        col.addView(shellLanguageRow(), cTop(cGap(8)));
 
         // ---------- ② 导入 / 导出（行式入口） ----------
         col.addView(cGrpTitle(t("title.grpThemeIo", "导入 / 导出")), cTop(cGap(20)));
@@ -10346,7 +10437,7 @@ public class MainActivity extends Activity {
     }
 
     private String conExtractMetaText(boolean ready) {
-        if (extracting) return conExtractMsg != null ? conExtractMsg
+        if (extracting) return conExtractMsg != null ? uiPlain(conExtractMsg)
                 : t("status.extract.working", "正在解压运行时与内核树…");
         if (ready) {
             String s = conFilesSummary != null ? conFilesSummary : "运行环境与内核树已就绪";
@@ -10356,7 +10447,7 @@ public class MainActivity extends Activity {
             else if (consoleDetailOpen) s += " · 正在核对完整性…";
             // v1.21（用户要求）：这里不再追加"· 点这一行看详情" ——
             // 状态块已经没有点击（详情入口已删除），这句话只会误导。
-            return s;
+            return uiPlain(s);
         }
         return t("desc.extract", "需要解压运行环境与内核（约 2.5 万个文件 / 约 220 MB）；解压完成后才能启动引擎。");
     }
@@ -10364,15 +10455,15 @@ public class MainActivity extends Activity {
     private String conEngineMetaText(boolean run, boolean ready, boolean busy) {
         if (run) {
             long mins = engineStartTs > 0 ? Math.max(0, (System.currentTimeMillis() - engineStartTs) / 60000) : 0;
-            return "端口 " + enginePort + " · 已运行 " + mins + " 分 · 通知 " + notifyPort();
+            return uiPlain("端口 " + enginePort + " · 已运行 " + mins + " 分 · 通知 " + notifyPort());
         }
         // v1.13：启动中显示统一的倒计时文案（真机 node 预熟要 17~25 秒，必须给用户一个“在动”的反馈）
         if (busy) {
             long sec = engineStartTs > 0 ? Math.max(0, (System.currentTimeMillis() - engineStartTs) / 1000) : 0;
-            return "端口 " + enginePort + " · 启动中… 已等待 " + sec + " 秒";
+            return uiPlain("端口 " + enginePort + " · 启动中… 已等待 " + sec + " 秒");
         }
         // v1.13：原来无论文件是否已解压都写“解压完成后可启动”，已解压时这句误导人。
-        return (ready ? "点「启动引擎」开始 · 端口 " : "解压完成后可启动 · 端口 ") + enginePort;
+        return uiPlain((ready ? "点「启动引擎」开始 · 端口 " : "解压完成后可启动 · 端口 ") + enginePort);
     }
 
     // ---------- 动作：解压 / 启动 ----------
@@ -12046,9 +12137,9 @@ public class MainActivity extends Activity {
      */
     static String uiPlain(String s) {
         if (s == null) return "";
-        String r = s;
-        if (r.indexOf('*') >= 0) r = r.replace("", "").replace("*", "");
-        if (r.indexOf('`') >= 0) r = r.replace("", "");
+        String r = I18n.tr(s);
+        if (r.indexOf('*') >= 0) r = r.replace("**", "").replace("*", "");
+        if (r.indexOf('`') >= 0) r = r.replace("`", "");
         return r;
     }
 

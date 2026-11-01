@@ -1316,9 +1316,9 @@ public class AccessibilityService extends android.accessibilityservice.Accessibi
         }
     }
 
-    /** 兜底：在活动窗口里找「前往 / 搜索 / 发送 / Go」这类 IME 动作按钮。 */
+    /** 兜底：在活动窗口里找「前往 / 搜索 / 发送 / Go / Поиск」这类 IME 动作按钮。 */
     private AccessibilityNodeInfo findImeActionButton() {
-        final String[] labels = {"前往", "搜索", "发送", "完成", "转到", "Go", "Search", "Send", "Done", "Enter"};
+        final String[] labels = {"前往", "搜索", "发送", "完成", "转到", "Go", "Search", "Send", "Done", "Enter", "Перейти", "Поиск", "Отправить", "Готово", "Ввод"};
         AccessibilityNodeInfo root = activeRoot();
         if (root == null) return null;
         final AccessibilityNodeInfo[] hit = {null};
