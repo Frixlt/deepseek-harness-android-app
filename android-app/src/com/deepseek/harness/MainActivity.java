@@ -1311,20 +1311,20 @@ public class MainActivity extends Activity {
                 @Override public void run() {
                     try {
                         new AlertDialog.Builder(MainActivity.this)
-                                .setTitle("系统 WebView 版本过旧")
-                                .setMessage("检测到系统 WebView 内核为 Chromium " + ver
-                                        + "（DSH 界面需要 " + WEBVIEW_MIN_CHROME + " 以上）。\n\n"
-                                        + "界面可能无法正常显示（白屏/无法交互），引擎本身不受影响。\n\n"
-                                        + "建议：① 更新\"Android System WebView\"后重试；"
-                                        + "② 安装「DeepSeek Harness 兼容版」（专为老设备优化）。")
-                                .setPositiveButton("去更新", new DialogInterface.OnClickListener() {
+                                .setTitle(I18n.tr("系统 WebView 版本过旧"))
+                                .setMessage(I18n.tr("检测到系统 WebView 内核为 Chromium ") + ver
+                                        + I18n.tr("（DSH 界面需要 ") + WEBVIEW_MIN_CHROME + I18n.tr(" 以上）。\n\n")
+                                        + I18n.tr("界面可能无法正常显示（白屏/无法交互），引擎本身不受影响。\n\n")
+                                        + I18n.tr("建议：① 更新\"Android System WebView\"后重试；")
+                                        + I18n.tr("② 安装「DeepSeek Harness 兼容版」（专为老设备优化）。"))
+                                .setPositiveButton(I18n.tr("去更新"), new DialogInterface.OnClickListener() {
                                     @Override public void onClick(DialogInterface d, int w) { openWebViewUpdate(); }
                                 })
-                                .setNegativeButton("继续尝试", new DialogInterface.OnClickListener() {
+                                .setNegativeButton(I18n.tr("继续尝试"), new DialogInterface.OnClickListener() {
                                     @Override public void onClick(DialogInterface d, int w) {
                                         // v1.21：老 WebView 大概率白屏 → 直接落到控制台，
                                         // 那里有"兼容版"引导、日志与重新解压等恢复手段。
-                                        fallbackToConsole("系统 WebView 版本过旧（Chromium " + ver + "），已打开控制台");
+                                        fallbackToConsole(I18n.tr("系统 WebView 版本过旧（Chromium ") + ver + I18n.tr("），已打开控制台"));
                                     }
                                 })
                                 .show();
@@ -3050,12 +3050,12 @@ public class MainActivity extends Activity {
         if (cur == null || cur.isEmpty()) { openWorkspacePicker(); return; }
         try {
             new AlertDialog.Builder(this)
-                    .setTitle("AI 工作区")
-                    .setMessage("当前工作区：\n" + cur + "\n\n选择其他文件夹，或恢复默认？")
-                    .setPositiveButton("重新选择", new DialogInterface.OnClickListener() {
+                    .setTitle(I18n.tr("AI 工作区"))
+                    .setMessage(I18n.tr("当前工作区：\n") + cur + I18n.tr("\n\n选择其他文件夹，或恢复默认？"))
+                    .setPositiveButton(I18n.tr("重新选择"), new DialogInterface.OnClickListener() {
                         @Override public void onClick(DialogInterface d, int w) { openWorkspacePicker(); }
                     })
-                    .setNegativeButton("恢复默认", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(I18n.tr("恢复默认"), new DialogInterface.OnClickListener() {
                         @Override public void onClick(DialogInterface d, int w) {
                             // v1.21：默认值不再是"空"，而是那个容易在文件管理器里找到的目录
                             // （/sdcard/DeepSeekHarness/Workspace）——所以"恢复默认"写它、不是清空。
@@ -3067,7 +3067,7 @@ public class MainActivity extends Activity {
                             refreshConsolePermIfShown();
                         }
                     })
-                    .setNeutralButton("取消", null)
+                    .setNeutralButton(I18n.tr("取消"), null)
                     .show();
         } catch (Throwable ignored) {}
     }
@@ -3130,9 +3130,9 @@ public class MainActivity extends Activity {
             } else {
                 try {
                     new AlertDialog.Builder(this)
-                            .setTitle("无法使用该目录")
-                            .setMessage("无法解析所选文件夹的真实路径，请选择手机存储（内部存储或 SD 卡）内的文件夹。")
-                            .setPositiveButton("知道了", null)
+                            .setTitle(I18n.tr("无法使用该目录"))
+                            .setMessage(I18n.tr("无法解析所选文件夹的真实路径，请选择手机存储（内部存储或 SD 卡）内的文件夹。"))
+                            .setPositiveButton(I18n.tr("知道了"), null)
                             .show();
                 } catch (Throwable ignored) {}
             }
@@ -3248,11 +3248,11 @@ public class MainActivity extends Activity {
 
         if (rootOkNow || shizukuNow) {
             AlertDialog.Builder b = new AlertDialog.Builder(this);
-            b.setTitle("系统特权（可选）");
-            b.setMessage((rootOkNow ? "已检测到 Root（su）可用，AI 可以执行系统级操作。\n" : "") +
-                    (shizukuNow ? "Shizuku 已授权，AI 可以执行系统级操作。\n" : "") +
-                    "\n不授予特权也能正常使用：文件读写、预览、编辑只需「所有文件访问」权限。");
-            b.setNegativeButton("关闭", null);
+            b.setTitle(I18n.tr("系统特权（可选）"));
+            b.setMessage((rootOkNow ? I18n.tr("已检测到 Root（su）可用，AI 可以执行系统级操作。\n") : "") +
+                    (shizukuNow ? I18n.tr("Shizuku 已授权，AI 可以执行系统级操作。\n") : "") +
+                    I18n.tr("\n不授予特权也能正常使用：文件读写、预览、编辑只需「所有文件访问」权限。"));
+            b.setNegativeButton(I18n.tr("关闭"), null);
             b.show();
         } else if (binderOk) {
             // 服务在运行但未授权 → 请求 Shizuku 弹授权框；若系统/ROM 没弹出来，8 秒后引导手动授权
@@ -3344,44 +3344,44 @@ public class MainActivity extends Activity {
             CharSequence l = getApplicationInfo().loadLabel(getPackageManager());
             if (l != null && l.length() > 0) label = l + "（" + getPackageName() + "）";
         } catch (Throwable ignored) {}
-        String msg = "Shizuku 的授权框没有出现（常见于 ColorOS/OPPO 等系统拦截了它的弹窗）。"
-                + "\n\n请手动授权：\n"
-                + "1. 打开 Shizuku 应用\n"
-                + "2. 进入「已授权的应用」（或首页的「授权应用」）\n"
-                + "3. 找到 " + label + " → 打开开关\n\n"
-                + "授权后回到本页会自动刷新。";
+        String msg = I18n.tr("Shizuku 的授权框没有出现（常见于 ColorOS/OPPO 等系统拦截了它的弹窗）。")
+                + I18n.tr("\n\n请手动授权：\n")
+                + I18n.tr("1. 打开 Shizuku 应用\n")
+                + I18n.tr("2. 进入「已授权的应用」（或首页的「授权应用」）\n")
+                + I18n.tr("3. 找到 ") + label + I18n.tr(" → 打开开关\n\n")
+                + I18n.tr("授权后回到本页会自动刷新。");
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("Shizuku 授权（需手动）");
+        b.setTitle(I18n.tr("Shizuku 授权（需手动）"));
         b.setMessage(msg);
-        b.setPositiveButton("打开 Shizuku", new DialogInterface.OnClickListener() {
+        b.setPositiveButton(I18n.tr("打开 Shizuku"), new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int w) { openShizukuApp(); }
         });
-        b.setNeutralButton("重新检测", new DialogInterface.OnClickListener() {
+        b.setNeutralButton(I18n.tr("重新检测"), new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int w) { probeShizuku(); conToast("已重新检测"); }
         });
-        b.setNegativeButton("关闭", null);
+        b.setNegativeButton(I18n.tr("关闭"), null);
         b.show();
     }
 
     private void fallbackShizukuDialog(boolean installed) {
         String msg;
         if (installed) {
-            msg = "Shizuku 服务未运行。\n\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。";
+            msg = I18n.tr("Shizuku 服务未运行。\n\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。");
         } else {
-            msg = "未检测到 Shizuku 应用。请先安装 Shizuku（官方版），再回来授权。";
+            msg = I18n.tr("未检测到 Shizuku 应用。请先安装 Shizuku（官方版），再回来授权。");
         }
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("Shizuku 特权");
+        b.setTitle(I18n.tr("Shizuku 特权"));
         b.setMessage(msg);
         if (installed) {
-            b.setPositiveButton("去启动 Shizuku", new DialogInterface.OnClickListener() {
+            b.setPositiveButton(I18n.tr("去启动 Shizuku"), new DialogInterface.OnClickListener() {
                 @Override public void onClick(DialogInterface d, int w) { openShizukuApp(); }
             });
         }
-        b.setNeutralButton("重新检测", new DialogInterface.OnClickListener() {
+        b.setNeutralButton(I18n.tr("重新检测"), new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface d, int w) { probeShizuku(); }
         });
-        b.setNegativeButton("关闭", null);
+        b.setNegativeButton(I18n.tr("关闭"), null);
         b.show();
     }
 
@@ -7772,7 +7772,7 @@ public class MainActivity extends Activity {
 
     private void conTogglePaint(TextView t) {
         boolean on = ((Boolean) t.getTag()).booleanValue();
-        t.setText(on ? "已启用" : "已关闭");
+        t.setText(I18n.tr(on ? "已启用" : "已关闭"));
         t.setTextColor(on ? cGreen() : cSub());
         t.setBackground(cShape(on ? (conDark() ? 0x241F9D6B : 0x1A1F9D6B) : 0x00000000,
                 on ? cGreen() : cLine(), 1, 12));

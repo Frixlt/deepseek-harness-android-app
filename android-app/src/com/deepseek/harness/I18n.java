@@ -40,8 +40,15 @@ public final class I18n {
     private static final Pattern PAT_SELFCHECK_SUMMARY = Pattern.compile("^清单文件\\s*(\\d+)\\s*·\\s*树上文件\\s*(\\d+)\\s*·\\s*已校验内容\\s*(\\d+)\\s*·\\s*用时\\s*(\\d+)s(.*)$");
     private static final Pattern PAT_SELFCHECK_DONE = Pattern.compile("^自检完成：(.+?)（缺失\\s*(\\d+)\\s*/\\s*不符\\s*(\\d+)）$");
     private static final Pattern PAT_WORKSPACE_SET = Pattern.compile("^已设置：(.+?)（点此更改或恢复默认）$");
-    private static final Pattern PAT_SAVED_THEMES = Pattern.compile("^(我保存过的主题|Saved Themes|Сохраненные темы)（(\\d+)）$");
+    private static final Pattern PAT_SAVED_THEMES = Pattern.compile("^(我保存过的主题|Saved Themes|Сохраненные темы|Сохранённые темы)（(\\d+)）$");
     private static final Pattern PAT_TRASH_COUNT = Pattern.compile("^(回收站|Trash|Корзина)（(\\d+)）$");
+    private static final Pattern PAT_SESSION_TOTAL = Pattern.compile("^共\\s*(\\d+)\\s*条会话\\s*·\\s*(.+)$");
+    private static final Pattern PAT_TRASH_SUMMARY = Pattern.compile("^回收站\\s*(\\d+)\\s*条\\s*·\\s*(.+)$");
+    private static final Pattern PAT_BAD_REFS_WARN = Pattern.compile("^⚠\\s*(\\d+)\\s*处坏附件引用（共\\s*(\\d+)\\s*处附件）$");
+    private static final Pattern PAT_REFS_OK = Pattern.compile("^正常（(\\d+)\\s*处附件引用，无损坏）$");
+    private static final Pattern PAT_HEAL_SUMMARY = Pattern.compile("^会话\\s*(\\d+)\\s*条\\s*·\\s*其中\\s*(\\d+)\\s*条有坏附件（共\\s*(\\d+)\\s*处）$");
+    private static final Pattern PAT_PLUGIN_ENABLED = Pattern.compile("^插件列表\\s*·\\s*已启用\\s*(\\d+)\\s*/\\s*(\\d+)$");
+    private static final Pattern PAT_EVENT_NO = Pattern.compile("^第\\s*(\\d+)\\s*号事件\\s*·\\s*(.+)$");
 
     static {
         resolveActiveLang();
@@ -254,8 +261,8 @@ public final class I18n {
 
         m = PAT_SELFCHECK_DONE.matcher(s);
         if (m.matches()) {
-            return ru ? ("Самодиагностика завершена: " + m.group(1) + " (отсутствует " + m.group(2) + " / не совпадает " + m.group(3) + ")")
-                      : ("Self-check complete: " + m.group(1) + " (missing " + m.group(2) + " / mismatch " + m.group(3) + ")");
+            return ru ? ("Самодиагностика завершена: " + tr(m.group(1)) + " (отсутствует " + m.group(2) + " / не совпадает " + m.group(3) + ")")
+                      : ("Self-check complete: " + tr(m.group(1)) + " (missing " + m.group(2) + " / mismatch " + m.group(3) + ")");
         }
 
         m = PAT_WORKSPACE_SET.matcher(s);
@@ -272,6 +279,48 @@ public final class I18n {
         m = PAT_TRASH_COUNT.matcher(s);
         if (m.matches()) {
             return (ru ? "Корзина (" : "Trash (") + m.group(2) + ")";
+        }
+
+        m = PAT_SESSION_TOTAL.matcher(s);
+        if (m.matches()) {
+            return ru ? ("Всего сессий: " + m.group(1) + " · " + m.group(2))
+                      : ("Total " + m.group(1) + " sessions · " + m.group(2));
+        }
+
+        m = PAT_TRASH_SUMMARY.matcher(s);
+        if (m.matches()) {
+            return ru ? ("Корзина: " + m.group(1) + " шт. · " + m.group(2))
+                      : ("Trash: " + m.group(1) + " items · " + m.group(2));
+        }
+
+        m = PAT_BAD_REFS_WARN.matcher(s);
+        if (m.matches()) {
+            return ru ? ("⚠ Повреждённых ссылок на вложения: " + m.group(1) + " (всего вложений: " + m.group(2) + ")")
+                      : ("⚠ " + m.group(1) + " broken attachment refs (" + m.group(2) + " attachments total)");
+        }
+
+        m = PAT_REFS_OK.matcher(s);
+        if (m.matches()) {
+            return ru ? ("В норме (ссылок на вложения: " + m.group(1) + ", без повреждений)")
+                      : ("OK (" + m.group(1) + " attachment refs, no corruption)");
+        }
+
+        m = PAT_HEAL_SUMMARY.matcher(s);
+        if (m.matches()) {
+            return ru ? ("Сессий: " + m.group(1) + " · С повреждёнными вложениями: " + m.group(2) + " (всего ссылок: " + m.group(3) + ")")
+                      : ("Sessions: " + m.group(1) + " · With broken attachments: " + m.group(2) + " (" + m.group(3) + " refs total)");
+        }
+
+        m = PAT_PLUGIN_ENABLED.matcher(s);
+        if (m.matches()) {
+            return ru ? ("Список плагинов · Включено " + m.group(1) + " / " + m.group(2))
+                      : ("Plugin list · Enabled " + m.group(1) + " / " + m.group(2));
+        }
+
+        m = PAT_EVENT_NO.matcher(s);
+        if (m.matches()) {
+            return ru ? ("Событие №" + m.group(1) + " · " + tr(m.group(2)))
+                      : ("Event #" + m.group(1) + " · " + tr(m.group(2)));
         }
 
         // Substring replacements for common composite status strings
@@ -317,6 +366,74 @@ public final class I18n {
             out = (ru ? "Дерево ядра не найдено: " : "Kernel tree not found: ") + out.substring("找不到内核树：".length());
         }
 
+        if (hasChinese(out)) {
+            out = greedySegmentTranslate(out, ru ? RU_MAP : EN_MAP, EN_MAP);
+        }
+
         return out;
+    }
+
+    private static boolean isChineseChar(char c) {
+        return c >= '\u4e00' && c <= '\u9fff';
+    }
+
+    private static boolean hasChinese(String s) {
+        if (s == null) return false;
+        int n = s.length();
+        for (int i = 0; i < n; i++) {
+            if (isChineseChar(s.charAt(i))) return true;
+        }
+        return false;
+    }
+
+    private static int nextChineseIndex(String s, int from) {
+        int n = s.length();
+        for (int i = from; i < n; i++) {
+            if (isChineseChar(s.charAt(i))) return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Universal fallback for runtime-concatenated strings ("Lit1" + var1 + "Lit2" + var2).
+     * Scans left-to-right and replaces the longest matching substrings found in the translation map.
+     */
+    private static String greedySegmentTranslate(String s, Map<String, String> primaryMap, Map<String, String> fallbackMap) {
+        int n = s.length();
+        StringBuilder sb = new StringBuilder(n + 32);
+        int i = 0;
+        while (i < n) {
+            int nextZh = nextChineseIndex(s, i);
+            if (nextZh < 0) {
+                sb.append(s, i, n);
+                break;
+            }
+            if (nextZh - i > 60) {
+                sb.append(s, i, nextZh - 60);
+                i = nextZh - 60;
+            }
+            int maxEnd = Math.min(n, i + 400);
+            boolean matched = false;
+            if (maxEnd > nextZh) {
+                for (int j = maxEnd; j > nextZh; j--) {
+                    String sub = s.substring(i, j);
+                    String trSub = primaryMap.get(sub);
+                    if (trSub == null && primaryMap != fallbackMap) {
+                        trSub = fallbackMap.get(sub);
+                    }
+                    if (trSub != null) {
+                        sb.append(trSub);
+                        i = j;
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+            if (!matched) {
+                sb.append(s.charAt(i));
+                i++;
+            }
+        }
+        return sb.toString();
     }
 }

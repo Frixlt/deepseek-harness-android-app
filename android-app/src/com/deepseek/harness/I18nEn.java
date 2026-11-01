@@ -35,12 +35,18 @@ final class I18nEn {
 
     private static void load0(Map<String, String> m) {
         m.put("\n\n⚠ 含 ", "\n\n⚠ Contains ");
+        m.put("\n\n会做什么：把它移到回收站（<dshHome>/sessions-deleted/），随时能在「回收站」里恢复。\n不会做什么：不碰别的会话，不碰用户数据里的其它东西。", "\n\nWhat it does: Moves the session to Trash (<dshHome>/sessions-deleted/), where it can be restored anytime.\nWhat it won't do: Other sessions and user data remain untouched.");
+        m.put("\n\n会把它放回「原来那条路径」（原位置：", "\n\nWill restore it to its original path (original location: ");
         m.put("\n\n它来自主题配置（可能是 AI 生成的），确认内容是你认识的就执行。", "\n\nIt comes from the theme configuration (maybe AI generated), make sure the content is familiar to you and execute it.");
         m.put("\n\n导入会覆盖当前的 console.json 与同名图片（现有配置先备份成 console.json.bak-import-<时间>）。", "\n\nThe import will overwrite the current console.json and the image with the same name (the existing configuration is backed up first as console.json.bak-import-<time>).");
+        m.put("\n\n提案文件：", "\n\nProposal file: ");
         m.put("\n\n请手动授权：\n", "\n\nPlease authorize manually:\n");
+        m.put("\n\n这一步不可恢复 —— 会真的从磁盘上删掉它，回收站里也不会再有。", "\n\nThis action is irreversible — the session will be permanently deleted from disk and removed from Trash.");
         m.put("\n\n选择其他文件夹，或恢复默认？", "\n\nChoose another folder, or restore default?");
         m.put("\n# v1.21：Android 上内核解析不出「系统 Documents 目录」，直接导致\n", "\n# v1.21: The kernel on Android cannot parse the \"system Documents directory\", which directly causes\n");
         m.put("\n# 本版补：pnpm 在 /sdcard（FUSE）上建不了符号链接 → 用 npm 式平铺布局。\n", "\n# This version adds: pnpm cannot create symbolic links on /sdcard (FUSE) → use npm style tile layout. \n");
+        m.put("\n# 本版补：pnpm 在 /sdcard（FUSE）上建不了符号链接 → 用 npm 式平铺布局。\n# 依赖目录仍建议放应用私有目录（$HOME/$DSH_HOME），/sdcard 只放源码。\nnode-linker=hoisted\n", "\n# Added by DSH: pnpm cannot create symlinks on /sdcard (FUSE) → use npm-style hoisted layout.\n# Keep dependencies in the app private directory ($HOME/$DSH_HOME) and store only source code on /sdcard.\nnode-linker=hoisted\n");
+        m.put("\n-------- dsh-web.log（末尾 400 行）--------\n", "\n-------- dsh-web.log (last 400 lines) --------\n");
         m.put("\n「清空记录」只删这些备份文件，不动当前正在用的 console.json。", "\n\"Clear records\" only deletes these backup files and leaves the console.json currently in use untouched.");
         m.put("\n上次回退：有（同目录 last-error.txt，", "\nLast rollback: Yes (same directory last-error.txt,");
         m.put("\n不授予特权也能正常使用：文件读写、预览、编辑只需「所有文件访问」权限。", "\nFull functionality remains available without elevated privileges: file reading, writing, previewing, and editing only require \"All Files Access\".");
@@ -51,30 +57,32 @@ final class I18nEn {
         m.put("\n可执行动作（本版不执行）：", "\nExecutable actions (disabled in this version):");
         m.put("\n命令：", "\nCommand:");
         m.put("\n复检：坏引用 ", "\nRe-check: broken references ");
+        m.put("\n完整日志路径：", "\nFull log path: ");
         m.put("\n布局：", "\nLayout: ");
         m.put("\n当前生效（", "\nCurrently effective (");
         m.put("\n改写前会把原文件备份成同目录的 .corrupt-<时间>；", "\nBefore rewriting, the original file will be backed up to.corrupt-<time> in the same directory;");
         m.put("\n整体回退原因：\n", "\nOverall rollback reason:\n");
         m.put("\n文案覆盖（", "\nText overrides (");
+        m.put("\n源指纹：", "\nSource fingerprint: ");
         m.put("\n状态：", "\nStatus:");
         m.put("\n状态：已生效", "\nStatus: Effective");
         m.put("\n状态：整体回退默认（配置有语法错误）", "\nStatus: Overall fallback to default (configuration has syntax errors)");
         m.put("\n生效范围：", "\nEffective range:");
+        m.put("\n端口 ", "\nPort ");
         m.put("\n背景图：", "\nBackground image:");
         m.put("\n自定义布局：", "\nCustom layout: ");
         m.put("\n警告 / 已回退的项：\n", "\nWarning / Rolled-back items:\n");
         m.put("\n说明：\n", "\nDescription:\n");
         m.put("\n路径：", "\nPath:");
         m.put("     不要任何 shell/http/intent/prompt 动作。\n", " Do not use any shell/http/intent/prompt actions. \n");
-        m.put("     不要任何 shell/http/intent/prompt 动作。\\n", " Do not use any shell/http/intent/prompt actions. \\n");
-        m.put("     卡片半透明 cardsAlpha 0.82、背景 dim 0.28（字要看得清）；隐藏\"检查更新\"；把\"启动引擎\"改叫\"点火\"；\n", " Card translucency cardsAlpha 0.82, background dim 0.28 (words must be clearly visible); hide \"Check for Updates\"; change \"Start Engine\" to \"Ignition\";\n");
-        m.put("     卡片半透明 cardsAlpha 0.82、背景 dim 0.28（字要看得清）；隐藏\\\"检查更新\\\"；把\\\"启动引擎\\\"改叫\\\"点火\\\"；\\n", " Card translucency cardsAlpha 0.82, background dim 0.28 (words must be clearly visible); hide \\\"Check for Updates\\\"; change \\\"Start Engine\\\" to \\\"Ignition\\\";\\n");
+        m.put("     卡片半透明 cardsAlpha 0.82、背景 dim 0.28（字要看得清）；隐藏\"检查更新\"；把\"启动引擎\"改叫\"点火\"；\n", "     Semi-transparent cards (cardsAlpha 0.82), background dim 0.28 (keep text legible); hide \"Check for Updates\"; rename \"Start Engine\" to \"Ignition\";\n");
         m.put(" (VISIBLE，由 windowRoot 负责隐藏)", " (VISIBLE, hidden by windowRoot)");
         m.put(" / 不符 ", " / mismatch ");
         m.put(" / 实际 ", " /actual ");
         m.put(" / 当前 ", " / current ");
-        m.put(" / 树 ", " / tree ");
-        m.put(" / 用户侧 ", " / user side ");
+        m.put(" / 树 ", " / Tree ");
+        m.put(" / 用户侧 ", " / user ");
+        m.put(" KB。\n\n清空不影响正在运行的引擎，之后的新日志会继续正常写入。", " KB.\n\nClearing logs will not affect the running engine; new log entries will continue to be written normally.");
         m.put(" ms）：坐标注入是串行的，请稍后重试，或把 durationMs 调小", " ms): touch injection is serialized; retry later or reduce durationMs");
         m.put(" not ready —— 判定为插件/网络请求卡住，跳过全量修复", " not ready —— It is determined that the plug-in/network request is stuck and full repair will be skipped.");
         m.put(" · JSON 损坏 ", " · JSON corrupted ");
@@ -86,7 +94,7 @@ final class I18nEn {
         m.put(" · 卡片不透明度", " · Card Opacity");
         m.put(" · 原位置 ", " ·Original location ");
         m.put(" · 启动中… 已等待 ", " · Starting… Waited ");
-        m.put(" · 圆角", " · Radius");
+        m.put(" · 圆角", " · Corner radius: ");
         m.put(" · 多余 ", " · Extra ");
         m.put(" · 完整性 OK", " · Integrity OK");
         m.put(" · 已对应当前安装版本", " · Already corresponds to the currently installed version");
@@ -99,80 +107,80 @@ final class I18nEn {
         m.put(" · 正在核对完整性…", " · Checking integrity…");
         m.put(" · 清单 ", " · Manifest ");
         m.put(" · 用时 ", " · Elapsed ");
-        m.put(" · 等宽", " · Monospace");
+        m.put(" · 等宽", " · Monospace: ");
         m.put(" · 缺失 ", " · Missing ");
         m.put(" · 行数 ", " · Number of rows ");
         m.put(" · 读不了 ", " · Unreadable ");
         m.put(" —— 「源已经变了」。\n\n", " ——\"The source has changed.\" \n\n");
-        m.put(" —— 「源已经变了」。\\n\\n", " ——\"The source has changed.\" \\n\\n");
+        m.put(" —— 「源已经变了」。\n\n为避免「照着一份旧判断去修一棵新树」，这个提案不允许执行。\n请重新跑一次自检，并让 AI 按最新结果重新提案。", " — the source tree has changed.\n\nTo avoid applying an outdated fix to a modified file tree, this proposal cannot be executed.\nPlease run the self-check again and ask the AI to generate a new proposal based on the latest results.");
         m.put(" —— 这不是结论，缺失/不符计数只统计了已处理的部分，请重新跑一次完整的。", " — this is not a final verdict; missing/mismatch counts only reflect inspected files. Please run a complete check.");
         m.put(" → 打开开关\n\n", " → Turn on the switch\n\n");
-        m.put(" → 打开开关\\n\\n", " → Turn on the switch\\n\\n");
         m.put(" → 自愈重跑 applyLinks", " → Self-healing and re-running applyLinks");
         m.put(" → 采用 ", " → Adopt ");
         m.put(" 不同 → 重建", " Different → Rebuild");
         m.put(" 不支持 ACTION_IME_ENTER（需要 Android 11+）；可退化为点击页面上的「前往/搜索/发送」按钮", " does not support ACTION_IME_ENTER (requires Android 11+); fallback to tapping on-screen 'Go/Search/Send' button");
         m.put(" 不是当前激活页签（", " Not the currently active tab (");
         m.put(" 与现有 ", " with existing ");
-        m.put(" 个", " indivual");
+        m.put(" 个", " items");
         m.put(" 个会话运行中…", " sessions running…");
-        m.put(" 个内核树里多余的文件），可以启动引擎了", " extra files in the kernel tree), you can start the engine.");
-        m.put(" 个可执行动作（shell / http / intent / prompt）。", " executable actions (shell/http/intent/prompt).");
-        m.put(" 个可执行动作（shell/http/intent/prompt）：本版「不会执行」它们（第 3 轮才启用，且必须逐个确认）。", " executable actions (shell/http/intent/prompt): This version \"will not execute\" them (only enabled in round 3, and must be confirmed one by one).");
-        m.put(" 个在用户数据/第三方插件区，永远只报不动）", " One is in the user data/third-party plug-in area and will never be reported)");
-        m.put(" 个坏数据块", " bad data blocks");
+        m.put(" 个内核树里多余的文件），可以启动引擎了", " extra files in the kernel tree), ready to start the engine");
+        m.put(" 个可执行动作（shell / http / intent / prompt）。", " executable actions (shell / http / intent / prompt).");
+        m.put(" 个可执行动作（shell / http / intent / prompt）。它们在主控台的「自定义按钮」卡片里可以点，「点的时候会先弹确认」、把要执行的命令/网址/提示词原样摆出来；http / intent / prompt 三类本版还没接执行。", " executable actions (shell / http / intent / prompt). They can be triggered from the \"Custom Buttons\" card on the console. Tapping a button will always show a confirmation dialog displaying the exact command, URL, or prompt to be run; http / intent / prompt execution is not yet enabled in this version.");
+        m.put(" 个可执行动作（shell/http/intent/prompt）：本版「不会执行」它们（第 3 轮才启用，且必须逐个确认）。", " executable actions (shell/http/intent/prompt): this version will not execute them (execution will be enabled in phase 3 with mandatory per-action confirmation).");
+        m.put(" 个在用户数据/第三方插件区，永远只报不动）", " in user data / third-party plugin directories, which are only reported and never modified)");
+        m.put(" 个坏数据块", " corrupt data blocks");
         m.put(" 个工作区文件", " workspace files");
         m.put(" 个应用 ✓", " apps ✓");
-        m.put(" 个应用：若刚才弹窗请选「允许」；", " Application: If the window just pops up, please select \"Allow\";");
+        m.put(" 个应用：若刚才弹窗请选「允许」；", " apps: if a permission prompt appeared, tap \"Allow\"; ");
+        m.put(" 个应用：若刚才弹窗请选「允许」；仍不行就到「应用信息 → 权限」打开「读取应用列表」", " apps: if a permission prompt appeared, tap \"Allow\"; if that still doesn't work, go to \"App Info → Permissions\" and enable \"Get installed apps\"");
         m.put(" 个数据块\n\n", " data blocks\n\n");
-        m.put(" 个数据块\\n\\n", " data blocks\\n\\n");
-        m.put(" 个文件", " files");
-        m.put(" 个文件…", " files…");
-        m.put(" 个文件写不进去，首个：", " Files cannot be written, the first one is:");
-        m.put(" 个文件就停了）", " It stops after one file)");
-        m.put(" 个文件（", " files (");
-        m.put(" 个文件（总数读取中…）", " files (total number being read...)");
-        m.put(" 个文件）", " files)");
-        m.put(" 个文件）→ ", " files) → ");
     }
 
     private static void load1(Map<String, String> m) {
-        m.put(" 个文件：", " files:");
-        m.put(" 个日志文件，释放 ", " log files, release ");
-        m.put(" 个是可执行动作（shell/http/intent/prompt）：", " One is an executable action (shell/http/intent/prompt):");
-        m.put(" 个是独立副本，下次启动自愈）", " Each is an independent copy and will heal itself next time)");
-        m.put(" 个清单外文件（属参考信息：多为开发树多出的第三方依赖，", " files outside manifest (for reference: mostly extra third-party dependencies from dev tree,");
+        m.put(" 个文件", " files");
+        m.put(" 个文件…", " files…");
+        m.put(" 个文件写不进去，首个：", " files could not be written; first failure: ");
+        m.put(" 个文件就停了）", " files before stopping)");
+        m.put(" 个文件就停了） —— 这不是结论，缺失/不符计数只统计了已处理的部分，请重新跑一次完整的。", " files before stopping) — this is not a final verdict; missing/mismatch counts only reflect inspected files. Please run a complete check.");
+        m.put(" 个文件（", " files (");
+        m.put(" 个文件（总数读取中…）", " files (counting total…)");
+        m.put(" 个文件）", " files)");
+        m.put(" 个文件）→ ", " files) → ");
+        m.put(" 个文件：", " files: ");
+        m.put(" 个日志文件，释放 ", " log files, freed ");
+        m.put(" 个是可执行动作（shell/http/intent/prompt）：", " executable actions (shell/http/intent/prompt): ");
+        m.put(" 个是可执行动作（shell/http/intent/prompt）：点按钮时会**先弹确认**，导入时也请自行确认来源", " executable actions (shell/http/intent/prompt): tapping a button will always **ask for confirmation first**; please also verify the source before importing");
+        m.put(" 个是独立副本，下次启动自愈）", " are standalone copies, will be auto-repaired on next startup)");
+        m.put(" 个清单外文件（属参考信息：多为开发树多出的第三方依赖，", " extra files not in manifest (for reference: mostly third-party dependencies from the dev tree, ");
+        m.put(" 个清单外文件（属参考信息：多为开发树多出的第三方依赖，其中 ", " extra files not in manifest (for reference: mostly third-party dependencies from the dev tree, including ");
         m.put(" 个清单外的内核命名空间文件（仅供参考）", " kernel namespace files outside manifest (for reference only)");
-        m.put(" 个读不了的）", " One cannot read)");
+        m.put(" 个读不了的）", " unreadable)");
         m.put(" 个附件实体", " attachment files");
         m.put(" 个页签", " tabs");
         m.put(" 个页签 · ", " tabs · ");
         m.put(" 个顶层节点", " top-level nodes");
-        m.put(" 个，清理陈旧内核包 ", " , clean up old kernel packages ");
-        m.put(" 个：主控台会多出一张「自定义按钮」卡片", " action(s): a \"Custom Buttons\" card will appear on the console");
+        m.put(" 个，清理陈旧内核包 ", " files, cleaned stale kernel packages: ");
+        m.put(" 个：主控台会多出一张「自定义按钮」卡片", ": a \"Custom Buttons\" card will be added to the console");
         m.put(" 以上）。\n\n", " above). \n\n");
-        m.put(" 以上）。\\n\\n", " above). \\n\\n");
-        m.put(" 份 · ", " share · ");
-        m.put(" 份你用过的配置（点下面「我保存过的主题」）", " configuration(s) you have used (tap \"Saved Themes\" below)");
-        m.put(" 份备份", " backup");
-        m.put(" 份未列出（先「清空记录」再进来看）", " The copies are not listed (clear the records first and then check in)");
-        m.put(" 份没删掉）", " The copies were not deleted)");
+        m.put(" 份 · ", " backups · ");
+        m.put(" 份你用过的配置（点下面「我保存过的主题」）", " previously used configuration(s) (tap \"Saved Themes\" below)");
+        m.put(" 份备份", " backups");
+        m.put(" 份未列出（先「清空记录」再进来看）", " more backups not shown (use \"Clear History\" to clean up old entries)");
+        m.put(" 份没删掉）", " failed to delete)");
         m.put(" 分 · 通知 ", " min · Notify ");
         m.put(" 列附近）", " (near the column)");
         m.put(" 别名=", " alias=");
         m.put(" 原始节点 ", " original node ");
         m.put(" 号事件", " event");
         m.put(" 号事件 · ", " No. event · ");
-        m.put(" 处同类问题\n", " Similar problem\n");
-        m.put(" 处同类问题\\n", " Similar problem\\n");
+        m.put(" 处同类问题\n", " similar issues\n");
         m.put(" 处坏附件 · 复检坏引用 ", " corrupt attachments converted · Broken references after re-check: ");
         m.put(" 处坏附件引用（共 ", " broken attachment references (total ");
-        m.put(" 处引用换成一行文字说明", " Replace the quotation with a one-line description");
+        m.put(" 处引用换成一行文字说明", " broken reference(s) will be replaced with a one-line text note");
         m.put(" 处附件引用，无损坏）", " attachment references, no corruption)");
         m.put(" 处附件）", " attachments)");
-        m.put(" 处）", " (at)");
-        m.put(" 处）\n", " )\n");
-        m.put(" 处）\\n", " )\\n");
+        m.put(" 处）", " refs)");
+        m.put(" 处）\n", " refs)\n");
         m.put(" 失败", " failed");
         m.put(" 失败: ", " fail: ");
         m.put(" 字号×", " Font size ×");
@@ -187,65 +195,65 @@ final class I18nEn {
         m.put(" 是未知字段（已忽略）", " is an unknown field (ignored)");
         m.put(" 未安装或不支持）", " Not installed or not supported)");
         m.put(" 未按住（先 down）", " is not held down (send down first)");
-        m.put(" 条 · ", " strip · ");
-        m.put(" 条 · 其中 ", " Article · Among them ");
-        m.put(" 条 · 没有发现坏附件", " Article · No bad attachments found");
-        m.put(" 条。目录：/sdcard/", " strip. Directory:/sdcard/");
+        m.put(" 条 · ", " items · ");
+        m.put(" 条 · 其中 ", " total · ");
+        m.put(" 条 · 没有发现坏附件", " total · No broken attachments found");
+        m.put(" 条。目录：/sdcard/", " entries. Directory: /sdcard/");
         m.put(" 条会话 · ", " sessions · ");
         m.put(" 条会话（", " sessions (");
-        m.put(" 条有坏附件（共 ", " Articles with bad attachments (total ");
-        m.put(" 条记录 · 最近 ", " records · recent ");
-        m.put(" 条）", " strip)");
+        m.put(" 条有坏附件（共 ", " sessions with broken attachments (total ");
+        m.put(" 条记录 · 最近 ", " entries · latest ");
+        m.put(" 条）", " items)");
         m.put(" 条）：", " items):");
-        m.put(" 次 → 直接进控制台", " times → directly enter the console");
-        m.put(" 次。\n\n", " Second-rate. \n\n");
-        m.put(" 次。\\n\\n", " Second-rate. \\n\\n");
-        m.put(" 次仍失败，不再自动重试", " Still failed, no more automatic retries");
-        m.put(" 次启动失败。很可能是装的插件把配置文件写坏了——", " The startup failed. It is very likely that the installed plug-in has damaged the configuration file——");
+        m.put(" 次 → 直接进控制台", " times → entering Console directly");
+        m.put(" 次。\n\n", " times.\n\n");
+        m.put(" 次。\n\n按设计稿的护栏：「同一故障最多自动执行 2 次，第 3 次只报告不执行」 —— 防止「越修越坏」。\n请把账本 / 自检报告导出给人看，或换一条思路（例如先做配置快照、或直接重新解压）。", " times.\n\nSafety guardrail: \"Run at most 2 repair attempts for the same fault; on the 3rd attempt, report only without executing\" — to prevent making things worse.\nPlease export the ledger or self-check report for inspection, or try another approach (e.g., take a config snapshot first, or re-extract directly).");
+        m.put(" 次仍失败，不再自动重试", " times and still failed, stopping automatic retries");
+        m.put(" 次启动失败。很可能是装的插件把配置文件写坏了——", " startup failures in a row. An installed plugin likely corrupted the configuration file — ");
+        m.put(" 次启动失败。很可能是装的插件把配置文件写坏了——用「安全模式启动」跳过用户层，不丢任何数据。", " startup failures in a row. An installed plugin likely corrupted the configuration file — use \"Safe Mode Boot\" to bypass the user layer without losing any data.");
         m.put(" 次探测未运行 → 收起", " consecutive checks inactive → minimized");
         m.put(" 次（上限 2 次）\n\n", " times (maximum 2 times)\n\n");
-        m.put(" 次（上限 2 次）\\n\\n", " times (maximum 2 times)\\n\\n");
-        m.put(" 次，后台进行）", " times, performed in the background)");
+        m.put(" 次（上限 2 次）\n\n⚠ 执行会改动内核树（只碰内核自己的 @deepseek-ai 命名空间，用户数据与第三方插件不动），且会在执行前写一条账本记录。", " times (maximum 2 times)\n\n⚠ Execution modifies the kernel tree (affecting only the internal @deepseek-ai namespace; user data and third-party plugins remain untouched) and writes a ledger entry beforehand.");
+        m.put(" 次，后台进行）", " times, running in the background)");
         m.put(" 步", " step");
         m.put(" 没有监听（应用更新后系统常会关停服务）", " No monitoring (the system often shuts down services after application updates)");
         m.put(" 秒", " s");
-        m.put(" 秒）", " Second)");
-        m.put(" 秒）：", " Second):");
+        m.put(" 秒）", " s)");
+        m.put(" 秒）：", " s): ");
         m.put(" 笔）", " strokes)");
-        m.put(" 行", " OK");
-        m.put(" 行 · ", " OK · ");
-        m.put(" 行 · 最后活动 ", " OK · Last activity ");
-        m.put(" 行第 ", " line of work ");
+        m.put(" 行", " lines");
+        m.put(" 行 · ", " lines · ");
+        m.put(" 行 · 最后活动 ", " lines · Last active ");
+        m.put(" 行第 ", " line, column ");
         m.put(" 读不到），无法做清单式证明", " unreadable), manifest verification unavailable");
-        m.put(" 轮）", " wheel)");
+        m.put(" 轮）", " rounds)");
         m.put(" 返回 false）：目标多半是 contenteditable 富文本（聊天框/编辑器），", " Return false): The target is mostly contenteditable rich text (chat box/editor),");
+        m.put(" 返回 false）：目标多半是 contenteditable 富文本（聊天框/编辑器），这类节点在控件树里常表现为「可输入但不可点击」。", " returned false): The target is likely a contenteditable rich-text field (chat box/editor); such nodes often appear as \"editable/focusable but not clickable\" in the accessibility tree.");
         m.put(" 返回 false，", " Return false,");
-        m.put(" 页", " Page");
-        m.put(" 页自定义布局（第 1 页 = 主控台；", " Page Custom Layout(Page 1 = Main Console;");
-        m.put(" 项回退", " Item rollback");
+        m.put(" 返回 false，节点类=", " returned false, node class=");
+        m.put(" 页", " pages");
+        m.put(" 页自定义布局（第 1 页 = 主控台；", " custom layout pages (Page 1 = Main Console; ");
+        m.put(" 页自定义布局（第 1 页 = 主控台；其余页在主控台底部自动生成入口行）", " custom layout pages (Page 1 = Main Console; remaining pages automatically generate entry rows at the bottom of the Main Console)");
+        m.put(" 项回退", " items reverted");
         m.put(" 项已回退", " items reverted");
         m.put(" 项已回退（详情）", " items reverted (details)");
-        m.put(" 项非法已回退，其余生效中", " The illegal items have been rolled back, and the rest are in effect.");
-        m.put(" 项非法，导入后会回退成内置值：", " The item is illegal and will fall back to the built-in value after import:");
-        m.put("\" 是救援面的一部分，不可移除 → 已忽略", "\" is part of the rescue surface and cannot be removed → ignored");
-        m.put("\",\"error\":\"Shizuku 执行失败：", "\",\"error\":\"Shizuku execution failed: ");
-        m.put("\",\"error\":\"命令超时（", "\",\"error\":\"Command timeout (");
-        m.put("\"note\":\"全量解压：按 payload 覆盖内核树，并清理 payload 已没有的 dsh* 陈旧内核包（用户数据与第三方插件不动）\"}", "\"note\":\"Full decompression: overwrite the kernel tree by payload, and clean up the dsh* old kernel package that no longer has the payload (user data and third-party plug-ins are unchanged)\"}");
-        m.put("\"symptom\":\"会话历史里有坏附件引用（每次请求都会复现）\",", "\"symptom\":\"There is a bad attachment reference in the session history (recurring with every request)\",");
-        m.put("\"verifiedBy\":\"session-heal.mjs 复检：坏引用归零 + 行数与 JSON 合法性不变\",", "\"verifiedBy\":\"session-heal.mjs recheck: bad references are reset to zero + the number of lines and JSON legality remain unchanged\",");
-        m.put("# DSH 手机版自动生成。每次启动引擎都会重写，改这里会被覆盖。\n", "# DSH mobile version is automatically generated. It will be rewritten every time the engine is started, and changes here will be overwritten. \n");
-        m.put("# DSH 手机版自动生成。每次启动引擎都会重写，改这里会被覆盖。\\n", "# DSH mobile version is automatically generated. It will be rewritten every time the engine is started, and changes here will be overwritten. \\n");
-        m.put("# `api/workspace/initializeDefault` 报 system Documents directory is unavailable on android，\n", "# `api/workspace/initializeDefault` reports system Documents directory is unavailable on android,\n");
-        m.put("# `api/workspace/initializeDefault` 报 system Documents directory is unavailable on android，\\n", "# `api/workspace/initializeDefault` reports system Documents directory is unavailable on android,\\n");
     }
 
     private static void load2(Map<String, String> m) {
+        m.put(" 项非法已回退，其余生效中", " invalid items reverted; remaining items active");
+        m.put(" 项非法，导入后会回退成内置值：", " invalid items will fall back to built-in defaults after import:");
+        m.put("\" 是救援面的一部分，不可移除 → 已忽略", "\" is part of the rescue surface and cannot be removed → ignored");
+        m.put("\",\"error\":\"Shizuku 执行失败：", "\",\"error\":\"Shizuku execution failed: ");
+        m.put("\",\"error\":\"命令超时（", "\",\"error\":\"Command timeout (");
+        m.put("\",\"note\":\"全量解压：按 payload 覆盖内核树，并清理 payload 已没有的 dsh* 陈旧内核包（用户数据与第三方插件不动）\"}", "\",\"note\":\"Full extraction: overwrite the kernel tree from payload and remove obsolete dsh* kernel packages no longer in payload (user data and third-party plugins remain untouched)\"}");
+        m.put("\"note\":\"全量解压：按 payload 覆盖内核树，并清理 payload 已没有的 dsh* 陈旧内核包（用户数据与第三方插件不动）\"}", "\"note\":\"Full decompression: overwrite the kernel tree by payload, and clean up the dsh* old kernel package that no longer has the payload (user data and third-party plug-ins are unchanged)\"}");
+        m.put("\"symptom\":\"会话历史里有坏附件引用（每次请求都会复现）\",", "\"symptom\":\"There is a bad attachment reference in the session history (recurring with every request)\",");
+        m.put("\"verifiedBy\":\"session-heal.mjs 复检：坏引用归零 + 行数与 JSON 合法性不变\",", "\"verifiedBy\":\"session-heal.mjs recheck: bad references are reset to zero + the number of lines and JSON legality remain unchanged\",");
+        m.put("# DSH 手机版自动生成。每次启动引擎都会重写，改这里会被覆盖。\n", "# Auto-generated by DSH Mobile. Rewritten every time the engine starts; manual changes here will be overwritten.\n");
+        m.put("# `api/workspace/initializeDefault` 报 system Documents directory is unavailable on android，\n", "# `api/workspace/initializeDefault` reports system Documents directory is unavailable on android,\n");
         m.put("# 依赖目录仍建议放应用私有目录（$HOME/$DSH_HOME），/sdcard 只放源码。\n", "# It is still recommended to put the dependent directory in the application private directory ($HOME/$DSH_HOME), and /sdcard only holds the source code. \n");
-        m.put("# 依赖目录仍建议放应用私有目录（$HOME/$DSH_HOME），/sdcard 只放源码。\\n", "# It is still recommended to put the dependent directory in the application private directory ($HOME/$DSH_HOME), and /sdcard only holds the source code. \\n");
         m.put("# 最终默认工作区 = <documentsDirectory>/deepseek-harness/default-workspace。\n", "# Final default workspace = <documentsDirectory>/deepseek-harness/default-workspace. \n");
-        m.put("# 最终默认工作区 = <documentsDirectory>/deepseek-harness/default-workspace。\\n", "# Final default workspace = <documentsDirectory>/deepseek-harness/default-workspace. \\n");
         m.put("# 默认工作区永远建不出来。这里用官方提供的 documentsDirectory 覆盖项指定一个可用目录，\n", "# The default workspace can never be created. Here, use the officially provided documentsDirectory overlay to specify an available directory,\n");
-        m.put("# 默认工作区永远建不出来。这里用官方提供的 documentsDirectory 覆盖项指定一个可用目录，\\n", "# The default workspace can never be created. Here, use the officially provided documentsDirectory overlay to specify an available directory,\\n");
         m.put("% 屏宽）", "% screen width)");
         m.put("% 已保存并生效", "% saved and effective");
         m.put("%,d 个文件 · %d MB", "%,d files · %d MB");
@@ -253,43 +261,29 @@ final class I18nEn {
         m.put("(空消息)", "(empty message)");
         m.put("(空白页)", "(blank page)");
         m.put("- 圆角改 22、字体放大到 1.1\n", "- Change the rounded corners to 22, enlarge the font to 1.1\n");
-        m.put("- 圆角改 22、字体放大到 1.1\\n", "- Change the rounded corners to 22, enlarge the font to 1.1\\n");
         m.put("- 把强调色换成暖橙 #f59e0b，背景图换成 /sdcard/Pictures/my.jpg\n", "- Change the accent color to warm orange #f59e0b and the background image to /sdcard/Pictures/my.jpg\n");
-        m.put("- 把强调色换成暖橙 #f59e0b，背景图换成 /sdcard/Pictures/my.jpg\\n", "- Change the accent color to warm orange #f59e0b and the background image to /sdcard/Pictures/my.jpg\\n");
         m.put("- 文案里\"重启\"改成\"重开\"\n", "- Change \"restart\" in the copy to \"restart\"\n");
-        m.put("- 文案里\\\"重启\\\"改成\\\"重开\\\"\\n", "- Change \\\"restart\\\" in the copy to \\\"restart\\\"\\n");
         m.put("--- dsh-web.log 尾部 ---\n", "--- dsh-web.log tail ---\n");
-        m.put("--- dsh-web.log 尾部 ---\\n", "--- dsh-web.log tail ---\\n");
         m.put("--- 候选目录 ---\n", "--- Candidate directory ---\n");
-        m.put("--- 候选目录 ---\\n", "--- Candidate directory ---\\n");
         m.put("-------- dsh-web.log（末尾 400 行）--------\n", "-------- dsh-web.log (last line 400)--------\n");
-        m.put("-------- dsh-web.log（末尾 400 行）--------\\n", "-------- dsh-web.log (last line 400)--------\\n");
         m.put("/heal-ledger/config-snapshot-<时间>/，并写一条账本。", "/heal-ledger/config-snapshot-<time>/, and write a ledger.");
+        m.put("/heal-proposals/*.json；App 只「读」它、绝不会自动执行 —— 执行必须你点。动作白名单写死在 App 里：resync / selfcheck / snapshot-config / open-ledger。提案里带源指纹，源一变即过期；同一源上最多执行 2 次。", "/heal-proposals/*.json; the app only reads proposals and never executes them automatically — you must confirm execution manually. The action whitelist is hardcoded in the app: resync / selfcheck / snapshot-config / open-ledger. Each proposal includes a source fingerprint and expires if the source changes; at most 2 executions are allowed per source.");
         m.put("1 共享 /sdcard/DeepSeekHarness/Workspace", "1 Share /sdcard/DeepSeekHarness/Workspace");
         m.put("1) 顺序：把\"日志\"提到最上面，\"检查更新\"挪到最后；\n", "1) Sequence: Move \"Log\" to the top, and move \"Check for Updates\" to the end;\n");
-        m.put("1) 顺序：把\\\"日志\\\"提到最上面，\\\"检查更新\\\"挪到最后；\\n", "1) Sequence: Move \\\"Log\\\" to the top, and move \\\"Check for Updates\\\" to the end;\\n");
         m.put("1. 先把原文件复制成 <会话文件>.corrupt-<时间>（失败就中止，一个字都不改）；\n", "1. First copy original file to <session file>.corrupt-<timestamp> (aborts without changes if backup fails);\n");
-        m.put("1. 先把原文件复制成 <会话文件>.corrupt-<时间>（失败就中止，一个字都不改）；\\n", "1. First copy original file to <session file>.corrupt-<timestamp> (aborts without changes if backup fails);\\n");
         m.put("1. 打开 Shizuku 应用\n", "1. Open the Shizuku app\n");
-        m.put("1. 打开 Shizuku 应用\\n", "1. Open the Shizuku app\\n");
         m.put("2 变体 /sdcard/", "2 variants /sdcard/");
         m.put("2) 隐藏：把\"检查更新\"整行藏掉；\n", "2) Hide: Hide the entire line \"Check for Updates\";\n");
-        m.put("2) 隐藏：把\\\"检查更新\\\"整行藏掉；\\n", "2) Hide: Hide the entire line \"Check for Updates\";\\n");
         m.put("2. 只把那些坏掉的附件块换成文字说明（形如「【附件不可用】…」），其余字节原样保留；\n", "2. Replace corrupted attachment blocks with text placeholders (e.g. \"[Attachment unavailable]...\") while preserving all other data;\n");
-        m.put("2. 只把那些坏掉的附件块换成文字说明（形如「【附件不可用】…」），其余字节原样保留；\\n", "2. Replace corrupted attachment blocks with text placeholders (e.g. \"[Attachment unavailable]...\") while preserving all other data;\\n");
         m.put("2. 进入「已授权的应用」（或首页的「授权应用」）\n", "2. Enter \"Authorized Applications\" (or \"Authorized Applications\" on the home page)\n");
-        m.put("2. 进入「已授权的应用」（或首页的「授权应用」）\\n", "2. Enter \"Authorized Applications\" (or \"Authorized Applications\" on the home page)\\n");
         m.put("20 秒没有任何请求", "No requests for 20 seconds");
         m.put("3 应用外部 files/Workspace", "3 Apply external files/Workspace");
-        m.put("3) 文案：\"启动引擎\"改叫\"点火\"、\"重启\"改叫\"重开\"、\"停止\"改叫\"熄火\"。\n", "3) Copy: \"Start engine\" is called \"ignition\", \"Restart\" is called \"restart\", \"Stop\" is called \"Stop engine\". \n");
-        m.put("3) 文案：\\\"启动引擎\\\"改叫\\\"点火\\\"、\\\"重启\\\"改叫\\\"重开\\\"、\\\"停止\\\"改叫\\\"熄火\\\"。\\n", "3) Copy: \\\"Start engine\\\" is called \\\"ignition\\\", \\\"Restart\\\" is called \\\"restart\\\", \\\"Stop\\\" is called \\\"Stop engine\\\". \\n");
+        m.put("3) 文案：\"启动引擎\"改叫\"点火\"、\"重启\"改叫\"重开\"、\"停止\"改叫\"熄火\"。\n", "3) Labels: rename \"Start Engine\" to \"Ignite\", \"Restart\" to \"Reopen\", and \"Stop\" to \"Shut Off\".\n");
         m.put("3. 找到 ", "3. find ");
         m.put("3. 立刻复检：坏引用必须归零、行数与 JSON 合法性必须不变；\n", "3. Immediate verification: broken references must be 0, line count and JSON validity must be preserved;\n");
-        m.put("3. 立刻复检：坏引用必须归零、行数与 JSON 合法性必须不变；\\n", "3. Immediate verification: broken references must be 0, line count and JSON validity must be preserved;\\n");
         m.put("32 位 ", "32 bit ");
         m.put("4 应用内部 filesDir/Workspace", "4 Application internal filesDir/Workspace");
         m.put("4. 写一条自愈账本（含动作清单与前后字节数）。\n\n", "4. Record in self-healing ledger (list of actions, byte size before and after).\n\n");
-        m.put("4. 写一条自愈账本（含动作清单与前后字节数）。\\n\\n", "4. Record in self-healing ledger (list of actions, byte size before and after).\\n\\n");
         m.put("64 位 ", "64 bit ");
         m.put("<把你的 console.json 贴在这里>", "<Post your console.json here>");
         m.put("A 并成一行", "A in a row");
@@ -297,16 +291,16 @@ final class I18nEn {
         m.put("ACTION_IME_ENTER 被拒绝（该输入框可能不支持 EditorAction，也没找到「前往/搜索/发送」按钮）", "ACTION_IME_ENTER was rejected (input field may not support EditorAction, and no 'Go/Search/Send' button found)");
         m.put("ACTION_IME_ENTER 被拒绝，且点击「前往/发送」按钮也失败", "ACTION_IME_ENTER was rejected, and tapping 'Go/Send' button also failed");
         m.put("ACTION_IME_ENTER 需要 Android 11+（当前 API ", "ACTION_IME_ENTER requires Android 11+ (current API ");
-        m.put("AI 任务完成/需要你关注时推送", "Pushed when the AI ​​task is completed/requires your attention");
-        m.put("AI 修复提案", "AI Repair Proposal");
-        m.put("AI 写出提案后，这里会出现它、并列出它想做什么", "After the AI ​​writes a proposal, it will appear here and list what it wants to do.");
+        m.put("AI 任务完成/需要你关注时推送", "Pushed when the AI task is completed/requires your attention");
+        m.put("AI 修复提案", "AI Repair Proposals");
+        m.put("AI 写出提案后，这里会出现它、并列出它想做什么", "After the AI writes a proposal, it will appear here and list what it wants to do.");
         m.put("AI 发通知 / 提醒", "AI sends notifications and reminders");
         m.put("AI 工作区", "AI Workspace");
         m.put("AI 工作区（可选）", "AI Workspace (Optional)");
         m.put("AI 引擎保活中，后台任务持续执行", "Engine background service active, tasks running continuously");
-        m.put("AI 查「今天用了多久某个 App」", "AI checks 'how long was an app used today'");
+        m.put("AI 查「今天用了多久某个 App」", "AI checks how long an app was used today");
         m.put("AI 查看 / 启动你装的应用（多数手机无需授权）", "AI views and launches installed apps (most devices require no manual grant)");
-        m.put("AI 正在点哪一页", "Which page is the AI ​​clicking on?");
+        m.put("AI 正在点哪一页", "Which page is the AI clicking on?");
         m.put("AI 浏览器跑在独立进程里：页面崩了不会带走控制台和引擎。这里能看它正在哪一页，也能把画面同屏显示出来。", "The AI browser runs in an isolated process: if a webpage crashes, the console and engine remain unaffected. You can monitor current page status or mirror the screen here.");
         m.put("AI 浏览器还没打开页面：先让 AI 打开一个网页，再开同屏", "AI Browser has no open pages: ask AI to open a webpage first, then start screen sync");
         m.put("AI 浏览器：结构化 DOM 快照 + 稳定 ref（关掉则 AI 不能上网）", "AI browser: structured DOM snapshot + stable ref (if turned off, AI cannot access the Internet)");
@@ -334,21 +328,21 @@ final class I18nEn {
         m.put("DeepSeek Harness 引擎运行状态", "DeepSeek Harness engine status");
         m.put("DeepSeek Harness 日志", "DeepSeek Harness Logs");
         m.put("DeepSeek Harness 日志\n", "DeepSeek Harness Logs\n");
-        m.put("DeepSeek Harness 日志\\n", "DeepSeek Harness Logs\\n");
+        m.put("DeepSeek Harness 日志\n版本 ", "DeepSeek Harness Logs\nVersion ");
         m.put("DeepSeek Harness 正在运行", "DeepSeek Harness is running");
         m.put("Download/DSH日志-", "Download/DSH log-");
         m.put("English", "English");
         m.put("FakeContext init failed, 虚拟屏不可用", "FakeContext init failed, virtual display unavailable");
         m.put("HTTP 动作还没接（要等第 3 轮余下部分）", "HTTP action not received yet (have to wait for the rest of round 3)");
-    }
-
-    private static void load3(Map<String, String> m) {
         m.put("HTTP 服务启动失败", "HTTP service startup failed");
         m.put("HTTP 请求", "HTTP request");
         m.put("Intent 动作还没接（要等第 3 轮余下部分）", "The Intent action has not been taken yet (will have to wait for the rest of round 3)");
         m.put("JSON 语法错误：", "JSON syntax error:");
         m.put("KB 上限", "KB limit");
         m.put("KB 上限（", "KB limit (");
+    }
+
+    private static void load3(Map<String, String> m) {
         m.put("Looper.loop 退出", "Looper.loop exit");
         m.put("PowerShell 沙箱 · Android 无 pwsh", "PowerShell Sandbox · Android without pwsh");
         m.put("SAF 路径 -> ", "SAF path -> ");
@@ -356,11 +350,9 @@ final class I18nEn {
         m.put("Shizuku / Root 特权（可选）", "Shizuku / Root Privileges (Optional)");
         m.put("Shizuku 可用（已授权本应用）", "Shizuku available (authorized for this app)");
         m.put("Shizuku 已授权，AI 可以执行系统级操作。\n", "Shizuku authorized: AI can perform system-level operations.\n");
-        m.put("Shizuku 已授权，AI 可以执行系统级操作。\\n", "Shizuku authorized: AI can perform system-level operations.\\n");
         m.put("Shizuku 已连接，但本应用还没授权 · 首次调用会弹授权框", "Shizuku is connected, but this app is not authorized yet · Authorization prompt will appear on first call");
         m.put("Shizuku 授权（需手动）", "Shizuku authorization (manual)");
         m.put("Shizuku 服务未运行。\n\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。", "Shizuku service is not running.\n\nPlease open the Shizuku app and start its service, then return here and tap 'Re-detect'. Once the service is running, the app will request authorization automatically.");
-        m.put("Shizuku 服务未运行。\\n\\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。", "Shizuku service is not running.\\n\\nPlease open the Shizuku app and start its service, then return here and tap 'Re-detect'. Once the service is running, the app will request authorization automatically.");
         m.put("Shizuku 特权", "Shizuku Privileges");
         m.put("Shizuku 的授权框没有出现（常见于 ColorOS/OPPO 等系统拦截了它的弹窗）。", "Shizuku authorization prompt did not appear (commonly blocked by ColorOS/OPPO popup management).");
         m.put("Shizuku（免 root 特权通道）", "Shizuku (No-Root Privilege)");
@@ -371,47 +363,11 @@ final class I18nEn {
         m.put("WebView 还没有尺寸", "WebView has no size yet");
         m.put("WebView 里还有页面", "There are pages in WebView");
         m.put("WebView/自绘界面建议改用 android_gesture（tap 笔）或核对 fx/fy；", "For WebView/self-drawn interface, it is recommended to use android_gesture (tap pen) or check fx/fy;");
+        m.put("WebView/自绘界面建议改用 android_gesture（tap 笔）或核对 fx/fy；也可以先 android_see 截图确认当前画面。", "For WebView or custom-drawn UI, use android_gesture (tap stroke) or verify fx/fy coordinates; you can also take a screenshot with android_see first to check the current screen.");
         m.put("[已回退]", "[reverted]");
         m.put("[已回退] ", "[reverted] ");
         m.put("[已回退] $.appearance.background.image：找不到图片 ", "[Reverted] $.appearance.background.image: Image not found ");
         m.put("[已回退] $.appearance.logo：找不到图片 ", "[Reverted] $.appearance.logo: Image not found ");
-        m.put("\\\" 是救援面的一部分，不可移除 → 已忽略", "\\\" is part of the rescue surface and cannot be removed → ignored");
-        m.put("\\\",\\\"error\\\":\\\"Shizuku 执行失败：", "\\\",\\\"error\\\":\\\"Shizuku execution failed: ");
-        m.put("\\\",\\\"error\\\":\\\"命令超时（", "\\\",\\\"error\\\":\\\"Command timeout (");
-        m.put("\\\"note\\\":\\\"全量解压：按 payload 覆盖内核树，并清理 payload 已没有的 dsh* 陈旧内核包（用户数据与第三方插件不动）\\\"}", "\\\"note\\\":\\\"Full decompression: overwrite the kernel tree by payload, and clean up the dsh* old kernel package that no longer has the payload (user data and third-party plug-ins are unchanged)\\\"}");
-        m.put("\\\"symptom\\\":\\\"会话历史里有坏附件引用（每次请求都会复现）\\\",", "\\\"symptom\\\":\\\"There is a bad attachment reference in the session history (recurring with every request)\\\",");
-        m.put("\\\"verifiedBy\\\":\\\"session-heal.mjs 复检：坏引用归零 + 行数与 JSON 合法性不变\\\",", "\\\"verifiedBy\\\":\\\"session-heal.mjs recheck: bad references are reset to zero + the number of lines and JSON legality remain unchanged\\\",");
-        m.put("\\n# v1.21：Android 上内核解析不出「系统 Documents 目录」，直接导致\\n", "\\n# v1.21: The kernel on Android cannot parse the \"system Documents directory\", which directly causes\\n");
-        m.put("\\n# 本版补：pnpm 在 /sdcard（FUSE）上建不了符号链接 → 用 npm 式平铺布局。\\n", "\\n# This version adds: pnpm cannot create symbolic links on /sdcard (FUSE) → use npm style tile layout. \\n");
-        m.put("\\n\\n⚠ 含 ", "\\n\\n⚠ Contains ");
-        m.put("\\n\\n它来自主题配置（可能是 AI 生成的），确认内容是你认识的就执行。", "\\n\\nIt comes from the theme configuration (maybe AI generated), make sure the content is familiar to you and execute it.");
-        m.put("\\n\\n导入会覆盖当前的 console.json 与同名图片（现有配置先备份成 console.json.bak-import-<时间>）。", "\\n\\nThe import will overwrite the current console.json and the image with the same name (the existing configuration is backed up first as console.json.bak-import-<time>).");
-        m.put("\\n\\n请手动授权：\\n", "\\n\\nPlease authorize manually:\\n");
-        m.put("\\n\\n选择其他文件夹，或恢复默认？", "\\n\\nChoose another folder, or restore default?");
-        m.put("\\n「清空记录」只删这些备份文件，不动当前正在用的 console.json。", "\\n\"Clear records\" only deletes these backup files and leaves the console.json currently in use untouched.");
-        m.put("\\n上次回退：有（同目录 last-error.txt，", "\\nLast rollback: Yes (same directory last-error.txt,");
-        m.put("\\n不授予特权也能正常使用：文件读写、预览、编辑只需「所有文件访问」权限。", "\\nFull functionality remains available without elevated privileges: file reading, writing, previewing, and editing only require \"All Files Access\".");
-        m.put("\\n共 ", "\\nTotal ");
-        m.put("\\n包名：", "\\nPackage name:");
-        m.put("\\n原文件已备份：", "\\nThe original file has been backed up:");
-        m.put("\\n可恢复：有 ", "\\nRecoverable: Yes ");
-        m.put("\\n可执行动作（本版不执行）：", "\\nExecutable actions (disabled in this version):");
-        m.put("\\n命令：", "\\nCommand:");
-        m.put("\\n复检：坏引用 ", "\\nRe-check: broken references ");
-        m.put("\\n布局：", "\\nLayout: ");
-        m.put("\\n当前生效（", "\\nCurrently effective (");
-        m.put("\\n改写前会把原文件备份成同目录的 .corrupt-<时间>；", "\\nBefore rewriting, the original file will be backed up to.corrupt-<time> in the same directory;");
-        m.put("\\n整体回退原因：\\n", "\\nOverall rollback reason:\\n");
-        m.put("\\n文案覆盖（", "\\nText overrides (");
-        m.put("\\n状态：", "\\nStatus:");
-        m.put("\\n状态：已生效", "\\nStatus: Effective");
-        m.put("\\n状态：整体回退默认（配置有语法错误）", "\\nStatus: Overall fallback to default (configuration has syntax errors)");
-        m.put("\\n生效范围：", "\\nEffective range:");
-        m.put("\\n背景图：", "\\nBackground image:");
-        m.put("\\n自定义布局：", "\\nCustom layout: ");
-        m.put("\\n警告 / 已回退的项：\\n", "\\nWarning / Rolled-back items:\\n");
-        m.put("\\n说明：\\n", "\\nDescription:\\n");
-        m.put("\\n路径：", "\\nPath:");
         m.put("a11y 请求被拒（令牌缺失或错误）：", "Accessibility request rejected (missing or invalid token): ");
         m.put("accept 失败: ", "accept failed: ");
         m.put("acquireLatestImage 异常: ", "acquireLatestImage exception: ");
@@ -419,9 +375,9 @@ final class I18nEn {
         m.put("action=view 需要 url 参数", "action=view requires url parameter");
         m.put("android_package 装 APK 用", "Used by android_package to install APKs");
         m.put("appearance.background 没给 image，本轮不生效（纯色底）", "appearance.background does not give an image, it will not take effect this round (solid color background)");
-        m.put("autoEnter: 用户曾主动停止引擎 → 进控制台等用户决定", "autoEnter: The user has actively stopped the engine → enter the console and wait for the user's decision");
+        m.put("autoEnter: 用户曾主动停止引擎 → 进控制台等用户决定", "autoEnter: Engine was manually stopped by user → opening Console to wait for user action");
         m.put("autoEnter: 界面连续失败 ", "autoEnter: The interface fails continuously ");
-        m.put("autoEnter: 秒进模式（不显示控制台），直接起引擎", "autoEnter: second-to-second mode (without displaying the console), start the engine directly");
+        m.put("autoEnter: 秒进模式（不显示控制台），直接起引擎", "autoEnter: Instant-enter mode (skipping Console), starting engine directly");
         m.put("autoEnter: 连续失败 ", "autoEnter: continuous failure ");
         m.put("background.blur 只在 Android 12+ 生效，本机已忽略（其余项照常生效）", "background.blur only takes effect on Android 12+ and is ignored on this machine (the rest take effect as usual)");
         m.put("bash 沙箱（本项目用 bash-local 替代）", "bash sandbox (this project uses bash-local instead)");
@@ -443,14 +399,11 @@ final class I18nEn {
         m.put("btn.extract.verify", "Verify Files");
         m.put("btn.heal.notRunnable", "Not enforceable");
         m.put("btn.heal.run", "Execute (requires confirmation)");
-    }
-
-    private static void load4(Map<String, String> m) {
         m.put("btn.log.clear", "Clear Logs");
         m.put("btn.log.clearShort", "Clear");
         m.put("btn.log.share", "Share");
         m.put("btn.log.view", "View Logs");
-        m.put("btn.plugins.restart", "Restart the engine to take effect");
+        m.put("btn.plugins.restart", "Restart Engine to Apply");
         m.put("btn.rescue", "Rescue");
         m.put("btn.rescue.exitSafe", "Exit Safe Mode");
         m.put("btn.rescue.export", "Export Data");
@@ -490,6 +443,9 @@ final class I18nEn {
         m.put("card.actions", "Custom Buttons");
         m.put("card.browser", "AI Browser");
         m.put("card.ledger", "Self-Healing Ledger");
+    }
+
+    private static void load4(Map<String, String> m) {
         m.put("card.log", "Logs");
         m.put("card.overlay", "Floating Window");
         m.put("card.perm", "Grant Permissions");
@@ -542,15 +498,12 @@ final class I18nEn {
         m.put("desc.ledgerDir", "Table of contents:");
         m.put("desc.logClear", "It only clears the logs and does not affect the running engine; new logs will continue to be written afterward.");
         m.put("desc.noBadSession", "All session attachment references match existing files and content is intact — no repairs needed.");
-        m.put("desc.noProposal", "After the AI ​​writes a proposal, it will appear here and list what it wants to do.");
+        m.put("desc.noProposal", "After the AI writes a proposal, it will appear here and list what it wants to do.");
         m.put("desc.overlay", "Status bubble text · Idle / Thinking / Calling tools / Completed");
         m.put("desc.perm", "Storage · Notifications · Floating Window · Battery · Root · Shizuku · Accessibility");
         m.put("desc.permPage", "Tap any row to grant/manage. Choose either Root or Shizuku (Root preferred).");
-    }
-
-    private static void load5(Map<String, String> m) {
         m.put("desc.plugins", "Turn off unused ones to save context");
-        m.put("desc.pluginsPage", "Turned off plug-ins are not loaded: tools are not included in the AI ​​tool list and occupy less context. Changes will take effect after restarting the engine.");
+        m.put("desc.pluginsPage", "Disabled plugins are not loaded: their tools are excluded from the AI tool list, using less context. Changes take effect after restarting the engine.");
         m.put("desc.rescue", "If the engine fails to start, use Safe Mode to bypass user config without data loss; or export a full backup.");
         m.put("desc.selfcheckShort", "Manifest Consistency Proof · Self-Healing Ledger");
         m.put("desc.sessionBadHint", "Tap an entry to inspect corruptions and decide whether to repair (only the selected session is modified):");
@@ -583,8 +536,8 @@ final class I18nEn {
         m.put("down 需要 x/y 或 fx/fy", "down requires x/y or fx/fy");
         m.put("dsh-web.log（末尾 200 行）", "dsh-web.log (last line 200)");
         m.put("dshroot heal: 覆盖写入 ", "dshroot heal: overwrite write ");
-        m.put("engine alive but not ready after extra rounds —— 交回原有兜底流程", "engine alive but not ready after extra rounds - return the original back-up process");
-        m.put("engine alive —— 继续等待（第 ", "engine alive - continue to wait (Chapter ");
+        m.put("engine alive but not ready after extra rounds —— 交回原有兜底流程", "engine alive but not ready after extra rounds — falling back to default recovery flow");
+        m.put("engine alive —— 继续等待（第 ", "engine alive — continuing to wait (#");
         m.put("engine cwd -> (未设置工作区，保持默认)", "engine cwd -> (no workspace set, keep default)");
         m.put("engine plugins refresh 跳过（载荷未变）", "engine plugins refresh skipped (load unchanged)");
         m.put("enterMainUi: WebView 已损坏，重建界面", "enterMainUi: WebView is damaged, rebuild the interface");
@@ -593,9 +546,11 @@ final class I18nEn {
         m.put("exec失败", "exec failed");
         m.put("exec失败: ", "exec failed: ");
         m.put("extract 需要 entry（单个包内路径）或 prefix（前缀，如 assets/）", "extract requires entry (path within a single package) or prefix (prefix, such as assets/)");
+    }
+
+    private static void load5(Map<String, String> m) {
         m.put("finger 越界（0~7）", "finger index out of bounds (0~7)");
         m.put("gesture body 需要是数组或 {\"strokes\":[...]}", "gesture body must be an array or {\"strokes\":[...]}");
-        m.put("gesture body 需要是数组或 {\\\"strokes\\\":[...]}", "gesture body must be an array or {\\\"strokes\\\":[...]}");
         m.put("gesture 参数解析失败: ", "Failed to parse gesture parameters: ");
         m.put("gesture 需要 POST JSON body", "gesture endpoint requires POST JSON body");
         m.put("gestureTap: 手势被系统取消（onCancelled）", "gestureTap: gesture cancelled by system (onCancelled)");
@@ -621,7 +576,6 @@ final class I18nEn {
         m.put("ms 内没等到文字「", "ms elapsed without text '");
         m.put("ms 无请求，判定宿主 App 已退出：销毁虚拟屏并退出", "ms without requests; host app inferred exited: destroying virtual display and quitting");
         m.put("ms）已终止\"}", "ms) terminated\"}");
-        m.put("ms）已终止\\\"}", "ms) terminated\\\"}");
         m.put("multi-op gesture：按住阶段未生效（仅单 op 的 swipe 支持）", "multi-op gesture: hold phase not supported (supported only for single-op swipe)");
         m.put("node存活=", "node survival=");
         m.put("npmrc 补齐失败（不致命）", "npmrc completion failed (not fatal)");
@@ -634,7 +588,7 @@ final class I18nEn {
         m.put("onNewIntent: EXTRA_OPEN_WEB → 进主界面（来源：悬浮窗面板）", "onNewIntent: EXTRA_OPEN_WEB → Enter the main interface (source: floating window panel)");
         m.put("onNewIntent: 引擎处于用户主动停止状态 → 进控制台", "onNewIntent: The engine is in user-initiated stop state → enter the console");
         m.put("onNewIntent: 引擎未就绪（booting=", "onNewIntent: The engine is not ready (booting=");
-        m.put("onNewIntent: 引擎正在启动 → 先进控制台", "onNewIntent: Engine starting → Advanced Console");
+        m.put("onNewIntent: 引擎正在启动 → 先进控制台", "onNewIntent: Engine is starting → opening Console first");
         m.put("onNullBinding（服务没给出 binder）", "onNullBinding (the service does not provide a binder)");
         m.put("onUnbind（系统解绑：用户关闭无障碍 / 服务被回收）", "onUnbind (system unbind: user disabled Accessibility / service recycled)");
         m.put("ovl.alphaDef", "Restore defaults");
@@ -649,9 +603,6 @@ final class I18nEn {
         m.put("ovl.tuckSave", "save");
         m.put("panel 失败", "Panel operation failed");
         m.put("payload integrity: 别名缺失 ", "payload integrity: alias missing ");
-    }
-
-    private static void load6(Map<String, String> m) {
         m.put("payload integrity: 自愈后 别名=", "payload integrity: after self-healing alias =");
         m.put("payload 里没有 node：", "There is no node in the payload:");
         m.put("pixel 需要 pts=x,y;x,y…（屏幕坐标，分号分隔）", "pixel requires pts=x,y;x,y… (screen coordinates, semicolon-separated)");
@@ -661,14 +612,14 @@ final class I18nEn {
         m.put("python3 theme_pack_check.py 你的主题包.zip", "python3 theme_pack_check.py your_theme_pack.zip");
         m.put("reader.close 失败: ", "reader.close failed: ");
         m.put("ref 已失效（元素不在了）", "ref is invalid (element no longer exists)");
-        m.put("ref 已失效（元素不在了）：请重新 browser_snapshot 或 browser_find", "ref is invalid (element no longer exists): please try browser_snapshot or browser_find again");
+        m.put("ref 已失效（元素不在了）：请重新 browser_snapshot 或 browser_find", "ref has expired (element no longer exists): please run browser_snapshot or browser_find again");
         m.put("ref 格式不对（应为 rXXXXXXX 或 rXXXXXXX-2）", "The ref format is wrong (should be rXXXXXXX or rXXXXXXX-2)");
         m.put("region 宽高必须为正", "region width and height must be positive");
         m.put("region 解析失败：", "Failed to parse region: ");
         m.put("region 起点超出屏幕（", "region origin is outside screen bounds (");
         m.put("region 需要 4 个数字：x,y,w,h", "region requires 4 numbers: x,y,w,h");
         m.put("root 只能由你在 root 管理器（Magisk / KernelSU）里授予本应用；", "Root can only be granted to this application by you in the root manager (Magisk / KernelSU);");
-        m.put("root 只能由你在 root 管理器（Magisk / KernelSU）里授予本应用；设备没 root 时这一项显示「本机无 root」。", "Root can only be granted in your root manager (Magisk / KernelSU); shows 'No Root Detected' if unrooted.");
+        m.put("root 只能由你在 root 管理器（Magisk / KernelSU）里授予本应用；设备没 root 时这一项显示「本机无 root」。", "Root can only be granted in your root manager (Magisk / KernelSU); shows \"No Root Detected\" if the device is not rooted.");
         m.put("root 可用（su）", "root is available (su)");
         m.put("root（超级用户）", "Root (Superuser)");
         m.put("schema 必须为 1（读到 ", "schema must be 1 (read ");
@@ -698,6 +649,9 @@ final class I18nEn {
         m.put("status.extract.done", "Extracted");
         m.put("status.extract.idle", "Not Extracted");
         m.put("status.extract.running", "Extracting…");
+    }
+
+    private static void load6(Map<String, String> m) {
         m.put("status.extract.working", "Extracting runtime and kernel tree…");
         m.put("status.failed", "Failed");
         m.put("status.lastHeal", "Last Repair");
@@ -752,9 +706,6 @@ final class I18nEn {
         m.put("title.grpShellScheme", "Appearance (Shell)");
         m.put("title.grpSystem", "System");
         m.put("title.grpThemeCare", "Maintenance");
-    }
-
-    private static void load7(Map<String, String> m) {
         m.put("title.grpThemeIo", "Import / Export");
         m.put("title.grpTrashCare", "Maintenance");
         m.put("title.grpTrashList", "Sessions in Trash");
@@ -781,9 +732,9 @@ final class I18nEn {
         m.put("warmPayload: 后台预热完成，文件已就绪（向导走完可直接起引擎）", "warmPayload: Background pre-warming complete, files ready (engine can start immediately after wizard)");
         m.put("warmPayload: 向导期间开始后台预热 payload", "warmPayload: Starting background payload pre-warming during wizard");
         m.put("watchdog: 引擎已恢复（探测成功或端口在监听）", "watchdog: The engine has recovered (detection is successful or the port is listening)");
-        m.put("watchdog: 引擎探测失败 ", "watchdog: Engine detection failed ");
+        m.put("watchdog: 引擎探测失败 ", "watchdog: Engine health check failed ");
         m.put("watchdog: 正在完全退出 → 停止看门狗", "watchdog: Exiting cleanly → stopping watchdog");
-        m.put("watchdog: 连续 3 次探测失败 → 重启引擎", "watchdog: 3 consecutive detection failures → restart engine");
+        m.put("watchdog: 连续 3 次探测失败 → 重启引擎", "watchdog: 3 consecutive health check failures → restarting engine");
         m.put("webview: onCreateWindow → 直接交给系统浏览器（isDialog=", "webview: onCreateWindow → directly handed over to the system browser (isDialog=");
         m.put("webview: 麦克风授权被拒 → deny", "webview: Microphone authorization denied → deny");
         m.put("webview: 麦克风授权通过 → grant 给页面", "webview: Microphone authorization passes → grant to the page");
@@ -801,6 +752,9 @@ final class I18nEn {
         m.put("{\"ok\":false,\"error\":\"未授予「修改系统设置」权限（WRITE_SETTINGS），无法修改；请先在权限引导页/系统设置里开启\"}", "{\"ok\":false,\"error\":\"The \"Modify System Settings\" permission (WRITE_SETTINGS) has not been granted and cannot be modified; please enable it in the permissions guide page/system settings first\"}");
         m.put("{\"ok\":false,\"error\":\"未授予悬浮窗权限，请在权限引导页/系统设置里开启\"}", "{\"ok\":false,\"error\":\"Overlay permission not granted. Please enable it in Permissions guide or system settings\"}");
         m.put("{\"ok\":false,\"error\":\"未知 action（show/hide/toggle/status/bubble/geom）\"}", "{\"ok\":false,\"error\":\"Unknown action (show/hide/toggle/status/bubble/geom)\"}");
+    }
+
+    private static void load7(Map<String, String> m) {
         m.put("{\"ok\":false,\"error\":\"未知路径 ", "{\"ok\":false,\"error\":\"Unknown path ");
         m.put("{\"ok\":false,\"error\":\"未知路由: ", "{\"ok\":false,\"error\":\"Unknown route: ");
         m.put("{\"ok\":false,\"error\":\"本地服务鉴权失败：缺少或错误的 X-DSH-Token（该接口仅限本应用引擎调用）\"}", "{\"ok\":false,\"error\":\"Local service authentication failed: missing or wrong X-DSH-Token (this interface can only be called by this application engine)\"}");
@@ -812,42 +766,13 @@ final class I18nEn {
         m.put("{\"ok\":false,\"error\":\"鉴权失败：缺少或错误的 X-DSH-Token\"}", "{\"ok\":false,\"error\":\"Authentication failed: missing or wrong X-DSH-Token\"}");
         m.put("{\"ok\":false,\"error\":\"音频服务不可用\"}", "{\"ok\":false,\"error\":\"Audio service is not available\"}");
         m.put("{\"ok\":true,\"running\":true,\"msg\":\"已显示\"}", "{\"ok\":true,\"running\":true,\"msg\":\"Displayed\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku binder 为空\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku Binder is null\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku newProcess 返回空\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku newProcess returned null\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku 未授权或服务未运行（App 内 pingBinder/checkSelfPermission 失败）\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Shizuku not authorized or service not running (pingBinder/checkSelfPermission failed in app)\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"shell 路由异常：", "{\\\"ok\\\":false,\\\"error\\\":\\\"shell routing exception:");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"token 校验失败（该接口仅限本应用引擎调用）\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Token verification failed (this interface can only be called by this application engine)\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"不支持的音量类型: ", "{\\\"ok\\\":false,\\\"error\\\":\\\"Unsupported volume type: ");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"写入失败（key 可能不存在或不允许修改）\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Writing failed (key may not exist or may not be modified)\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"悬浮窗未运行或还没排过版\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"The floating window is not running or has not been typed\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未授予「使用情况访问」权限（UsageStats），请先在系统设置-使用情况访问里开启\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"\"Usage Access\" permission (UsageStats) has not been granted, please first enable it in System Settings-Usage Access\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未授予「修改系统设置」权限（WRITE_SETTINGS），无法修改；请先在权限引导页/系统设置里开启\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"The \"Modify System Settings\" permission (WRITE_SETTINGS) has not been granted and cannot be modified; please enable it in the permissions guide page/system settings first\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未授予悬浮窗权限，请在权限引导页/系统设置里开启\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Floating window permission is not granted, please enable it in the permission guide page/system settings\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未知 action（show/hide/toggle/status/bubble/geom）\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Unknown action (show/hide/toggle/status/bubble/geom)\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未知路径 ", "{\\\"ok\\\":false,\\\"error\\\":\\\"Unknown path ");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"未知路由: ", "{\\\"ok\\\":false,\\\"error\\\":\\\"Unknown route: ");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"本地服务鉴权失败：缺少或错误的 X-DSH-Token（该接口仅限本应用引擎调用）\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Local service authentication failed: missing or wrong X-DSH-Token (this interface can only be called by this application engine)\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"缺少 command 参数\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Missing command parameter\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"缺少 content 参数\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Missing content parameter\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"缺少 key 参数\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Missing key parameter\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"虚拟屏服务未就绪（特权进程未启动）：", "{\\\"ok\\\":false,\\\"error\\\":\\\"Virtual display service not ready (privileged process not started): ");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"通知权限未授予，无法发送通知\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Notification permission is not granted and notification cannot be sent\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"鉴权失败：缺少或错误的 X-DSH-Token\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Authentication failed: missing or wrong X-DSH-Token\\\"}");
-        m.put("{\\\"ok\\\":false,\\\"error\\\":\\\"音频服务不可用\\\"}", "{\\\"ok\\\":false,\\\"error\\\":\\\"Audio service is not available\\\"}");
-        m.put("{\\\"ok\\\":true,\\\"running\\\":true,\\\"msg\\\":\\\"已显示\\\"}", "{\\\"ok\\\":true,\\\"running\\\":true,\\\"msg\\\":\\\"Displayed\\\"}");
         m.put("{工具}", "{tool}");
         m.put("· console.json.bak*（导入主题前的备份）\n\n", "· console.json.bak* (backup before theme import)\n\n");
-        m.put("· console.json.bak*（导入主题前的备份）\\n\\n", "· console.json.bak* (backup before theme import)\\n\\n");
         m.put("· console.json.disabled-*（点「恢复默认」时收起的）\n", "· console.json.disabled-* (backed up when resetting to default)\n");
-        m.put("· console.json.disabled-*（点「恢复默认」时收起的）\\n", "· console.json.disabled-* (backed up when resetting to default)\\n");
         m.put("· console.json.replaced-*（恢复操作换下来的）\n", "· console.json.replaced-* (replaced during restore operation)\n");
-        m.put("· console.json.replaced-*（恢复操作换下来的）\\n", "· console.json.replaced-* (replaced during restore operation)\\n");
         m.put("· dshhome/profiles/web/cordis.patch.yml（插件树/开关）\n", "· dshhome/profiles/web/cordis.patch.yml (plugin tree/switch)\n");
-        m.put("· dshhome/profiles/web/cordis.patch.yml（插件树/开关）\\n", "· dshhome/profiles/web/cordis.patch.yml (plugin tree/switch)\\n");
         m.put("· dshhome/profiles/web/package.json（插件注册表）\n", "· dshhome/profiles/web/package.json (plug-in registry)\n");
-        m.put("· dshhome/profiles/web/package.json（插件注册表）\\n", "· dshhome/profiles/web/package.json (plug-in registry)\\n");
         m.put("· dshhome/settings.yaml（界面设置）\n\n", "· dshhome/settings.yaml (interface settings)\n\n");
-        m.put("· dshhome/settings.yaml（界面设置）\\n\\n", "· dshhome/settings.yaml (interface settings)\\n\\n");
         m.put("· …另外 ", "· …in addition ");
         m.put("· 点这一行看详情", "· Click this line to see details");
         m.put("· 行数 ", "· Lines ");
@@ -855,13 +780,11 @@ final class I18nEn {
         m.put("·文案（", "· Text (");
         m.put("Русский", "Русский");
         m.put("…另外 ", "…in addition ");
-    }
-
-    private static void load8(Map<String, String> m) {
         m.put("‹ Console", "‹ Console");
         m.put("‹ 控制台", "‹ Console");
         m.put("① 从零生成一个主题", "① Create theme from scratch");
         m.put("① 先用 android_tap 点中输入框，确认软键盘出现（必须有真实键盘焦点）；", "① First use android_tap to focus the input field and verify keyboard appears (requires actual focus);");
+        m.put("① 先用 android_tap 点中输入框，确认软键盘出现（必须有真实键盘焦点）；② 有 Shizuku/root 时用 shizuku_shell 执行 input keyevent 279（粘贴剪贴板，支持中文）或 input text <ASCII>（仅英文数字）；③ 没有特权通道时 a11y 无法写入 contenteditable —— 请让用户手输，或改用带 <input> 表单的界面。", "① First use android_tap to focus the input field and verify the soft keyboard appears (requires real keyboard focus); ② With Shizuku/root, use shizuku_shell to run 'input keyevent 279' (paste from clipboard, supports Unicode/Chinese) or 'input text <ASCII>' (ASCII alphanumeric only); ③ Without a privileged channel, Accessibility cannot write to contenteditable fields — ask the user to type manually or use a page with standard <input> fields.");
         m.put("② 「缺失/内容不符」才是需要处理的真问题，「清单外文件」只是参考信息", "② \"Missing / content mismatch\" indicates real discrepancies to fix; \"files outside manifest\" is informational only");
         m.put("② 回收站在 sessions/ 之外，内核扫不到、不会被当成会话加载；", "② The recycle bin is outside sessions/, cannot be scanned by the kernel, and will not be loaded as a session;");
         m.put("② 安装「DeepSeek Harness 兼容版」（专为老设备优化）。", "② Install \"DeepSeek Harness Compatible Edition\" (optimized for older devices).");
@@ -885,12 +808,13 @@ final class I18nEn {
         m.put("「在等你回答」「出错」这两类状态不套模板，原样显示。", "States \"Waiting for input\" and \"error\" are displayed as-is without templates.");
         m.put("「彻底删除」会真的从磁盘删掉，不可恢复 —— 所以它只在这里提供，且每次都要单独确认。", "\"Delete Permanently\" will physically remove files from disk and cannot be undone — available only here and requires confirmation.");
         m.put("「查看」直接看末尾 200 行；「分享」调用系统分享（QQ / 微信 / 邮件…都能选），", "\"View\" directly looks at the last 200 lines; \"Share\" calls the system sharing (QQ / WeChat / Email... can be selected),");
+        m.put("「查看」直接看末尾 200 行；「分享」调用系统分享（QQ / 微信 / 邮件…都能选），正文里带完整日志路径与末尾 400 行。", "\"View\" shows the last 200 lines directly; \"Share\" opens the system share sheet (Telegram, WeChat, Email, etc.) with the full log path and the last 400 lines.");
         m.put("「结束」同时管插件的 done 与 ended 两种结束状态；", "\"End\" simultaneously controls the two end states of the plug-in: done and ended;");
+        m.put("」\n\nAI 的判断依据：", "\"\n\nAI reasoning: ");
         m.put("」\n命令：", "\"\nCommand:");
-        m.put("」\\n命令：", "\"\\nCommand:");
         m.put("」——这次点击可能没生效", "' — tap may not have taken effect");
         m.put("」不在白名单里。\n\n唯一允许的四个动作是：\n", "\" is not in the whitelist. \n\nThe only four actions allowed are:\n");
-        m.put("」不在白名单里。\\n\\n唯一允许的四个动作是：\\n", "\" is not in the whitelist. \\n\\nThe only four actions allowed are:\\n");
+        m.put("」不在白名单里。\n\n唯一允许的四个动作是：\n· resync / selfcheck / snapshot-config / open-ledger\n\n（AI 只能提建议，不能自己造动作；白名单写死在 App 里。）", "\" is not in the whitelist.\n\nThe only four allowed actions are:\n· resync / selfcheck / snapshot-config / open-ledger\n\n(AI can only suggest actions and cannot invent new ones; the whitelist is hardcoded in the app.)");
         m.put("」变体（", "\" variant (");
         m.put("」的条目（先用 action=list 看清单）", "\"(use action=list to look at the list first)");
         m.put("」（含 ", "\" (including ");
@@ -915,7 +839,6 @@ final class I18nEn {
         m.put("下一步该干什么", "what to do next");
         m.put("下一步：", "Next steps:");
         m.put("下一步：\n", "Next steps:\n");
-        m.put("下一步：\\n", "Next step:\\n");
         m.put("下方有个很丑的类似进度条的东西在动", "There is something ugly like a progress bar moving below.");
         m.put("下方还有个很丑的类似进度条的东西在动", "There is also an ugly progress bar-like thing moving below.");
         m.put("下班啦", "Session Ended");
@@ -932,18 +855,21 @@ final class I18nEn {
         m.put("不支持的键：", "Unsupported keys:");
         m.put("不是合法颜色（支持 #rgb/#rrggbb/#aarrggbb）", "Not a legal color (supports #rgb/#rrggbb/#aarrggbb)");
         m.put("不符", "Mismatch");
+    }
+
+    private static void load8(Map<String, String> m) {
         m.put("不能让控制台全自定义失效", "Don’t let the full customization of the console fail");
         m.put("不许带引号", "No quotation marks allowed");
         m.put("不限制", "no limit");
         m.put("与 :browser 断开（子进程没了？下次调用会自动重连）", "Disconnect from:browser (the child process is gone? It will automatically reconnect next time it is called)");
         m.put("且会在执行前写一条账本记录。", "And a ledger record will be written before execution.");
         m.put("东西多了很杂很乱，做的简洁一点", "There are too many things and it’s very complicated and messy, so make it simpler.");
+        m.put("东西多了很杂很乱，做的简洁一点不能让控制台全自定义失效", "Too many items make it cluttered; keep it simple without breaking full Console customization");
         m.put("丢失后补挂", "Replacement after loss");
         m.put("两种浅色差一点点", "The two light colors are slightly different");
-        m.put("中文", "中文");
+        m.put("中文", "Chinese");
         m.put("中文/WebView 输入框建议改用 android_paste_text（剪贴板粘贴路径）。", "For Chinese/WebView input fields, use android_paste_text (clipboard paste) instead.");
         m.put("为避免「照着一份旧判断去修一棵新树」，这个提案不允许执行。\n", "In order to avoid \"building a new tree based on an old judgment\", this proposal is not allowed to be implemented. \n");
-        m.put("为避免「照着一份旧判断去修一棵新树」，这个提案不允许执行。\\n", "In order to avoid \"building a new tree based on an old judgment\", this proposal is not allowed to be implemented. \\n");
         m.put("主控台", "main console");
         m.put("主界面导航到外部地址 → 系统浏览器: ", "The main interface navigates to the external address → System Browser: ");
         m.put("主通道 = 结构化 DOM 快照 + 稳定 ref 寻址；截图只做给人看的证据，不参与定位", "Main channel = structured DOM snapshot + stable ref addressing; screenshots are only used as evidence for people to see and do not participate in positioning");
@@ -958,9 +884,6 @@ final class I18nEn {
         m.put("主题：内置默认（", "Theme: Built-in Default (");
         m.put("也可以先 android_see 截图确认当前画面。", "You can also take a screenshot with android_see to verify current screen.");
         m.put("也可以随时导出全部数据做备份。", "You can also export all data for backup at any time.");
-    }
-
-    private static void load9(Map<String, String> m) {
         m.put("亮一下又弹回已关闭", "It lights up and bounces back to closed");
         m.put("仍不行就到「应用信息 → 权限」打开「读取应用列表」", "If it still doesn't work, go to \"Application Information → Permissions\" and open \"Read Application List\"");
         m.put("仍失败时用 android_see 截图后点击输入法自带的「粘贴」键（键盘上方一行，屏幕底部约 y≈0.586），", "If it still fails, capture screenshot with android_see and tap the IME 'Paste' button (bar above keyboard, approx y≈0.586 at bottom);");
@@ -971,7 +894,6 @@ final class I18nEn {
         m.put("从通知进控制台", "Go to console from notification");
         m.put("以默认样式打开", "Open in Default Style");
         m.put("以默认样式打开控制台？\n\n这会忽略主题配置（文件不删），方便你在主题把自己改乱时找回操作入口。", "Open console in default style? \n\nThis will ignore the theme configuration (the files will not be deleted), making it easier for you to find the operation entry when the theme changes itself.");
-        m.put("以默认样式打开控制台？\\n\\n这会忽略主题配置（文件不删），方便你在主题把自己改乱时找回操作入口。", "Open console in default style? \\n\\nThis will ignore the theme configuration (the files will not be deleted), making it easier for you to find the operation entry when the theme changes itself.");
         m.put("以默认样式打开（忽略主题配置，文件不删）", "Open in default style (theme configuration is ignored and the file is not deleted)");
         m.put("任务", "Task");
         m.put("任务已完成", "Task completed");
@@ -981,13 +903,11 @@ final class I18nEn {
         m.put("任务：—", "Task: —");
         m.put("任意 HTTP 响应(200-499)", "Any HTTP response (200-499)");
         m.put("会做什么：\n", "What it will do:\n");
-        m.put("会做什么：\\n", "What it will do:\\n");
         m.put("会做什么：把它移到回收站（<dshHome>/sessions-deleted/），随时能在「回收站」里恢复。\n", "What will happen: Moved to Trash (<dshHome>/sessions-deleted/), can be restored anytime from \"Trash\".\n");
         m.put("会做什么：把它移到回收站（<dshHome>/sessions-deleted/），随时能在「回收站」里恢复。\n不会做什么：不碰别的会话，不碰用户数据里的其它东西。", "What will happen: Moved to Trash (<dshHome>/sessions-deleted/), can be restored anytime from \"Trash\".\nWhat will NOT happen: Other sessions and user data remain completely untouched.");
-        m.put("会做什么：把它移到回收站（<dshHome>/sessions-deleted/），随时能在「回收站」里恢复。\\n", "What will happen: Moved to Trash (<dshHome>/sessions-deleted/), can be restored anytime from \"Trash\".\\n");
         m.put("会删除下面这些备份文件（共 ", "The following backup files (total ");
         m.put("会把备份里的用户数据（会话 / 凭证 / 设置 / 工作区）写回本机，然后重启引擎。\n\n", "The user data (session/credentials/settings/workspace) in the backup will be written back to the local machine, and then the engine will be restarted. \n\n");
-        m.put("会把备份里的用户数据（会话 / 凭证 / 设置 / 工作区）写回本机，然后重启引擎。\\n\\n", "The user data (session/credentials/settings/workspace) in the backup will be written back to the local machine, and then the engine will be restarted. \\n\\n");
+        m.put("会把备份里的用户数据（会话 / 凭证 / 设置 / 工作区）写回本机，然后重启引擎。\n\n当前同名数据会被覆盖（备份文件本身不动）。\n\n开始导入吗？", "This will restore user data (sessions / credentials / settings / workspace) from the backup to this device and restart the engine.\n\nExisting data with the same name will be overwritten (the backup file itself remains untouched).\n\nStart import now?");
         m.put("会把它放回「原来那条路径」（原位置：", "Will restore it to its original path (original location: ");
         m.put("会真的删掉回收站里全部 ", "All sessions in the Trash will be permanently deleted (");
         m.put("会话", "Sessions");
@@ -1022,33 +942,34 @@ final class I18nEn {
         m.put("修复完成", "Repair Complete");
         m.put("修复结果", "Repair Result");
         m.put("修复要改写会话文件，而引擎正在运行 —— 它可能同时在写同一条会话。\n\n", "Fix to overwrite session files while the engine is running - it might be writing to the same session at the same time. \n\n");
-        m.put("修复要改写会话文件，而引擎正在运行 —— 它可能同时在写同一条会话。\n\n请先回主控台点「休息一下」（停止引擎），再回来修复。这样做是为了不让一次修复把正在使用的会话写坏。", "Repairing modifies session files, but the engine is currently running and may write to this session at the same time.\n\nPlease return to Console and tap \"Take a Break\" (Stop Engine) before repairing. This protects active sessions from data corruption.");
-        m.put("修复要改写会话文件，而引擎正在运行 —— 它可能同时在写同一条会话。\\n\\n", "Fix to overwrite session files while the engine is running - it might be writing to the same session at the same time. \\n\\n");
-        m.put("修复要改写会话文件，而引擎正在运行 —— 它可能同时在写同一条会话。\\n\\n请先回主控台点「休息一下」（停止引擎），再回来修复。这样做是为了不让一次修复把正在使用的会话写坏。", "Repairing modifies session files, but the engine is currently running and may write to this session at the same time.\\n\\nPlease return to Console and tap \"Take a Break\" (Stop Engine) before repairing. This protects active sessions from data corruption.");
+        m.put("修复要改写会话文件，而引擎正在运行 —— 它可能同时在写同一条会话。\n\n请先回主控台点「休息一下」（停止引擎），再回来修复。这样做是为了不让一次修复把正在使用的会话写坏。", "Repairing modifies session files, but the engine is currently running and may write to this session at the same time.\n\nPlease return to the Console and tap \"Take a Break\" (Stop Engine) before repairing. This protects active sessions from data corruption.");
         m.put("修好之后再「退出安全模式」把用户层还回去。", "After repairing, \"Exit Safe Mode\" to return the user layer.");
         m.put("修完再点一次「清单自检」，期望变成 缺失 0 / 不符 0 —— 这是自愈成功的硬判据。", "After repair, run \"Manifest Self-Check\" again. The result should be 0 missing / 0 mismatch — this confirms successful self-healing.");
         m.put("修完立刻复检：坏引用必须归零、行数与 JSON 合法性不变。", "Recheck immediately after repairing: bad references must be reset to zero, and the number of rows and JSON validity remain unchanged.");
         m.put("修改系统设置", "Modify System Settings");
         m.put("做法：把 profile 的用户层（可能被插件写坏的配置）整体旁置，", "Method: Put aside the user layer of the profile (the configuration that may be written by the plug-in) as a whole.");
+        m.put("做法：把 profile 的用户层（可能被插件写坏的配置）整体旁置，用出厂配置启动引擎。\n\n你的会话记录、API Key、模型配置、工作区绑定都会原样保留；被旁置的文件也不删，启动后 AI 可以直接读它们来定位问题。\n\n现在进入安全模式吗？", "How it works: The user profile layer (configuration that may have been corrupted by plugins) is set aside, and the engine starts with factory defaults.\n\nYour session history, API keys, model settings, and workspace bindings are preserved intact; the set-aside files are not deleted, so AI can inspect them after startup to diagnose the issue.\n\nEnter Safe Mode now?");
         m.put("做自愈前先留底；恢复默认前先做快照", "Backup before self-healing; create snapshot before resetting to default");
         m.put("停不掉", "Can't stop");
         m.put("停止", "Stop");
-        m.put("停止引擎", "stop engine");
+        m.put("停止引擎", "Stop Engine");
         m.put("停靠右侧", "dock right");
         m.put("偶尔在 dsh 中也显示小鲸鱼", "Show Floating Whale in DSH when needed");
         m.put("像素采样超时", "Pixel sampling timed out");
         m.put("允许安装 APK：侧载应用、AI 帮你下载并安装应用时需要。\n\n不给的话 AI 无法替你安装应用。", "Allow APK installation: Required for sideloading apps and AI downloading and installing apps for you. \n\nIf you don't give it, AI cannot install the application for you.");
-        m.put("允许安装 APK：侧载应用、AI 帮你下载并安装应用时需要。\\n\\n不给的话 AI 无法替你安装应用。", "Allow APK installation: Required for sideloading apps and AI downloading and installing apps for you. \\n\\nIf you don't give it, AI cannot install the application for you.");
         m.put("允许读写系统设置，比如调亮度、音量、保持屏幕常亮。\n\nAI 帮你改设置时需要；不给只是这类操作不可用。", "Allows reading and writing system settings, such as adjusting brightness, volume, and keeping the screen on. \n\nIt is needed when AI helps you change settings; if not, this type of operation will not be available.");
-        m.put("允许读写系统设置，比如调亮度、音量、保持屏幕常亮。\\n\\nAI 帮你改设置时需要；不给只是这类操作不可用。", "Allows reading and writing system settings, such as adjusting brightness, volume, and keeping the screen on. \\n\\nIt is needed when AI helps you change settings; if not, this type of operation will not be available.");
+    }
+
+    private static void load9(Map<String, String> m) {
         m.put("元素是 disabled，点了也不会有反应", "The element is disabled and there will be no response when clicked.");
-        m.put("先 browser_tabs{op:'switch',tabId} 切过去；或省略 tabId 表示当前页签", "First switch to browser_tabs{op:'switch',tabId}; or omit tabId to indicate the current tab");
+        m.put("先 browser_tabs{op:'switch',tabId} 切过去；或省略 tabId 表示当前页签", "First switch tabs using browser_tabs{op:'switch',tabId}, or omit tabId to target the active tab");
         m.put("先停止引擎", "Stop Engine First");
         m.put("先在控制台点「解压文件」把内核树解出来，再回来自检。", "First, click \"Extract File\" on the console to extract the kernel tree, and then go back to self-check.");
         m.put("先复制你的 console.json 一起贴过去", "Copy your console.json first and paste alongside");
         m.put("先开空窗、几秒后再 tab.location=授权地址", "Open an empty window first and wait a few seconds before tab.location=authorized address");
         m.put("先有页面", "Page first");
         m.put("先用 android_tap 点击目标输入框使其聚焦（并确认软键盘弹出），再调用本工具；", "First use android_tap to focus the target input field (and verify keyboard appears), then call this tool;");
+        m.put("先用 android_tap 点击目标输入框使其聚焦（并确认软键盘弹出），再调用本工具；中文/WebView 输入框建议改用 android_paste_text（剪贴板粘贴路径）。", "First use android_tap to tap and focus the target input field (and verify the soft keyboard appears), then call this tool; for Unicode/Chinese or WebView input fields, use android_paste_text (clipboard paste) instead.");
         m.put("先解压文件", "Extract files first");
         m.put("免得用 AI 的时候突然弹框打断你。", "To avoid sudden pop-ups interrupting you when using AI.");
         m.put("全部应用通知", "All app notifications");
@@ -1061,10 +982,7 @@ final class I18nEn {
         m.put("关同屏", "Close Screen Sync");
         m.put("关掉全部页签并回收浏览器进程（不影响引擎）", "Close all tabs and recycle the browser process (does not affect the engine)");
         m.put("关掉用不到的，省上下文", "Turn off unused ones to save context");
-    }
-
-    private static void load10(Map<String, String> m) {
-        m.put("关掉的插件不加载：工具不进 AI 的工具表，也少占上下文。改动在重启引擎后生效。", "Turned off plug-ins are not loaded: tools are not included in the AI ​​tool list and occupy less context. Changes will take effect after restarting the engine.");
+        m.put("关掉的插件不加载：工具不进 AI 的工具表，也少占上下文。改动在重启引擎后生效。", "Disabled plugins are not loaded: their tools are excluded from the AI tool list, using less context. Changes take effect after restarting the engine.");
         m.put("关掉的页签连同它的页面/内存一起释放（整进程隔离是 A2 的剩余项）", "The closed tab is released along with its page/memory (whole process isolation is the remainder of A2)");
         m.put("关闭", "Close");
         m.put("关闭失败：", "Close failed:");
@@ -1073,7 +991,6 @@ final class I18nEn {
         m.put("关闭虚拟屏失败（特权服务无响应）", "Failed to close virtual display (privileged service not responding)");
         m.put("其中 ", "in ");
         m.put("其余保持不变，输出新的 console.json + theme.json + 打包命令。\n", "The rest remains unchanged and outputs the new console.json + theme.json + packaging command. \n");
-        m.put("其余保持不变，输出新的 console.json + theme.json + 打包命令。\\n", "The rest remains unchanged and outputs the new console.json + theme.json + packaging command. \\n");
         m.put("其余页在主控台底部自动生成入口行）", "The remaining pages automatically generate entry lines at the bottom of the main console)");
         m.put("其它", "Other");
         m.put("兼容版", "Compatible version");
@@ -1109,7 +1026,7 @@ final class I18nEn {
         m.put("准备环境", "Preparing Environment");
         m.put("分享", "Share");
         m.put("分享日志", "Share Logs");
-        m.put("分享日志文件", "Share log files");
+        m.put("分享日志文件", "Share Log Files");
         m.put("切过去回不来", "You can't come back after cutting through the past");
         m.put("刚启动还没 listen", "Just started and haven’t listened yet");
         m.put("刚完成", "Just finished");
@@ -1120,7 +1037,7 @@ final class I18nEn {
         m.put("删掉之后这些历史配置就找不回来了。", "Once deleted, these historical configurations cannot be retrieved.");
         m.put("删掉的会话会先出现在这里", "Deleted sessions will appear here first");
         m.put("删掉的会话先放在这里（在 sessions/ 之外，内核看不到它们）。", "Deleted sessions are kept here first (outside sessions/, invisible to kernel).");
-        m.put("删掉的会话先放在这里（在 sessions/ 之外，内核看不到它们）。可以「恢复」回原位；确认不要了再「彻底删除」—— 那一步不可恢复。", "Deleted sessions are kept here first (outside sessions/, invisible to kernel). You can restore them to original location, or permanently delete them when no longer needed (irreversible).");
+        m.put("删掉的会话先放在这里（在 sessions/ 之外，内核看不到它们）。可以「恢复」回原位；确认不要了再「彻底删除」—— 那一步不可恢复。", "Deleted sessions are temporarily stored here (outside sessions/, hidden from the kernel). You can \"Restore\" them to their original location, or \"Delete Permanently\" when no longer needed — that step is irreversible.");
         m.put("删除", "Delete");
         m.put("删除不需要的会话 · 先进回收站，可恢复", "Delete unneeded sessions · Moved to Trash first, recoverable");
         m.put("删除这个会话？", "Delete this session?");
@@ -1144,16 +1061,19 @@ final class I18nEn {
         m.put("动作名「", "Action name \"");
         m.put("动作执行失败：", "Action execution failed: ");
         m.put("动作执行结果", "action execution result");
+    }
+
+    private static void load10(Map<String, String> m) {
         m.put("动作：「", "action:\"");
         m.put("动作：只降级这一条会话里的坏附件引用（", "Action: Convert corrupt attachment references in this session to text (");
         m.put("包名", "package name");
         m.put("包含：console.json", "Contains: console.json");
         m.put("匿名类内再套匿名类", "Anonymous class inside anonymous class");
         m.put("升级", "upgrade");
-        m.put("升级后引擎起不来", "Engine won't start after upgrade");
-        m.put("半藏", "Hanzo");
+        m.put("升级后引擎起不来", "Engine fails to start after update");
+        m.put("半藏", "Half-hidden");
         m.put("半藏/可拖动", "Half hidden/dragable");
-        m.put("半藏位", "Hanzo position");
+        m.put("半藏位", "Half-hidden position");
         m.put("占位保留", "placeholder reserved");
         m.put("卡片", "Cards");
         m.put("卡片参数", "Card Parameters");
@@ -1164,9 +1084,6 @@ final class I18nEn {
         m.put("去启动 Shizuku", "Go to start Shizuku");
         m.put("去开启", "Enable");
         m.put("去授权", "Grant");
-    }
-
-    private static void load11(Map<String, String> m) {
         m.put("去掉记号、保留文字", "Remove marks and keep text");
         m.put("去更新", "Go to update");
         m.put("去设置", "Settings");
@@ -1186,10 +1103,9 @@ final class I18nEn {
         m.put("变体隔离", "variant isolation");
         m.put("变没变", "Has it changed?");
         m.put("另有 ", "Also ");
-        m.put("只允许 http/https/about:blank（file/content/data/javascript/blob/intent 一律拒绝）", "Only http/https/about:blank allowed");
+        m.put("只允许 http/https/about:blank（file/content/data/javascript/blob/intent 一律拒绝）", "Only http/https/about:blank are allowed (file/content/data/javascript/blob/intent are rejected)");
         m.put("只删这些备份，不动当前正在用的 console.json —— 你现在看到的主题不会变。\n", "Only these backup files will be deleted; active console.json remains untouched.\n");
         m.put("只删这些备份，不动当前正在用的 console.json —— 你现在看到的主题不会变。\n删掉之后这些历史配置就找不回来了。", "Only these backup files will be deleted; active console.json remains untouched.\nDeleted history cannot be recovered.");
-        m.put("只删这些备份，不动当前正在用的 console.json —— 你现在看到的主题不会变。\\n", "Only these backup files will be deleted; active console.json remains untouched.\\n");
         m.put("只刷新状态", "Only refresh status");
         m.put("只收能点/能输/有语义的元素", "Only elements that can gain points/can be lost/have semantic meaning are collected");
         m.put("只改文案 / 只调布局 / 只加按钮", "Only change text / Only adjust layout / Only add buttons");
@@ -1199,7 +1115,7 @@ final class I18nEn {
         m.put("只清日志，不影响正在运行的引擎；之后的新日志会继续写入", "It only clears the logs and does not affect the running engine; new logs will continue to be written afterward.");
         m.put("只画出第一个节点", "Draw only the first node");
         m.put("只给我 appearance 这一段：企业蓝 #2563eb 为强调色，浅色底 #f8fafc、卡片 #ffffff、文字 #0f172a、\n", "Just give me the appearance section: Corporate blue #2563eb is the accent color, light base #f8fafc, card #ffffff, text #0f172a,\n");
-        m.put("只给我 appearance 这一段：企业蓝 #2563eb 为强调色，浅色底 #f8fafc、卡片 #ffffff、文字 #0f172a、\\n", "Just give me the appearance section: Corporate blue #2563eb is the accent color, light base #f8fafc, card #ffffff, text #0f172a,\\n");
+        m.put("只给我 appearance 这一段：企业蓝 #2563eb 为强调色，浅色底 #f8fafc、卡片 #ffffff、文字 #0f172a、\n次要 #64748b、分割线 #e2e8f0；深色底 #0b1220、卡片 #111a2b、文字 #e6edf7、次要 #94a3b8、分割线 #1e293b。\n输出可直接合并进 console.json 的 JSON 片段。", "Give me only the appearance section: corporate blue #2563eb as accent color; light background #f8fafc, card #ffffff, text #0f172a,\nsecondary #64748b, divider #e2e8f0; dark background #0b1220, card #111a2b, text #e6edf7, secondary #94a3b8, divider #1e293b.\nOutput a JSON snippet ready to merge into console.json.");
         m.put("只能是 classic 或 simple（当前 ", "Can only be classic or simple (currently ");
         m.put("只读", "Read-only");
         m.put("只读同屏：能看不能点（触摸穿透到下面）", "Read-only screen sync: view only (touch events pass through to underlying app)");
@@ -1214,6 +1130,7 @@ final class I18nEn {
         m.put("可整套丢弃", "Can be discarded as a set");
         m.put("可用", "Available");
         m.put("可能处于锁屏/桌面/动画过渡：先用 android_see 截图确认当前画面，回到目标界面后重试；", "Device may be on lockscreen/home/animating: verify screen with android_see, return to target app, and retry;");
+        m.put("可能处于锁屏/桌面/动画过渡：先用 android_see 截图确认当前画面，回到目标界面后重试；或先用 android_tap 点击一次目标输入框再输入。", "Device may be on lock screen, home screen, or in a transition animation: take a screenshot with android_see to verify the current screen, return to the target screen, and retry; or use android_tap to tap the target input field once before typing.");
         m.put("可能被系统关掉", "May be turned off by the system");
         m.put("可自动修 N 个", "Can automatically repair N");
         m.put("可选风格", "Optional styles");
@@ -1232,7 +1149,6 @@ final class I18nEn {
         m.put("向内收一点点", "Pull inward a little");
         m.put("否", "no");
         m.put("否则退出后可能又启动不了。\n\n确认退出吗？", "Otherwise, it may not start again after exiting. \n\nAre you sure to exit?");
-        m.put("否则退出后可能又启动不了。\\n\\n确认退出吗？", "Otherwise, it may not start again after exiting. \\n\\nAre you sure to exit?");
         m.put("启动", "Start");
         m.put("启动中…", "Starting…");
         m.put("启动壳", "Start shell");
@@ -1248,6 +1164,9 @@ final class I18nEn {
         m.put("回到上次页面（含控制台）", "Return to the previous page (including console)");
         m.put("回到旧卡片版", "Return to classic card layout");
         m.put("回收站", "Trash");
+    }
+
+    private static void load11(Map<String, String> m) {
         m.put("回收站 ", "Trash ");
         m.put("回收站 %d 条 · %s", "Trash: %d session(s) · %s");
         m.put("回收站是空的", "Trash is empty");
@@ -1264,18 +1183,15 @@ final class I18nEn {
         m.put("在 Web 界面里发一条消息，这里就会出现它", "Send a message in the Web UI and it will appear here");
         m.put("在 conDialogView 里抓住引用", "Grab the reference in conDialogView");
         m.put("在其它应用之上显示内容：桌面小鲸鱼状态窗、虚拟屏预览窗都靠它。\n\n不给的话没有小鲸鱼，也看不到虚拟屏画面。", "Display over other apps: powers the Floating Whale status overlay and virtual display preview.\n\nWithout this permission, the floating overlay and preview window cannot be shown.");
-        m.put("在其它应用之上显示内容：桌面小鲸鱼状态窗、虚拟屏预览窗都靠它。\\n\\n不给的话没有小鲸鱼，也看不到虚拟屏画面。", "Display over other apps: powers the Floating Whale status overlay and virtual display preview.\\n\\nWithout this permission, the floating overlay and preview window cannot be shown.");
         m.put("在后台开一块独立屏跑 App · 需要 root 或 Shizuku", "Open an independent screen to run the app in the background · Root or Shizuku is required");
         m.put("在后台开一块独立屏跑 App，主屏不受影响；开启后会弹出可拖动缩放的预览窗。", "Open a separate screen in the background to run the app, and the main screen will not be affected; after opening, a preview window that can be dragged and zoomed will pop up.");
-    }
-
-    private static void load12(Map<String, String> m) {
         m.put("在新版下隐藏/排序某一行", "Hide/sort a row under the new version");
         m.put("在跑", "Running");
         m.put("地址里带 userinfo（@）一律拒绝", "Addresses containing userinfo (@) will be rejected.");
         m.put("坏图毒死的会话：只降级那一条消息", "Sessions broken by corrupted images: only downgrade that message");
         m.put("坏附件", "Corrupted Attachments");
         m.put("坏附件（比如内容已经损坏的图片）一旦写进会话历史，之后每次发消息都会重新读它、", "If a corrupted attachment is written to session history, it is re-read on every message, causing persistent errors");
+        m.put("坏附件（比如内容已经损坏的图片）一旦写进会话历史，之后每次发消息都会重新读它、每次都以同样方式失败，整条会话就只能放弃。这里只做一件事：把坏掉的那一条消息里的附件换成一行文字说明，会话的正文、上下文与顺序一字不动。扫描是只读的；真正改写前会让你确认，并且先把原文件备份一份。", "Once a corrupted attachment (such as a damaged image) is written into session history, every subsequent message re-reads it and fails in the same way, forcing you to abandon the entire session. This tool does only one thing: replaces the broken attachment in that message with a single-line text note, leaving the session text, context, and order untouched. Scanning is read-only; before any changes are written, you will be asked to confirm and a backup of the original file will be created first.");
         m.put("基本权限", "Basic Permissions");
         m.put("壳", "shell");
         m.put("壳与页面同一色调", "The shell is the same color as the page");
@@ -1293,7 +1209,6 @@ final class I18nEn {
         m.put("多页签：每个页签各有自己的 ref / 快照 / 代次；带 tabId 的动作必须落在激活页签上，否则回 stale-tab", "Multiple tabs: Each tab has its own ref/snapshot/generation; the action with tabId must fall on the active tab, otherwise it will return to stale-tab");
         m.put("大小不符：", "Size mismatch: ");
         m.put("失灵时到系统设置或控制台「权限」页重新打开即可。\n\n", "If it fails, just go to the system settings or the \"Permissions\" page of the console and reopen it. \n\n");
-        m.put("失灵时到系统设置或控制台「权限」页重新打开即可。\\n\\n", "If it fails, just go to the system settings or the \"Permissions\" page of the console and reopen it. \\n\\n");
         m.put("失败", "Failed");
         m.put("失败：", "fail:");
         m.put("好", "good");
@@ -1332,15 +1247,15 @@ final class I18nEn {
         m.put("将会做什么", "what will be done");
         m.put("将把下面 ", "Will put the following ");
         m.put("将来提 targetSdk", "TargetSdk will be mentioned in the future");
-        m.put("小人右边界", "villain right border");
-        m.put("小人在半空", "The villain is in the air");
+        m.put("小人右边界", "right edge of the assistant icon");
+        m.put("小人在半空", "assistant icon floating mid-screen");
         m.put("小人气泡里说什么 · 空闲 / 思考 / 调用工具 / 结束", "Status bubble text · Idle / Thinking / Calling tools / Completed");
-        m.put("小人没靠右", "The villain didn't keep to the right");
-        m.put("小人的右边界", "The right border of the villain");
-        m.put("小人相对窗口的左偏移", "The left offset of the villain relative to the window");
-        m.put("小人窗口", "villain window");
-        m.put("小人窗口的 lp.x", "lp.x of the villain window");
-        m.put("小人贴屏幕右缘", "The villain is attached to the right edge of the screen");
+        m.put("小人没靠右", "assistant icon not aligned to the right");
+        m.put("小人的右边界", "right edge of the assistant icon");
+        m.put("小人相对窗口的左偏移", "left offset of the assistant icon relative to the window");
+        m.put("小人窗口", "assistant window");
+        m.put("小人窗口的 lp.x", "lp.x of the assistant window");
+        m.put("小人贴屏幕右缘", "assistant icon docked to the right screen edge");
         m.put("小人靠屏幕右侧时消息气泡显示的长度太短", "Message bubble length is too short when avatar is docked to right side of screen");
         m.put("小条", "Top bar");
         m.put("小条开始搬窗 ", "Moving window by top bar ");
@@ -1352,6 +1267,9 @@ final class I18nEn {
         m.put("小鲸鱼横向拖不动、半藏也站不住", "Floating Whale cannot drag horizontally or dock properly");
         m.put("就不要调整大小了，能移动就行", "Resizing disabled; moving the window is sufficient");
         m.put("就绪", "Ready");
+    }
+
+    private static void load12(Map<String, String> m) {
         m.put("展开面板后文字一字一行（竖排）", "After the panel is expanded, the text is one word per line (vertical arrangement)");
         m.put("崩溃", "collapse");
         m.put("工作中 N 个会话", "N active sessions");
@@ -1370,9 +1288,6 @@ final class I18nEn {
         m.put("已向 Shizuku 申请授权，请在弹框里点「允许」后再点「开启」", "Authorization requested from Shizuku; tap 'Allow' in prompt, then tap 'Enable'");
         m.put("已启用", "Enabled");
         m.put("已启用 ", "Enabled ");
-    }
-
-    private static void load13(Map<String, String> m) {
         m.put("已处理 ", "Processed ");
         m.put("已复制主题目录路径：", "Theme directory path copied:");
         m.put("已复制到剪贴板", "Copied to clipboard");
@@ -1398,7 +1313,7 @@ final class I18nEn {
         m.put("已恢复默认文案", "Default text restored");
         m.put("已恢复，但这份配置有语法错误（走整体回退）", "Restored, but this configuration has syntax errors (return as a whole)");
         m.put("已恢复：", "Restored:");
-        m.put("已截断；可用 ref 取局部（先用 browser_find 定位）", "Truncated; you can use ref to get the part (first use browser_find to locate)");
+        m.put("已截断；可用 ref 取局部（先用 browser_find 定位）", "Truncated; use ref to fetch a specific section (locate with browser_find first)");
         m.put("已拒绝：", "Rejected: ");
         m.put("已按住 37794ms", "Pressed and held for 37794ms");
         m.put("已按住 42 万毫秒", "Pressed for 420,000 milliseconds");
@@ -1406,12 +1321,12 @@ final class I18nEn {
         m.put("已授权", "Granted");
         m.put("已授权 ", "Granted ");
         m.put("已授权 ✓", "Granted ✓");
-        m.put("已整体回退", "Fallback Triggered");
+        m.put("已整体回退", "Reverted to Default");
         m.put("已旁置 profile 的用户层，用出厂配置启动——会话/凭证/设置都还在。", "Profiled user layer, booted with factory configuration - sessions/credentials/settings are all still there.");
+        m.put("已旁置 profile 的用户层，用出厂配置启动——会话/凭证/设置都还在。修好之后再「退出安全模式」把用户层还回去。", "The profile user layer has been set aside and started with factory configuration — your sessions, credentials, and settings are still intact. Once repaired, tap \"Exit Safe Mode\" to restore the user layer.");
         m.put("已是最新版本（", "Already the latest version (");
         m.put("已显示", "Shown");
-        m.put("已检测到 Root（su）可用，AI 可以执行系统级操作。\n", "It has been detected that Root (su) is available and the AI ​​can perform system-level operations. \n");
-        m.put("已检测到 Root（su）可用，AI 可以执行系统级操作。\\n", "It has been detected that Root (su) is available and the AI ​​can perform system-level operations. \\n");
+        m.put("已检测到 Root（su）可用，AI 可以执行系统级操作。\n", "It has been detected that Root (su) is available and the AI can perform system-level operations. \n");
         m.put("已清空 ", "Cleared ");
         m.put("已清空回收站（", "Trash emptied (");
         m.put("已移到回收站（可恢复）", "Moved to Trash (recoverable)");
@@ -1455,6 +1370,9 @@ final class I18nEn {
         m.put("应为图片文件名（png/jpg/jpeg/webp）或 /sdcard/… 路径", "Should be the image file name (png/jpg/jpeg/webp) or /sdcard/… path");
         m.put("应为对象", "should be an object");
         m.put("应为对象（组合动作数组暂不支持）", "Should be an object (combination action array is not supported yet)");
+    }
+
+    private static void load13(Map<String, String> m) {
         m.put("应为数组", "Expected to be an array");
         m.put("应在 0.8~1.4（当前 ", "Should be between 0.8~1.4 (currently ");
         m.put("应在 0~1", "Should be between 0~1");
@@ -1472,10 +1390,6 @@ final class I18nEn {
         m.put("建立快照", "Create a snapshot");
         m.put("建议", "suggestion");
         m.put("建议：① 更新\"Android System WebView\"后重试；", "Suggestions: ① Update \"Android System WebView\" and try again;");
-        m.put("建议：① 更新\\\"Android System WebView\\\"后重试；", "Suggestions: ① Update \\\"Android System WebView\\\" and try again;");
-    }
-
-    private static void load14(Map<String, String> m) {
         m.put("建议：允许后台运行", "Recommendation: Allow Background Activity");
         m.put("开启", "turn on");
         m.put("开启后 AI 可在独立屏上操作 App", "After turning it on, AI can operate the app on a separate screen");
@@ -1485,26 +1399,28 @@ final class I18nEn {
         m.put("开始导入", "Start importing");
         m.put("开始快速自检（只比大小）…", "Start a quick self-check (only size comparison)…");
         m.put("开始运行", "Start running");
+        m.put("异常", "Abnormal");
         m.put("引导页 + 系统弹窗", "Boot page + system pop-up window");
         m.put("引导页有、权限页原先没有", "The boot page has it, but the permissions page originally didn’t.");
-        m.put("引擎", "engine");
+        m.put("引擎", "Engine");
         m.put("引擎保活", "Engine background service");
         m.put("引擎启动失败：", "Engine start failed: ");
+        m.put("引擎启动超时", "Engine startup timed out");
         m.put("引擎启动超时（端口 ", "Engine start timeout (port ");
-        m.put("引擎启动超时，已回到控制台；就绪后会自动进入", "The engine startup timed out and has returned to the console; it will automatically enter when ready.");
-        m.put("引擎启动超时，正在补齐引擎文件后重试…", "Engine startup timed out, trying again after completing engine files...");
+        m.put("引擎启动超时，已回到控制台；就绪后会自动进入", "Engine startup timed out, returned to Console; will enter automatically when ready");
+        m.put("引擎启动超时，正在补齐引擎文件后重试…", "Engine startup timed out, repairing missing engine files and retrying…");
         m.put("引擎处于你上次手动停止的状态，点「启动引擎」即可恢复", "Engine was stopped manually. Tap 'Start' to resume.");
         m.put("引擎已停止", "Engine Stopped");
-        m.put("引擎已就绪", "engine is ready");
-        m.put("引擎已死", "engine is dead");
-        m.put("引擎是否在跑", "Is the engine running?");
+        m.put("引擎已就绪", "Engine is ready");
+        m.put("引擎已死", "Engine stopped");
+        m.put("引擎是否在跑", "whether the engine is running");
         m.put("引擎未运行", "Engine not running");
-        m.put("引擎正在启动（较慢），继续等待…（已等待 ", "Engine starting (slower), continue waiting... (Waited ");
+        m.put("引擎正在启动（较慢），继续等待…（已等待 ", "Engine is starting (taking longer than usual), please wait… (waited ");
         m.put("引擎状态：", "Engine status: ");
         m.put("引擎状态：未运行", "Engine status: not running");
-        m.put("引擎真的就绪", "The engine is really ready");
-        m.put("引擎起不来时，用安全模式跳过用户层启动（不丢数据）；", "When the engine fails to start, use safe mode to skip user-level startup (without losing data);");
-        m.put("引擎起不来时，用安全模式跳过用户层启动（不丢数据）；也可以随时导出全部数据做备份。", "If the engine fails to start, use Safe Mode to bypass user config (no data lost); export backup anytime.");
+        m.put("引擎真的就绪", "engine is truly ready");
+        m.put("引擎起不来时，用安全模式跳过用户层启动（不丢数据）；", "If the engine fails to start, use Safe Mode to bypass user config (no data lost); ");
+        m.put("引擎起不来时，用安全模式跳过用户层启动（不丢数据）；也可以随时导出全部数据做备份。", "If the engine fails to start, use Safe Mode to bypass user config (no data lost); you can also export all data as a backup anytime.");
         m.put("引擎运行中", "Engine Running");
         m.put("引擎还没启动过", "Engine has not been started yet");
         m.put("引擎进程在跑但一直没就绪（常见于账号登录/网络卡住）；可试「安全模式启动」", "The engine process is running but is not ready (commonly caused by account login/network stuck); you can try \"Safe Mode Startup\"");
@@ -1513,24 +1429,22 @@ final class I18nEn {
         m.put("当前", "current");
         m.put("当前 ", "current ");
         m.put("当前主题", "Current Theme");
-        m.put("当前共 ", "Currently ");
+        m.put("当前共 ", "Current total: ");
         m.put("当前只能看到 ", "Currently only visible ");
         m.put("当前可见的那一层", "The currently visible layer");
         m.put("当前同名数据会被覆盖（备份文件本身不动）。\n\n开始导入吗？", "The current data with the same name will be overwritten (the backup file itself will not be changed). \n\nStart importing?");
-        m.put("当前同名数据会被覆盖（备份文件本身不动）。\\n\\n开始导入吗？", "The current data with the same name will be overwritten (the backup file itself will not be changed). \\n\\nStart importing?");
         m.put("当前工作区：\n", "Current workspace:\n");
-        m.put("当前工作区：\\n", "Current workspace:\\n");
         m.put("当前应用被系统限制后台活动，AI 执行任务时挂后台可能被系统杀掉。\n\n建议把本应用设为「不限制」", "Background activity is restricted by the system. The AI engine might be killed when running background tasks.\n\nIt is strongly recommended to set battery optimization to 'Unrestricted'.");
-        m.put("当前应用被系统限制后台活动，AI 执行任务时挂后台可能被系统杀掉。\n\n建议把本应用设为「不限制」电池优化，确保任务持续运行。", "The current application is restricted from background activities by the system, and the AI ​​may be killed by the system if it hangs in the background while executing tasks. \n\nIt is recommended to set this application to \"unrestricted\" battery optimization to ensure that tasks continue to run.");
-        m.put("当前应用被系统限制后台活动，AI 执行任务时挂后台可能被系统杀掉。\\n\\n建议把本应用设为「不限制」电池优化，确保任务持续运行。", "The current application is restricted from background activities by the system, and the AI ​​may be killed by the system if it hangs in the background while executing tasks. \\n\\nIt is recommended to set this application to \"unrestricted\" battery optimization to ensure that tasks continue to run.");
+        m.put("当前应用被系统限制后台活动，AI 执行任务时挂后台可能被系统杀掉。\n\n建议把本应用设为「不限制」电池优化，确保任务持续运行。", "The current application is restricted from background activities by the system, and the AI may be killed by the system if it hangs in the background while executing tasks. \n\nIt is recommended to set this application to \"unrestricted\" battery optimization to ensure that tasks continue to run.");
         m.put("当前没有可读取的活动窗口（可能处于锁屏或安全页面）", "No readable active window currently (may be on lockscreen or secure surface)");
-        m.put("当前没有提案文件", "No proposal files currently");
+        m.put("当前没有提案文件", "No proposal files");
         m.put("当前没有活动窗口", "No active window currently");
         m.put("当前没有活动窗口（无障碍拿不到窗口根节点）", "No active window found (cannot get window root via Accessibility)");
         m.put("当前激活页签", "Currently active tab");
         m.put("当前版本 ", "Current version: ");
         m.put("当前状态：", "Current status: ");
         m.put("当前界面没有可读控件（常见于 Unity/游戏/自绘界面）。请改用 android_see 截屏看图，", "No readable UI elements found (common in Unity/games/custom-rendered UI). Use android_see for visual screenshot perception instead, ");
+        m.put("当前界面没有可读控件（常见于 Unity/游戏/自绘界面）。请改用 android_see 截屏看图，并优先用分数坐标（fx/fy，0~1）点击/滑动——截图会被模型查看器缩放，绝对像素坐标会点偏。", "No readable UI elements found (common in Unity/games/custom-rendered UI). Use android_see for visual screenshot perception instead, and prefer fractional coordinates (fx/fy, 0~1) for tap/swipe — screenshots get scaled by model viewers, causing pixel drift.");
         m.put("当前窗口里没有可编辑/可聚焦的输入框节点", "No editable or focusable input field in current window");
         m.put("当前这次构建用的那套源", "The set of sources currently used for this build");
         m.put("当时窗口有多宽", "How wide was the window at that time?");
@@ -1559,6 +1473,9 @@ final class I18nEn {
         m.put("恢复任务", "recovery task");
         m.put("恢复失败：", "Recovery failed:");
         m.put("恢复这个会话？", "Restore this session?");
+    }
+
+    private static void load14(Map<String, String> m) {
         m.put("恢复默认", "Reset to Default");
         m.put("恢复默认 / 导入之前的旧配置都收在这里，点一下直接恢复", "Restore default/old configurations before importing are collected here, click to restore directly");
         m.put("恢复默认主题", "Reset Theme");
@@ -1576,11 +1493,9 @@ final class I18nEn {
         m.put("悬浮窗消息", "Floating Window Messages");
         m.put("悬浮窗面板「退出」按钮", "Floating window panel \"Exit\" button");
         m.put("想用「帮我点一下」「看看这个界面」这类能力，这一步必须开。", "If you want to use capabilities such as \"click for me\" and \"look at this interface\", this step must be enabled.");
-    }
-
-    private static void load15(Map<String, String> m) {
         m.put("想要的顺序", "desired order");
         m.put("愿意改配置文件", "Willing to change the configuration file");
+        m.put("成功", "Success");
         m.put("我们处理了", "we dealt with it");
         m.put("我们自己算出来的默认/兜底目录", "The default/backup directory we calculated ourselves");
         m.put("我保存过的主题", "Saved Themes");
@@ -1657,10 +1572,13 @@ final class I18nEn {
         m.put("承载窗没建起来 —— 多半是缺「悬浮窗」权限（控制台 →「权限」页可授予）", "Failed to create overlay window — overlay permission likely missing (grant in Console → Permissions)");
         m.put("把 console.json 改名留底（不删）；之后可从「我保存过的主题」恢复", "Rename console.json and leave it as it is (do not delete it); you can restore it later from \"My Saved Themes\"");
         m.put("把上次旁置的用户层放回去（覆盖当前出厂配置）。\n\n", "Put back the last placed user layer (overwriting the current factory configuration). \n\n");
-        m.put("把上次旁置的用户层放回去（覆盖当前出厂配置）。\\n\\n", "Put back the last placed user layer (overwriting the current factory configuration). \\n\\n");
+        m.put("把上次旁置的用户层放回去（覆盖当前出厂配置）。\n\n如果刚才是因为插件把配置写坏才进的安全模式，建议先在对话里让 AI 把坏文件修好，否则退出后可能又启动不了。\n\n确认退出吗？", "Restore the previously set-aside user layer (overwriting the current factory configuration).\n\nIf you entered Safe Mode because a plugin corrupted your configuration, we recommend asking the AI in chat to fix the broken files first; otherwise, the engine may fail to start again after exiting.\n\nConfirm exit?");
         m.put("把内核配置里最容易被改坏、也最需要能回退的几个文件「另存一份副本」（不动原文件）：\n\n", "\"Save a copy\" of the files in the kernel configuration that are most susceptible to modification and that need to be rolled back (do not leave the original files alone):\n\n");
-        m.put("把内核配置里最容易被改坏、也最需要能回退的几个文件「另存一份副本」（不动原文件）：\\n\\n", "\"Save a copy\" of the files in the kernel configuration that are most susceptible to modification and that need to be rolled back (do not leave the original files alone):\\n\\n");
+        m.put("把内核配置里最容易被改坏、也最需要能回退的几个文件「另存一份副本」（不动原文件）：\n\n· dshhome/profiles/web/cordis.patch.yml（插件树/开关）\n· dshhome/profiles/web/package.json（插件注册表）\n· dshhome/settings.yaml（界面设置）\n\n存到 /sdcard/", "Save a read-only backup copy of the kernel configuration files that are most prone to corruption and most critical for rollback (leaving original files untouched):\n\n· dshhome/profiles/web/cordis.patch.yml (plugin tree & toggles)\n· dshhome/profiles/web/package.json (plugin registry)\n· dshhome/settings.yaml (UI settings)\n\nSaved to /sdcard/");
         m.put("把回收站里的会话一次性真正删掉，删完找不回来", "Permanently delete all sessions in the Trash. Cannot be undone.");
+    }
+
+    private static void load15(Map<String, String> m) {
         m.put("把当前主题打成 zip（含 console.json 与图片），导出后可直接分享", "Make the current theme into a zip (including console.json and images) and share it directly after exporting");
         m.put("把整份规范当上下文发给 AI（较长）", "Send entire specification to AI as context (long)");
         m.put("把旧偏好升级掉", "Upgrade old preferences");
@@ -1678,16 +1596,13 @@ final class I18nEn {
         m.put("拖底删除", "Delete at the bottom");
         m.put("拖底消失", "The bottom disappears");
         m.put("拖拽的移动段被系统取消（按住 ", "Drag move segment cancelled by system (hold ");
+        m.put("拖拽的移动段被系统取消（按住 笔已注入，移动段未完成）；可减小 durationMs 重试，或改用 android_touch 的 down/move 手动控制", "Drag move segment was cancelled by the system (hold stroke injected, move segment incomplete); reduce durationMs and retry, or use android_touch down/move for manual control");
         m.put("拖顶部小条搬窗", "Drag top bar to move window");
-    }
-
-    private static void load16(Map<String, String> m) {
         m.put("持锁会话", "Locked session");
         m.put("按住", "Press and hold");
         m.put("按住超时：真正释放残留手指（补 UP）", "Hold timeout: releasing residual pointer (dispatching UP)");
         m.put("按住阶段", "Hold phase");
         m.put("按设计稿的护栏：「同一故障最多自动执行 2 次，第 3 次只报告不执行」 —— 防止「越修越坏」。\n", "According to the guardrail of the design draft: \"The same fault can be automatically executed up to 2 times, and the third time it will only be reported and not executed\" - to prevent \"the more repairs get worse, the worse it gets.\" \n");
-        m.put("按设计稿的护栏：「同一故障最多自动执行 2 次，第 3 次只报告不执行」 —— 防止「越修越坏」。\\n", "According to the guardrail of the design draft: \"The same fault can be automatically executed up to 2 times, and the third time it will only be reported and not executed\" - to prevent \"the more repairs get worse, the worse it gets.\" \\n");
         m.put("按钮", "button");
         m.put("按钮/button/btn", "button/button/btn");
         m.put("损坏的附件", "Corrupted Attachments");
@@ -1695,12 +1610,10 @@ final class I18nEn {
         m.put("换顺序 / 藏卡片 / 改按钮名字", "Change order / hide cards / rename buttons");
         m.put("授予权限", "Grant Permissions");
         m.put("授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击等。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。", "After authorization, AI can perform system-level operations: install/uninstall applications, change system settings, simulate clicks, etc. \n\nIt’s completely usable even if it’s not required - file reading, writing, previewing, and editing only require the \"All File Access\" above.");
-        m.put("授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击等。\\n\\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。", "After authorization, AI can perform system-level operations: install/uninstall applications, change system settings, simulate clicks, etc. \\n\\nIt’s completely usable even if it’s not required - file reading, writing, previewing, and editing only require the \"All File Access\" above.");
         m.put("授权后回到本页会自动刷新。", "After authorization, returning to this page will automatically refresh.");
         m.put("授权跳转后回到前台 → 刷新界面以重新拉取登录状态", "Return to the front desk after authorization jump → Refresh the interface to pull the login status again");
         m.put("授权页已交给浏览器", "The authorization page has been handed over to the browser");
         m.put("接收 AI 完成任务等通知，人不在应用里也能知道任务跑完了。\n\n不给的话收不到这些提醒（其它功能不受影响）。", "Receive notifications such as when AI completes a task, so people can know that the task has been completed even when they are not in the app. \n\nIf you do not give it, you will not receive these reminders (other functions will not be affected).");
-        m.put("接收 AI 完成任务等通知，人不在应用里也能知道任务跑完了。\\n\\n不给的话收不到这些提醒（其它功能不受影响）。", "Receive notifications such as when AI completes a task, so people can know that the task has been completed even when they are not in the app. \\n\\nIf you do not give it, you will not receive these reminders (other functions will not be affected).");
         m.put("控件树嵌套过深（>", "The control tree is nested too deeply (>");
         m.put("控制台", "Console");
         m.put("控制台、引导页、启动页会跟随 DSH 页面的色调；也可以在这里固定成浅色或深色。", "Console, guide, and splash follow DSH page tone; or choose fixed light/dark mode here.");
@@ -1716,7 +1629,7 @@ final class I18nEn {
         m.put("提示", "hint");
         m.put("提示：App 至少启动过一次；横竖屏在开启时决定，切换方向需先关闭再开启。", "Tip: The App has been launched at least once; the horizontal and vertical screen is determined when it is opened, and the switching direction must be closed and then opened again.");
         m.put("插件", "Plugins");
-        m.put("插件列表", "Plugins List");
+        m.put("插件列表", "Plugin List");
         m.put("插件已关闭", "Plugin is closed");
         m.put("搜索", "Search");
         m.put("搬窗", "Move window");
@@ -1742,7 +1655,7 @@ final class I18nEn {
         m.put("文件里没有这个键", "This key does not exist in the file");
         m.put("文件齐全", "Complete documentation");
         m.put("文件：", "document:");
-        m.put("文案应 ≤", "Copywriting should be ≤");
+        m.put("文案应 ≤", "Text length must be ≤ ");
         m.put("文案应为字符串", "Copy should be a string");
         m.put("文案节点", "Text nodes");
         m.put("新建终端", "New Terminal");
@@ -1753,7 +1666,7 @@ final class I18nEn {
         m.put("旁置目录已不存在（", "The side directory no longer exists (");
         m.put("无 Shizuku 授权（binder 未就绪），稍后自动重试——请确认 Shizuku 服务在运行且已授权本应用", "No Shizuku authorization (Binder not ready), retrying later — please verify Shizuku service is running and authorized");
         m.put("无按住阶段", "No hold phase");
-        m.put("无改动", "No changes");
+        m.put("无改动", "No Changes");
         m.put("无法使用该目录", "The directory cannot be used");
         m.put("无法创建 ", "Unable to create ");
         m.put("无法创建 profile 目录：", "Unable to create profile directory:");
@@ -1766,6 +1679,9 @@ final class I18nEn {
         m.put("无法获取屏幕尺寸", "Unable to retrieve screen dimensions");
         m.put("无法解析启动组件：", "Unable to resolve startup component:");
         m.put("无法解析所选文件夹的真实路径，请选择手机存储（内部存储或 SD 卡）内的文件夹。", "The real path of the selected folder cannot be resolved. Please select a folder within the phone storage (internal storage or SD card).");
+    }
+
+    private static void load16(Map<String, String> m) {
         m.put("无法读取所选文件", "Unable to read selected file");
         m.put("无配置（内置默认）", "No configuration (built-in default)");
         m.put("无障碍在设置里是开启的，但端口 ", "Accessibility is enabled in Settings, but port ");
@@ -1782,9 +1698,6 @@ final class I18nEn {
         m.put("日志文件", "Log Files");
         m.put("日志读取失败：", "Log reading failed:");
         m.put("旧尺寸", "old size");
-    }
-
-    private static void load17(Map<String, String> m) {
         m.put("时间: ", "time: ");
         m.put("时间：", "time:");
         m.put("是", "yes");
@@ -1794,7 +1707,7 @@ final class I18nEn {
         m.put("是否深色", "Is it dark?");
         m.put("是否独立 inode", "Is the inode independent?");
         m.put("是谁触发的退出", "Who triggered the exit?");
-        m.put("显式写过的值永远优先", "Explicitly written values ​​always take precedence");
+        m.put("显式写过的值永远优先", "Explicitly written values always take precedence");
         m.put("显示", "Show");
         m.put("显示已清空、新日志却消失", "It shows that it has been cleared and the new logs have disappeared.");
         m.put("显示悬浮窗", "Show Overlay");
@@ -1812,7 +1725,7 @@ final class I18nEn {
         m.put("有些系统", "some systems");
         m.put("有会话工作", "Session is active");
         m.put("有容器、有页签、有激活页签", "There are containers, there are tabs, there are activation tabs");
-        m.put("有消息时小人被往左挤，消息消失后停在半空", "When there is a message, the villain is pushed to the left. After the message disappears, it stops in mid-air.");
+        m.put("有消息时小人被往左挤，消息消失后停在半空", "When a message appears, the assistant icon is pushed left, and stays floating mid-screen after the message disappears");
         m.put("有问题的会话", "Problematic Sessions");
         m.put("服务器地址没更新", "The server address is not updated");
         m.put("服务器将停止运行", "The server will stop running");
@@ -1833,17 +1746,13 @@ final class I18nEn {
         m.put("未知", "unknown");
         m.put("未知 nav op（back/forward/reload/close）：", "Unknown nav op (back/forward/reload/close):");
         m.put("未知动作类型 \"", "Unknown action type \"");
-        m.put("未知动作类型 \\\"", "Unknown action type \\\"");
         m.put("未知动作：", "Unknown action: ");
         m.put("未知卡片 id \"", "Unknown card ID \"");
-        m.put("未知卡片 id \\\"", "Unknown card ID \\\"");
         m.put("未知子命令：", "Unknown subcommand: ");
         m.put("未知手势 kind: ", "Unknown gesture kind: ");
         m.put("未知操作：", "Unknown operation:");
         m.put("未知积木 id \"", "Unknown building block id \"");
-        m.put("未知积木 id \\\"", "Unknown building block id \\\"");
         m.put("未知节点类型 \"", "Unknown node type \"");
-        m.put("未知节点类型 \\\"", "Unknown node type \\\"");
         m.put("未知路由: ", "Unknown route: ");
         m.put("未知错误", "Unknown error");
         m.put("未解压", "Not Extracted");
@@ -1873,8 +1782,10 @@ final class I18nEn {
         m.put("松手即隐藏", "Release to hide");
         m.put("构造代码的顺序", "The order in which code is constructed");
         m.put("查看", "Check");
+    }
+
+    private static void load17(Map<String, String> m) {
         m.put("查看应用使用时长与统计信息，AI 才能回答\"我今天用了多久微信\"这类问题。\n\n不给的话应用使用统计相关功能不可用。", "By checking application usage time and statistical information, AI can answer questions such as \"How long did I use WeChat today?\" \n\nIf you do not give it, the application usage statistics related functions will not be available.");
-        m.put("查看应用使用时长与统计信息，AI 才能回答\\\"我今天用了多久微信\\\"这类问题。\\n\\n不给的话应用使用统计相关功能不可用。", "By checking application usage time and statistical information, AI can answer questions such as \"How long did I use WeChat today?\" \\n\\nIf you do not give it, the application usage statistics related functions will not be available.");
         m.put("查看日志", "View Logs");
         m.put("查看日志 / 分享日志 / 外镜像", "View log/share log/external mirror");
         m.put("查看自愈账本（只读）", "View self-healing ledger (read-only)");
@@ -1885,9 +1796,6 @@ final class I18nEn {
         m.put("校验", "Verify");
         m.put("校验中…", "Verifying…");
         m.put("校验内容（sha256）", "Verifying content (sha256)…");
-    }
-
-    private static void load18(Map<String, String> m) {
         m.put("校验器说合法、App 说非法", "The validator says it’s legal, but the app says it’s illegal.");
         m.put("校验失败：内部文件是旧版本解压的（记录 ", "Verification failed: the internal files were decompressed by an old version (record ");
         m.put("校验失败：缺 ", "Verification failed: missing ");
@@ -1900,8 +1808,7 @@ final class I18nEn {
         m.put("检查更新失败（网络）", "Failed to check for updates (network error)");
         m.put("检查更新失败：", "Checking for updates failed:");
         m.put("检测到系统 WebView 内核为 Chromium ", "Detected that the system WebView core is Chromium ");
-        m.put("次要 #64748b、分割线 #e2e8f0；深色底 #0b1220、卡片 #111a2b、文字 #e6edf7、次要 #94a3b8、分割线 #1e293b。\n", "Minor #64748b, split line #e2e8f0; dark base #0b1220, card #111a2b, text #e6edf7, minor #94a3b8, split line #1e293b. \n");
-        m.put("次要 #64748b、分割线 #e2e8f0；深色底 #0b1220、卡片 #111a2b、文字 #e6edf7、次要 #94a3b8、分割线 #1e293b。\\n", "Minor #64748b, split line #e2e8f0; dark base #0b1220, card #111a2b, text #e6edf7, minor #94a3b8, split line #1e293b. \\n");
+        m.put("次要 #64748b、分割线 #e2e8f0；深色底 #0b1220、卡片 #111a2b、文字 #e6edf7、次要 #94a3b8、分割线 #1e293b。\n", "secondary #64748b, divider #e2e8f0; dark background #0b1220, card #111a2b, text #e6edf7, secondary #94a3b8, divider #1e293b.\n");
         m.put("欢迎使用 DeepSeek Harness", "Welcome to DeepSeek Harness");
         m.put("欢迎来到 DeepSeek Harness", "Welcome to DeepSeek Harness");
         m.put("正在修复…（先备份，再只降级坏引用，最后复检）", "Repairing… (backing up first, replacing corrupt references with text, then verifying)");
@@ -1912,7 +1819,7 @@ final class I18nEn {
         m.put("正在准备日志…", "Preparing log…");
         m.put("正在准备日志文件…", "Preparing log file...");
         m.put("正在删除（移到回收站）…", "Deleting (moving to Trash)…");
-        m.put("正在加载；要「打开并等加载完成」用 browser_open{url,newTab:true}，或直接 browser_snapshot", "Loading; to \"open and wait for loading to complete\" use browser_open{url,newTab:true}, or directly browser_snapshot");
+        m.put("正在加载；要「打开并等加载完成」用 browser_open{url,newTab:true}，或直接 browser_snapshot", "Loading; to open and wait for load completion, use browser_open{url,newTab:true} or call browser_snapshot directly");
         m.put("正在同步内核文件（增量）", "Syncing kernel files (incremental)…");
         m.put("正在同步运行时文件", "Syncing runtime files…");
         m.put("正在向用户提问", "Asking user");
@@ -1948,10 +1855,11 @@ final class I18nEn {
         m.put("正在退出…", "Exiting…");
         m.put("正在退出安全模式…", "Exiting safe mode...");
         m.put("正在重启引擎…", "Restarting engine…");
+        m.put("正常", "OK");
         m.put("正常路径直接进主界面", "Directly enter the main interface via the normal path");
         m.put("正常（", "normal(");
         m.put("正文里带完整日志路径与末尾 400 行。", "Include the full log path and the last 400 lines in the text.");
-        m.put("每个页签的状态（ref/快照/代次）互相独立；切换后如需 ref 请重新 browser_snapshot", "The status of each tab (ref/snapshot/generation) is independent of each other; if you need ref after switching, please reset browser_snapshot");
+        m.put("每个页签的状态（ref/快照/代次）互相独立；切换后如需 ref 请重新 browser_snapshot", "Each tab's state (ref/snapshot/generation) is independent; after switching tabs, call browser_snapshot again if you need refs");
         m.put("每次自检与修复追加一条 JSON，AI 可以直接读它向你解释修过什么", "Appends a JSON record on every self-check and repair; AI can read it directly to explain what was repaired.");
         m.put("每次都以同样方式失败，整条会话就只能放弃。", "Failing identically on each attempt forces the entire session to be abandoned.");
         m.put("每页应为对象", "Each page should be an object");
@@ -1977,6 +1885,9 @@ final class I18nEn {
         m.put("没有可处理该 Intent 的应用", "There is no app that can handle the intent");
         m.put("没有可恢复的配置（你还没「恢复默认」过）", "No backup configuration found to restore");
         m.put("没有可清空的日志", "No logs to clear");
+    }
+
+    private static void load18(Map<String, String> m) {
         m.put("没有可用的浏览器，无法打开授权页", "No available browser found to open authorization page");
         m.put("没有可用的浏览器，无法打开链接", "No available browser found to open link");
         m.put("没有可用的系统浏览器，退回内置卡片", "No system browser available, return built-in card");
@@ -1988,9 +1899,6 @@ final class I18nEn {
         m.put("没有按住的手指", "No pointers currently held");
         m.put("没有这个页签：", "There is no such tab:");
         m.put("没有需要修复的地方", "No issues to repair");
-    }
-
-    private static void load19(Map<String, String> m) {
         m.put("注入了、屏幕不动", "Touch injected, screen did not respond");
         m.put("注入了但无效", "Touch injected but had no effect");
         m.put("注入失败：", "Injection failed:");
@@ -2008,6 +1916,7 @@ final class I18nEn {
         m.put("浏览器已关干净", "The browser has been closed");
         m.put("浏览器已经关干净了", "Browser closed completely");
         m.put("浏览器平时由 AI 的浏览器工具按需打开（它有自己的进程，不用时会回收）。", "The browser is usually opened on demand by AI's browser tool (it has its own process and is recycled when not in use).");
+        m.put("浏览器平时由 AI 的浏览器工具按需打开（它有自己的进程，不用时会回收）。这枚按钮只是方便你验证同屏查看与页签功能。", "The browser is normally opened on demand by the AI's browser tool (it runs in its own process and is reclaimed when idle). This button is simply for testing live view and tab management.");
         m.put("浏览器状态", "Browser Status");
         m.put("浏览器还没打开：先点下面「打开测试页」，或让 AI 用浏览器工具打开一个网页", "The browser has not been opened yet: first click \"Open Test Page\" below, or let AI open a webpage using browser tools");
         m.put("浏览器进程已退出（连接已重置，重试即可）：", "The browser process has exited (the connection has been reset, just try again):");
@@ -2069,18 +1978,19 @@ final class I18nEn {
         m.put("状态：整体回退默认（配置有语法错误）", "Status: Full fallback to default (JSON syntax error)");
         m.put("环境准备", "Preparing Environment");
         m.put("现在正以默认样式打开控制台（主题配置被忽略，文件没删）。\n\n要恢复主题样式吗？", "The console is now opening in the default style (theme configuration is ignored, files are not deleted). \n\nDo you want to restore the theme style?");
-        m.put("现在正以默认样式打开控制台（主题配置被忽略，文件没删）。\\n\\n要恢复主题样式吗？", "The console is now opening in the default style (theme configuration is ignored, files are not deleted). \\n\\nDo you want to restore the theme style?");
         m.put("现在进入安全模式吗？", "Enter safe mode now?");
         m.put("生效", "Take effect");
         m.put("生效范围：", "Active scopes: ");
         m.put("用 action=extract + entry=<包内路径> 取出单个文件；JS bundle / 接口表通常在 assets/ 下。", "Use action=extract + entry=<path in package> to extract a single file; the JS bundle/interface table is usually under assets/.");
         m.put("用「安全模式启动」跳过用户层，不丢任何数据。", "Use \"Safe Mode Boot\" to skip the user layer without losing any data.");
-        m.put("用出厂配置启动引擎。\n\n", "Start the engine with factory configuration. \n\n");
-        m.put("用出厂配置启动引擎。\\n\\n", "Start the engine with factory configuration. \\n\\n");
+        m.put("用出厂配置启动引擎。\n\n", "Start the engine with factory settings.\n\n");
         m.put("用户主动停止", "User actively stops");
-        m.put("用户主动停止引擎", "User actively stops the engine");
+        m.put("用户主动停止引擎", "User manually stopped the engine");
         m.put("用户主动启动", "User initiates");
         m.put("用户关掉了无障碍", "User disabled Accessibility service");
+    }
+
+    private static void load19(Map<String, String> m) {
         m.put("用户刚操作过 App / App 在前台", "The user has just operated the App / App is in the foreground");
         m.put("用户数据（dshhome 下）与第三方插件（dshhome/profiles 下）永远只报不改。", "User data (under dshhome) and third-party plug-ins (under dshhome/profiles) are always reported and never changed.");
         m.put("用户是否主动隐藏过", "Whether the user has actively hidden");
@@ -2091,15 +2001,11 @@ final class I18nEn {
         m.put("用量统计 / 悬浮窗 / 装包 / 应用与设置 / 截图 / 输入", "Usage stats / Floating window / Package installer / Apps & settings / Screenshots / Input");
         m.put("申请 Shizuku 授权失败：", "Failed to request Shizuku authorization: ");
         m.put("电池优化", "Battery Optimization");
-    }
-
-    private static void load20(Map<String, String> m) {
         m.put("画面区拦截", "Intercept display area touch");
         m.put("界面主题", "Console Theme");
         m.put("界面主题 · 浅色 ›", "Interface Theme · Light ›");
         m.put("界面加载失败（", "Interface failed to load (");
         m.put("界面可能无法正常显示（白屏/无法交互），引擎本身不受影响。\n\n", "The interface may not display properly (white screen/unable to interact), but the engine itself is not affected. \n\n");
-        m.put("界面可能无法正常显示（白屏/无法交互），引擎本身不受影响。\\n\\n", "The interface may not display properly (white screen/unable to interact), but the engine itself is not affected. \\n\\n");
         m.put("界面外观", "Appearance");
         m.put("界面外观（壳）", "Appearance (Shell)");
         m.put("界面是否变化", "Whether UI changed");
@@ -2128,7 +2034,7 @@ final class I18nEn {
         m.put("真的加载完了", "Really loaded");
         m.put("真的去查一次", "Really check it out");
         m.put("真的画出了内容", "Really draw the content");
-        m.put("真的要启动引擎", "Really start the engine");
+        m.put("真的要启动引擎", "Actually starting the engine");
         m.put("真要腾空间，去回收站里「彻底删除」。删除只动这一条会话，不碰别的。", "If you really need to free up space, go to the Recycle Bin and \"completely delete\" it. Deletion will only touch this conversation and nothing else.");
         m.put("知道了", "knew");
         m.put("硬链→软链→复制", "Hard link→Soft link→Copy");
@@ -2144,36 +2050,34 @@ final class I18nEn {
         m.put("碰巧", "happen");
         m.put("禁止访问回环地址与引擎端口", "Block access to loopback address and engine port");
         m.put("禁止访问本机地址（IPv4 字面量变体）：那是引擎与 App 本地服务所在处", "Deny access to local addresses (IPv4 literal variant): that's where the engine and app local services reside");
-        m.put("禁止访问本机地址（回环）：那是引擎与 App 本地服务所在处", "Access to localhost denied: reserved for local engine services");
-        m.put("秒进", "Advance in seconds");
+        m.put("禁止访问本机地址（回环）：那是引擎与 App 本地服务所在处", "Access to localhost (loopback) denied: reserved for the engine and local app services");
+        m.put("秒进", "Instant load");
         m.put("稍后", "Later");
         m.put("空", "null");
-        m.put("空地址", "Empty address");
+        m.put("空地址", "Empty URL");
         m.put("空闲", "idle");
         m.put("空闲时", "When Idle");
         m.put("窗口常驻、只切视图可见性", "Window resident, view visibility only");
         m.put("端口 ", "Port ");
         m.put("笔已注入，移动段未完成）；", "stroke injected, move segment not completed); ");
         m.put("笔画数超限（单次最多 ", "Stroke count exceeded limit (maximum ");
-        m.put("第 ", "No. ");
-        m.put("第 9 页点下一页、第 10 页刚渲染", "Click next page on page 9, page 10 just rendered");
-        m.put("第 X / N 步", "Step X/N");
-        m.put("第一次真查询时弹框", "Pop-up box when querying for the first time");
-        m.put("第一页就对不上", "It doesn’t match the first page");
-        m.put("第三方供应商适配（关掉则「添加提供方」不可用）", "Third-party supplier adaptation (if turned off, \"Add Provider\" will not be available)");
+        m.put("第 ", "#");
+        m.put("第 9 页点下一页、第 10 页刚渲染", "tapping Next on page 9 right as page 10 renders");
+        m.put("第 X / N 步", "Step X / N");
+        m.put("第一次真查询时弹框", "prompts on first actual query");
+        m.put("第一页就对不上", "Mismatch right on the first page");
+        m.put("第三方供应商适配（关掉则「添加提供方」不可用）", "Third-party provider adapter (disabling makes \"Add Provider\" unavailable)");
         m.put("等几秒重试；或先 android_screen 确认界面还响应；", "Wait a few seconds and retry; or use android_screen first to verify UI is responsive;");
+        m.put("等几秒重试；或先 android_screen 确认界面还响应；内存紧张（<400MB）时更容易失败，可先关掉其它 App。", "Wait a few seconds and retry, or call android_screen first to verify the UI is responsive; failures are more likely under low memory (<400MB), so try closing other apps first.");
         m.put("等加载", "Waiting for loading");
-        m.put("等待引擎启动", "Wait for the engine to start");
+        m.put("等待引擎启动", "Waiting for engine to start");
         m.put("算出来放得下、屏幕上却出现省略号", "The calculation can be put down, but an ellipsis appears on the screen.");
         m.put("类型：", "type:");
         m.put("类型：HTTP ", "Type: HTTP ");
         m.put("类型：发 Intent\n", "Type: Send Intent\n");
-        m.put("类型：发 Intent\\n", "Type: Send Intent\\n");
         m.put("类型：打开网址\n", "Type: Open URL\n");
-        m.put("类型：打开网址\\n", "Type: Open URL\\n");
         m.put("类型：执行命令", "Type: execute command");
         m.put("类型：把提示词发给 DSH 的 AI\n", "Type: Send prompt words to DSH’s AI\n");
-        m.put("类型：把提示词发给 DSH 的 AI\\n", "Type: Send prompt words to DSH’s AI\\n");
         m.put("糙", "rough");
         m.put("系统", "System");
         m.put("系统 WebView 版本过旧", "System WebView version is too old");
@@ -2187,6 +2091,9 @@ final class I18nEn {
         m.put("系统返回错误码 ", "System returned error code ");
         m.put("系统默认", "Auto (System)");
         m.put("纯 View", "Pure View");
+    }
+
+    private static void load20(Map<String, String> m) {
         m.put("终端", "Terminal");
         m.put("绑定已失效（子进程崩溃）→ 解绑，下次调用重连", "The binding has expired (the child process crashed) → Unbind and reconnect next time");
         m.put("结束时", "When Completed");
@@ -2194,9 +2101,6 @@ final class I18nEn {
         m.put("结构指纹", "Structural fingerprint");
         m.put("结果：", "result:");
         m.put("给人看的证据", "evidence to show");
-    }
-
-    private static void load21(Map<String, String> m) {
         m.put("给人看的证据；不参与定位（定位一律走 ref）", "Evidence for others to see; does not participate in positioning (positioning will always use ref)");
         m.put("继续尝试", "keep trying");
         m.put("维护", "Maintenance");
@@ -2232,7 +2136,7 @@ final class I18nEn {
         m.put("自检完成：", "Self-check complete: ");
         m.put("自检抛异常：", "Self-check throws exception:");
         m.put("自检进行中 · ", "Self-test in progress · ");
-        m.put("节点已达上限，用 browser_find 缩小范围", "The node limit has been reached. Use browser_find to narrow the range.");
+        m.put("节点已达上限，用 browser_find 缩小范围", "Node limit reached; use browser_find to narrow the scope");
         m.put("节点应为对象", "Node should be an object");
         m.put("节点类=", "Node class=");
         m.put("藏到屏幕外", "Hide off screen");
@@ -2247,26 +2151,24 @@ final class I18nEn {
         m.put("虚拟屏状态", "Virtual display status");
         m.put("虚拟屏预览窗已显示（画面区拖动/缩放，顶部小条点击收起到小鲸鱼）", "Virtual display preview active (drag/scale in preview, tap top bar to minimize to Floating Whale)");
         m.put("虚拟屏：建屏 / 看图 / 点击 · 8 个工具", "Virtual display: create / screenshot / touch · 8 tools");
-        m.put("行 + 分隔线", "row + separator");
-        m.put("行标题文案", "Row title text");
+        m.put("行 + 分隔线", "row + divider");
+        m.put("行标题文案", "Row title label");
         m.put("被坏附件卡住的会话：只降级那一条消息", "Sessions blocked by corrupt attachments: converts affected messages to text placeholders");
         m.put("被收起来", "being put away");
         m.put("被新配置替换的", "replaced by new configuration");
-        m.put("被旁置的文件也不删，启动后 AI 可以直接读它们来定位问题。\n\n", "The files that have been bypassed will not be deleted. After starting, the AI ​​can directly read them to locate the problem. \n\n");
-        m.put("被旁置的文件也不删，启动后 AI 可以直接读它们来定位问题。\\n\\n", "The files that have been bypassed will not be deleted. After starting, the AI ​​can directly read them to locate the problem. \\n\\n");
+        m.put("被旁置的文件也不删，启动后 AI 可以直接读它们来定位问题。\n\n", "The files that have been bypassed will not be deleted. After starting, the AI can directly read them to locate the problem. \n\n");
         m.put("被系统回收", "Recycled by the system");
         m.put("装在 Termux 里跑", "Install and run in Termux");
         m.put("要求：深色、低饱和，强调色青绿 #2dd4bf；背景用一张海边夜景（生成 1080×2400 的图，命名 bg.jpg）；\n", "Requirements: dark color, low saturation, accent color green #2dd4bf; use a seaside night scene as the background (generate a 1080×2400 image, named bg.jpg);\n");
-        m.put("要求：深色、低饱和，强调色青绿 #2dd4bf；背景用一张海边夜景（生成 1080×2400 的图，命名 bg.jpg）；\\n", "Requirements: dark color, low saturation, accent color green #2dd4bf; use a seaside night scene as the background (generate a 1080×2400 image, named bg.jpg);\\n");
         m.put("要清理", "To clean up");
         m.put("要等一会儿", "Have to wait a while");
         m.put("覆盖安装", "Overlay installation");
-        m.put("规范与自检", "Specification & Check");
+        m.put("规范与自检", "Specification & Self-Check");
         m.put("规范就在主题目录里（THEME-PACK-SPEC.md），连同 schema、示例、零依赖校验器一起随包分发；", "The specification is in the theme directory (THEME-PACK-SPEC.md), and is distributed with the package together with schema, examples, and zero-dependency validators;");
+        m.put("规范就在主题目录里（THEME-PACK-SPEC.md），连同 schema、示例、零依赖校验器一起随包分发；AI 生成的包可以先自检一遍再导入。", "The specification is located in the theme directory (THEME-PACK-SPEC.md) and bundled with the schema, examples, and zero-dependency validator; AI-generated packages can run a self-check before importing.");
         m.put("规范工作区不可写，回退到旧的共享目录 ", "Canonical workspace not writable, fallback to old shared directory ");
         m.put("规范文件不在（是否缺存储权限？）", "The specification file is not there (does it lack storage permission?)");
         m.put("规范：THEME-PACK-SPEC.md（或见 console.schema.json + console.example.json）\n", "Specification: THEME-PACK-SPEC.md (or see console.schema.json + console.example.json)\n");
-        m.put("规范：THEME-PACK-SPEC.md（或见 console.schema.json + console.example.json）\\n", "Specification: THEME-PACK-SPEC.md (or see console.schema.json + console.example.json)\\n");
         m.put("视口不可用（WebView 还没有尺寸）", "Viewport is not available (WebView has no dimensions yet)");
         m.put("视口不可用（页面没有尺寸）", "Viewport is unavailable (page has no dimensions)");
         m.put("视口内的可交互元素 ref 列表", "A ref list of interactive elements within the viewport");
@@ -2283,41 +2185,40 @@ final class I18nEn {
         m.put("解压过程中请勿锁屏", "Do not lock the screen during extraction");
         m.put("解析异常（已回退默认）：", "Parsing exception (fallback to default):");
         m.put("触摸注入没有完成（dispatchGesture 被取消/超时/拒绝）——", "Touch injection not completed (dispatchGesture cancelled/timed out/rejected) — ");
+        m.put("触摸注入没有完成（dispatchGesture 被取消/超时/拒绝）——前台应用在繁忙时可能吞掉注入的触摸", "Touch injection did not complete (dispatchGesture cancelled/timed out/rejected) — foreground app may drop injected touches when busy");
         m.put("触摸注入没有完成（被系统取消/超时/拒绝）", "Touch injection did not complete (cancelled, timed out, or rejected by system)");
         m.put("触摸点了但页面没变", "I touched it but the page did not change");
         m.put("警告：", "warn:");
         m.put("让 AI 做主题包", "Generate Theme with AI");
         m.put("让 AI 打开一个网页后，这里会列出它的页签", "After asking AI to open a web page, its tabs will be listed here");
         m.put("让 AI 知道你装了哪些应用，并帮你启动它们（例如「帮我打开微信」「列出我装的游戏」）。\n\n", "Let AI know which apps you have installed and help you launch them (such as \"Help me open WeChat\" and \"List the games I have installed\"). \n\n");
-        m.put("让 AI 知道你装了哪些应用，并帮你启动它们（例如「帮我打开微信」「列出我装的游戏」）。\n\n点下面的按钮会触发系统的授权询问，在这里一次性允许掉，免得用 AI 的时候突然弹框打断你。", "Allows AI to see installed applications and launch them for you (e.g. \"open browser\", \"list installed games\").\n\nTapping the button triggers the system prompt; granting it now prevents interruptions during AI tasks.");
-        m.put("让 AI 知道你装了哪些应用，并帮你启动它们（例如「帮我打开微信」「列出我装的游戏」）。\\n\\n", "Let AI know which apps you have installed and help you launch them (such as \"Help me open WeChat\" and \"List the games I have installed\"). \\n\\n");
-        m.put("让本应用在后台常驻、不被系统提前杀掉 —— 引擎要一直在跑，这是稳定在线的前提。\n\n强烈建议授权；不给的话切后台后引擎可能被杀。", "Let this application stay in the background and not be killed by the system in advance - the engine must always be running, which is the prerequisite for stable online performance. \n\nIt is strongly recommended to authorize it; if you do not grant it, the engine may be killed after switching to the background.");
-        m.put("让本应用在后台常驻、不被系统提前杀掉 —— 引擎要一直在跑，这是稳定在线的前提。\\n\\n强烈建议授权；不给的话切后台后引擎可能被杀。", "Let this application stay in the background and not be killed by the system in advance - the engine must always be running, which is the prerequisite for stable online performance. \\n\\nIt is strongly recommended to authorize it; if you do not grant it, the engine may be killed after switching to the background.");
-        m.put("设为「不限制」，否则切后台引擎会被杀", "Set to 'Unrestricted', otherwise engine may be killed in background");
+        m.put("让 AI 知道你装了哪些应用，并帮你启动它们（例如「帮我打开微信」「列出我装的游戏」）。\n\n点下面的按钮会触发系统的授权询问，在这里一次性允许掉，免得用 AI 的时候突然弹框打断你。", "Allows AI to see your installed apps and launch them for you (e.g. \"open WeChat for me\", \"list my installed games\").\n\nTapping the button below triggers the system permission prompt. Granting it now prevents pop-ups from interrupting AI tasks later.");
+        m.put("让本应用在后台常驻、不被系统提前杀掉 —— 引擎要一直在跑，这是稳定在线的前提。\n\n强烈建议授权；不给的话切后台后引擎可能被杀。", "Allows the app to stay active in the background without being terminated by the system — keeping the engine running continuously is essential for stable operation.\n\nStrongly recommended; without it, the engine may be killed when the app moves to the background.");
+    }
+
+    private static void load21(Map<String, String> m) {
+        m.put("设为「不限制」，否则切后台引擎会被杀", "Set to \"Unrestricted\", otherwise the engine may be killed in the background");
         m.put("设了却没生效", "Set it up but it doesn’t take effect");
         m.put("设备架构为 ", "The device architecture is ");
         m.put("设备没 root 时这一项显示「本机无 root」。", "When the device is not rooted, this item displays \"This machine does not have root\".");
-    }
-
-    private static void load22(Map<String, String> m) {
         m.put("访问手机上所有文件（Android 11 及以上需要单独授权，11 以下由存储权限覆盖）。\n\nAI 读写你的项目文件、整理文档都靠它。", "Access all files on device (required on Android 11+; covered by Storage permission on Android 10 and below).\n\nAI relies on this to read and edit project files and manage documents.");
-        m.put("访问手机上所有文件（Android 11 及以上需要单独授权，11 以下由存储权限覆盖）。\\n\\nAI 读写你的项目文件、整理文档都靠它。", "Access all files on device (required on Android 11+; covered by Storage permission on Android 10 and below).\\n\\nAI relies on this to read and edit project files and manage documents.");
         m.put("诊断", "Diagnostics");
         m.put("该应用没有 launcher 入口（可能未安装，或它是没有界面的系统包）：", "The application does not have a launcher entry (it may not be installed, or it is a system package without an interface):");
         m.put("该节点/输入法拒绝了粘贴：可先 android_tap 点击输入框并确认键盘弹出；", "Node or input method rejected paste: try android_tap first and verify keyboard is visible;");
+        m.put("该节点/输入法拒绝了粘贴：可先 android_tap 点击输入框并确认键盘弹出；仍失败时用 android_see 截图后点击输入法自带的「粘贴」键（键盘上方一行，屏幕底部约 y≈0.586），或用特权通道 android_input(action=text，需 Shizuku/root)。", "The node or IME rejected paste: first tap the input box with android_tap and verify the keyboard appears; if it still fails, take a screenshot with android_see and tap the IME's built-in \"Paste\" button (on the toolbar above the keyboard, around y≈0.586), or use the privileged channel android_input(action=text, requires Shizuku/root).");
         m.put("该节点拒绝无障碍写文本（常见于 WebView/contenteditable）：改用 android_paste_text 走剪贴板粘贴；", "This node rejects Accessibility text input (common in WebView/contenteditable): use android_paste_text to paste from clipboard;");
+        m.put("该节点拒绝无障碍写文本（常见于 WebView/contenteditable）：改用 android_paste_text 走剪贴板粘贴；或先用 android_tap 聚焦并确认键盘弹出后重试。", "This node rejected Accessibility text input (common in WebView/contenteditable): use android_paste_text to paste via clipboard, or focus the field with android_tap, verify the keyboard is open, and retry.");
         m.put("详情 ›", "Details ›");
         m.put("语言", "Interface Language");
         m.put("语言 / Language / Язык", "Interface Language");
         m.put("语音输入 / 录音类功能需要；不给只是这类能力不可用", "Required for voice input and recording; without this, voice features are unavailable");
         m.put("误判", "Misjudgment");
-        m.put("请先回主控台点「休息一下」（停止引擎），再回来修复。", "Please go back to the main console and click \"Take a rest\" (stop the engine) before coming back to fix it.");
+        m.put("请先回主控台点「休息一下」（停止引擎），再回来修复。", "Please return to the main console and tap \"Take a Break\" (stop the engine) before coming back to repair.");
         m.put("请在 root 管理器（Magisk / KernelSU）里给本应用授予 root", "Please grant root access to this app in Magisk / KernelSU");
         m.put("请帮我做一个 DeepSeek Harness 安卓控制台的主题包（zip）。\n", "Please help me make a theme package (zip) for DeepSeek Harness Android console. \n");
-        m.put("请帮我做一个 DeepSeek Harness 安卓控制台的主题包（zip）。\\n", "Please help me make a theme package (zip) for DeepSeek Harness Android console. \\n");
+        m.put("请帮我做一个 DeepSeek Harness 安卓控制台的主题包（zip）。\n规范：THEME-PACK-SPEC.md（或见 console.schema.json + console.example.json）\n要求：深色、低饱和，强调色青绿 #2dd4bf；背景用一张海边夜景（生成 1080×2400 的图，命名 bg.jpg）；\n     卡片半透明 cardsAlpha 0.82、背景 dim 0.28（字要看得清）；隐藏\"检查更新\"；把\"启动引擎\"改叫\"点火\"；\n     不要任何 shell/http/intent/prompt 动作。\n输出：1) console.json 全文 2) theme.json 全文 3) 打包命令 zip mytheme.zip theme.json console.json bg.jpg", "Please create a theme pack (zip) for the DeepSeek Harness Android console.\nSpec: THEME-PACK-SPEC.md (or see console.schema.json + console.example.json)\nRequirements: dark theme, low saturation, teal accent #2dd4bf; seaside night background (generate a 1080×2400 image named bg.jpg);\n     semi-transparent cards (cardsAlpha 0.82), background dim 0.28 (keep text legible); hide \"Check for Updates\"; rename \"Start Engine\" to \"Ignition\";\n     do not include any shell/http/intent/prompt actions.\nOutput: 1) full console.json 2) full theme.json 3) packaging command: zip mytheme.zip theme.json console.json bg.jpg");
         m.put("请把账本 / 自检报告导出给人看，或换一条思路（例如先做配置快照、或直接重新解压）。", "Please export the ledger/self-inspection report for others to see, or try another way (for example, take a configuration snapshot first, or re-decompress it directly).");
         m.put("请按下面这份规范生成 / 修改 DeepSeek Harness 安卓控制台的主题包（zip）。\n\n", "Please follow the following specifications to generate/modify the theme package (zip) of the DeepSeek Harness Android console. \n\n");
-        m.put("请按下面这份规范生成 / 修改 DeepSeek Harness 安卓控制台的主题包（zip）。\\n\\n", "Please follow the following specifications to generate/modify the theme package (zip) of the DeepSeek Harness Android console. \\n\\n");
         m.put("请用同变体源码自行构建，或先「导出全部数据」再卸载换装官方版。", "Please build it yourself using the same variant source code, or \"export all data\" first and then uninstall and replace with the official version.");
         m.put("请重新跑一次自检，并让 AI 按最新结果重新提案。", "Please run the self-check again and let AI re-propose based on the latest results.");
         m.put("读不了（权限/损坏）：", "Unreadable (permission / corruption): ");
@@ -2325,8 +2226,7 @@ final class I18nEn {
         m.put("读不到规范文件（", "Cannot read specification file (");
         m.put("读写 /sdcard，AI 才能碰你的文件", "Read and write /sdcard so AI can access your files");
         m.put("读写手机上的文件：导入/导出内容、把 AI 生成的文件存到手机、写日志与运行数据。\n\n不给的话，AI 无法保存任何文件。", "Read and write device storage: import/export files, save AI-generated content, write logs and runtime data.\n\nWithout this permission, AI cannot save any files.");
-        m.put("读写手机上的文件：导入/导出内容、把 AI 生成的文件存到手机、写日志与运行数据。\\n\\n不给的话，AI 无法保存任何文件。", "Read and write device storage: import/export files, save AI-generated content, write logs and runtime data.\\n\\nWithout this permission, AI cannot save any files.");
-        m.put("读写手机文件（Android 10 及以下需要；11+ 由上面「所有文件访问」覆盖）", "Read/write files (Android 10 and below; Android 11+ covered by 'All Files Access')");
+        m.put("读写手机文件（Android 10 及以下需要；11+ 由上面「所有文件访问」覆盖）", "Read/write device files (required on Android 10 and below; covered by \"All Files Access\" on Android 11+)");
         m.put("读取会话列表", "Load Sessions");
         m.put("读取回收站", "Load Trash");
         m.put("读取失败", "Read Failed");
@@ -2344,14 +2244,15 @@ final class I18nEn {
         m.put("账本为空（还没有过自检或修复记录）", "Ledger is empty (no self-check or repair records logged yet)");
         m.put("账本读取失败", "Ledger reading failed");
         m.put("账本读取失败：", "Ledger reading failed:");
-        m.put("账本还空着：跑一次自检就会写下第一条", "Ledger is empty: run self-check once to record the first entry");
+        m.put("账本还空着：跑一次自检就会写下第一条", "Ledger is empty: run a self-check once to record the first entry");
         m.put("贴边站着", "Docked to screen edge");
+        m.put("超时", "timeout");
         m.put("跑的是旧 core", "Running the old core");
         m.put("距右边缘", "from right edge");
         m.put("跟随系统", "Follow System");
         m.put("跟随页面", "Follow Page");
         m.put("跨目录去重", "Cross-directory deduplication");
-        m.put("跳离本地引擎地址", "Jump out of local engine address");
+        m.put("跳离本地引擎地址", "Navigations leaving the local engine URL");
         m.put("跳过", "Skip");
         m.put("跳过这页", "Skip This Step");
         m.put("转到", "Go to");
@@ -2360,23 +2261,25 @@ final class I18nEn {
         m.put("输入动作未被执行（", "Input action was not executed (");
         m.put("输出可直接合并进 console.json 的 JSON 片段。", "Output JSON snippet that can be directly merged into console.json.");
         m.put("输出新的 console.json（含 layout.order / layout.hidden / text 三段）。\n", "Output new console.json (containing layout.order / layout.hidden / text sections).\n");
-        m.put("输出新的 console.json（含 layout.order / layout.hidden / text 三段）。\\n", "Output new console.json (containing layout.order / layout.hidden / text sections).\\n");
         m.put("输出：1) console.json 全文 2) theme.json 全文 3) 打包命令 zip mytheme.zip theme.json console.json bg.jpg", "Output: 1) full console.json 2) full theme.json 3) packaging command: zip mytheme.zip theme.json console.json bg.jpg");
         m.put("边界（写死在代码里）：① 删除 = 移到 <dshHome>/sessions-deleted/（回收站），不是 rm；", "Boundary (hard-coded in the code): ① Delete = move to <dshHome>/sessions-deleted/ (recycle bin), not rm;");
-        m.put("边界（写死在代码里）：① 删除 = 移到 <dshHome>/sessions-deleted/（回收站），不是 rm；② 回收站在 sessions/ 之外，内核扫不到、不会被当成会话加载；③ 只动 sessions/ 与回收站这两棵树，越界一律拒绝；④ 每次删除 / 恢复 / 彻底删都写一条自愈账本。", "Safety boundaries (enforced in code): ① Delete = move to <dshHome>/sessions-deleted/ (Trash), not rm; ② Trash is outside sessions/ so kernel will not scan or load it; ③ Only touches sessions/ and Trash trees, out-of-bounds requests are rejected; ④ Every delete, restore, or permanent purge is logged in the self-healing ledger.");
+        m.put("边界（写死在代码里）：① 删除 = 移到 <dshHome>/sessions-deleted/（回收站），不是 rm；② 回收站在 sessions/ 之外，内核扫不到、不会被当成会话加载；③ 只动 sessions/ 与回收站这两棵树，越界一律拒绝；④ 每次删除 / 恢复 / 彻底删都写一条自愈账本。", "Safety boundaries (hardcoded): ① Delete = move to <dshHome>/sessions-deleted/ (Trash), not rm; ② Trash is outside sessions/, so the kernel never scans or loads it as a session; ③ Only touches the sessions/ and Trash directories — any out-of-bounds path is rejected; ④ Every delete, restore, or permanent purge is recorded in the self-healing ledger.");
         m.put("边界（写死在代码里）：① 只处理你点选的那一条，没有「批量修复」这种东西；", "Safety boundaries (strictly enforced in code): ① Operates strictly on the selected session (no batch modifications);");
+        m.put("边界（写死在代码里）：① 只处理你点选的那一条，没有「批量修复」这种东西；② 引擎在跑时不允许改写（内核可能正在写同一条会话），要先停止引擎；③ 改写前把原文件备份成 <会话文件>.corrupt-<时间>；④ 修完立刻复检：坏引用必须归零、行数与 JSON 合法性必须不变，否则如实报「部分完成」。", "Safety boundaries (hardcoded): ① Only processes the single session you selected — there is no batch repair; ② Rewriting is blocked while the engine is running (the kernel may be writing to the same session), so stop the engine first; ③ Before rewriting, the original file is backed up as <session_file>.corrupt-<timestamp>; ④ Immediate re-verification after repair: broken references must be zero and line count and JSON validity must remain unchanged, otherwise it is reported as \"Partially Completed\".");
         m.put("边界（写死在代码里）：① 同屏是只读的（能看不能点，触摸穿透）；② 不改窗口尺寸 —— AI 的点击坐标口径依赖它；③ 浏览器崩溃只死 :browser 进程，控制台与引擎不受影响。", "Architecture boundaries: ① Screen sync is read-only (view only, touch passes through); ② Window dimensions are locked — AI coordinate mapping relies on them; ③ Browser crashes only affect the :browser process; console and engine continue uninterrupted.");
         m.put("边界（写死在代码里）：① 自检「只读」，不删不改；", "Safety boundaries (strictly enforced in code): ① Self-check is strictly read-only; no files are modified or deleted;");
+        m.put("边界（写死在代码里）：① 自检「只读」，不删不改；② 「缺失/内容不符」才是需要处理的真问题，「清单外文件」只是参考信息（清单在开发树上算的，天然比出货树少，多数是第三方依赖）；③ 真正的清理只发生在两个 @deepseek-ai 目录里、且只删 dsh 开头的陈旧条目 —— 用户数据（dshhome 下）与第三方插件（dshhome/profiles 下）永远只报不改。", "Safety boundaries (hardcoded): ① Self-check is strictly read-only and never modifies or deletes files; ② Only \"Missing / content mismatch\" items are actual issues to fix, whereas \"files outside manifest\" is informational only (the manifest is computed from the dev tree and naturally smaller than the shipped tree, mostly third-party dependencies); ③ Actual cleanup only occurs inside the two @deepseek-ai directories and only removes stale entries starting with dsh — user data (under dshhome) and third-party plugins (under dshhome/profiles) are only reported and never modified.");
         m.put("运行中", "Running");
         m.put("运行中（端口 ", "running (port ");
         m.put("运行环境", "Environment");
         m.put("运行环境与内核树已就绪", "Runtime environment and kernel tree ready");
         m.put("运行环境与内核树已就绪 ✓", "Runtime environment and kernel tree ready ✓");
-        m.put("运行环境已就绪。引擎起不来（升级后报 import 错、混装树）时先点「重新解压」——", "The operating environment is ready. When the engine cannot start (import errors and mixed installation trees are reported after the upgrade), click \"Re-Extract\" -");
+        m.put("运行环境已就绪。引擎起不来（升级后报 import 错、混装树）时先点「重新解压」——", "Runtime environment is ready. If the engine fails to start (e.g. import errors or mixed file trees after an update), tap \"Re-extract\" first — ");
+        m.put("运行环境已就绪。引擎起不来（升级后报 import 错、混装树）时先点「重新解压」——它只覆盖内核自己的文件，不动你的会话、插件与配置。", "Runtime environment is ready. If the engine fails to start (e.g. import errors or mixed file trees after an update), tap \"Re-extract\" first — it only overwrites the kernel's own files, leaving your sessions, plugins, and configurations untouched.");
         m.put("还在等引擎", "Still waiting for the engine");
         m.put("还是不能调整大小", "Resizing is not supported");
         m.put("还没有 console.json 可导出（当前是内置默认）", "No console.json found to export (currently using built-in default)");
-        m.put("还没有快照：先 browser_snapshot（或 browser_find）拿到 ref，再动作；不猜坐标", "There is no snapshot yet: get the ref from browser_snapshot (or browser_find) first, and then act; do not guess the coordinates");
+        m.put("还没有快照：先 browser_snapshot（或 browser_find）拿到 ref，再动作；不猜坐标", "No snapshot yet: call browser_snapshot (or browser_find) to get a ref before acting; do not guess coordinates");
         m.put("还没有扫描过。点下面的「扫描会话」开始 —— 扫描全程只读。", "No scan performed yet. Tap \"Scan Sessions\" below to begin — the scan is completely read-only.");
         m.put("还没有日志（引擎没启动过）", "No logs yet (engine has not been started)");
         m.put("还没有读取过列表。点下面的「读取会话列表」开始 —— 只读。", "Session list has not been loaded yet. Tap \"Load Sessions\" below to start (read-only).");
@@ -2394,29 +2297,28 @@ final class I18nEn {
         m.put("这一页管的是控制台自己的样子。配置文件在手机存储里，改完存盘几秒内自动生效，不用重启 App。", "This page manages the appearance of the console itself. The configuration file is in the phone's storage, and it will automatically take effect within a few seconds after the change is saved, without restarting the app.");
         m.put("这不像本应用的备份包（缺少 manifest.json）", "This is not like the backup package of this application (manifest.json is missing)");
         m.put("这个 App 现在的浅色底/深色底", "The current light or dark background of this app");
+    }
+
+    private static void load22(Map<String, String> m) {
         m.put("这个 zip 里没有 console.json —— 主题包必须包含它。", "This ZIP does not contain console.json — theme packs must include it.");
         m.put("这个主题包不能用（「现有配置未改动」）：\n", "This theme package cannot be used (\"Existing configuration has not been changed\"):\n");
-        m.put("这个主题包不能用（「现有配置未改动」）：\\n", "This theme package cannot be used (\"Existing configuration has not been changed\"):\\n");
         m.put("这个动作带的 tabId=", "This action has tabId=");
         m.put("这个提案不能执行", "This proposal cannot be implemented");
         m.put("这份配置里有 ", "This configuration contains ");
-    }
-
-    private static void load23(Map<String, String> m) {
         m.put("这是 AI 能「看见并操作手机界面」的前提：读屏、点按、输入、截图理解。\n\n", "This is the premise that AI can \"see and operate the mobile phone interface\": read the screen, click, input, and take screenshots to understand. \n\n");
-        m.put("这是 AI 能「看见并操作手机界面」的前提：读屏、点按、输入、截图理解。\n\n注意：系统可能会定期关闭此权限，失灵时到系统设置或控制台「权限」页重新打开即可。\n\n想用「帮我点一下」「看看这个界面」这类能力，这一步必须开。", "Prerequisite for AI to inspect and operate the screen: screen reading, tapping, typing, and visual understanding.\n\nNote: The system may periodically turn off this service. If gestures stop responding, simply re-enable it in System Settings or Console → Permissions.\n\nRequired for capabilities like \"tap this for me\" or \"look at this screen\".");
-        m.put("这是 AI 能「看见并操作手机界面」的前提：读屏、点按、输入、截图理解。\\n\\n", "This is the premise that AI can \"see and operate the mobile phone interface\": read the screen, click, input, and take screenshots to understand. \\n\\n");
+        m.put("这是 AI 能「看见并操作手机界面」的前提：读屏、点按、输入、截图理解。\n\n注意：系统可能会定期关闭此权限，失灵时到系统设置或控制台「权限」页重新打开即可。\n\n想用「帮我点一下」「看看这个界面」这类能力，这一步必须开。", "Prerequisite for AI to see and interact with the phone screen: screen reading, tapping, typing, and visual understanding.\n\nNote: The system may periodically turn off this permission. If it stops working, simply re-enable it in System Settings or Console → Permissions.\n\nRequired for commands like \"tap this for me\" or \"look at this screen\".");
         m.put("这是「清单式一致性证明」：拿随包清单（每个文件的路径/大小/sha256）跟设备上的内核树逐条比对，", "Manifest consistency proof: compares package manifest (path, size, sha256 of each file) against device kernel tree entry by entry.");
+        m.put("这是「清单式一致性证明」：拿随包清单（每个文件的路径/大小/sha256）跟设备上的内核树逐条比对，回答的是「到底哪个文件不对」，而不是「感觉坏了」。全程只读，不会改任何文件。", "Manifest consistency check: compares the bundled manifest (path, size, and sha256 of each file) against the on-device kernel tree entry by entry, pinpointing exactly which file is mismatched instead of guessing. Strictly read-only; no files are modified.");
         m.put("这是我现在的控制台主题配置。请只改这三件事，其余保持不动：\n", "This is my current console theme configuration. Please change only these three things and leave the rest unchanged:\n");
-        m.put("这是我现在的控制台主题配置。请只改这三件事，其余保持不动：\\n", "This is my current console theme configuration. Please change only these three things and leave the rest unchanged:\\n");
+        m.put("这是我现在的控制台主题配置。请只改这三件事，其余保持不动：\n1) 顺序：把\"日志\"提到最上面，\"检查更新\"挪到最后；\n2) 隐藏：把\"检查更新\"整行藏掉；\n3) 文案：\"启动引擎\"改叫\"点火\"、\"重启\"改叫\"重开\"、\"停止\"改叫\"熄火\"。\n输出新的 console.json（含 layout.order / layout.hidden / text 三段）。\n<把你的 console.json 贴在这里>", "Here is my current console theme configuration. Please make only these three changes and keep everything else unchanged:\n1) Order: move \"Logs\" to the top and \"Check for Updates\" to the bottom;\n2) Hide: hide the entire \"Check for Updates\" row;\n3) Labels: rename \"Start Engine\" to \"Ignition\", \"Restart\" to \"Reboot\", and \"Stop\" to \"Shut Down\".\nOutput the updated console.json (including layout.order, layout.hidden, and text sections).\n<Paste your console.json here>");
         m.put("这是我现在的控制台主题配置（console.json 全文如下）。请在此基础上改：\n", "This is my current console theme configuration (full text of console.json is below). Please change based on this:\n");
-        m.put("这是我现在的控制台主题配置（console.json 全文如下）。请在此基础上改：\\n", "This is my current console theme configuration (full text of console.json is below). Please change based on this:\\n");
+        m.put("这是我现在的控制台主题配置（console.json 全文如下）。请在此基础上改：\n- 把强调色换成暖橙 #f59e0b，背景图换成 /sdcard/Pictures/my.jpg\n- 圆角改 22、字体放大到 1.1\n- 文案里\"重启\"改成\"重开\"\n其余保持不变，输出新的 console.json + theme.json + 打包命令。\n<把你的 console.json 贴在这里>", "Here is my current console theme configuration (full console.json below). Please modify it as follows:\n- Change the accent color to warm orange #f59e0b and the background image to /sdcard/Pictures/my.jpg\n- Change the corner radius to 22 and font scale to 1.1\n- Rename the label \"Restart\" to \"Reboot\"\nKeep everything else unchanged and output the updated console.json, theme.json, and packaging command.\n<Paste your console.json here>");
         m.put("这枚按钮只是方便你验证同屏查看与页签功能。", "This button is provided for testing screen sync and tab functionality.");
         m.put("这样做是为了不让一次修复把正在使用的会话写坏。", "This is done to prevent a repair from corrupting an active session.");
         m.put("这类节点在控件树里常表现为「可输入但不可点击」。", "Such nodes often appear as 'focusable/editable but not clickable' in accessibility tree.");
         m.put("这里只做一件事：把坏掉的那一条消息里的附件换成一行文字说明，会话的正文、上下文与顺序一字不动。", "This tool performs one focused task: replaces the corrupted attachment in that specific message with a single text placeholder while keeping all text, context, and sequence intact.");
         m.put("这里可以删掉不需要的会话。删除是「先移到回收站」—— 随时能恢复；", "You can delete unnecessary conversations here. Deletion is \"moved to the recycle bin first\" - it can be restored at any time;");
-        m.put("这里可以删掉不需要的会话。删除是「先移到回收站」—— 随时能恢复；真要腾空间，去回收站里「彻底删除」。删除只动这一条会话，不碰别的。", "You can delete unneeded sessions here. Deleting first moves them to the Trash — recoverable anytime. To free up storage, use \"Delete Permanently\" in the Trash. Only this session is affected.");
+        m.put("这里可以删掉不需要的会话。删除是「先移到回收站」—— 随时能恢复；真要腾空间，去回收站里「彻底删除」。删除只动这一条会话，不碰别的。", "You can delete unneeded sessions here. Deleting moves them to the Trash first, so they can be restored anytime; to free up space, use \"Delete Permanently\" in the Trash. Deleting only affects the selected session.");
         m.put("进入", "Open");
         m.put("进入安全模式", "Enter safe mode");
         m.put("进入安全模式失败：", "Failed to enter safe mode:");
@@ -2450,8 +2352,8 @@ final class I18nEn {
         m.put("配色·字号·圆角·背景图", "Colors · Font scale · Radius · Background");
         m.put("重启", "Restart");
         m.put("重启→互相抢端口→探测依旧失败", "Restart → port conflict → probe failed");
-        m.put("重启引擎", "restart engine");
-        m.put("重启引擎生效", "Restart the engine to take effect");
+        m.put("重启引擎", "Restart Engine");
+        m.put("重启引擎生效", "Restart Engine to Apply");
         m.put("重新加载", "Reload");
         m.put("重新加载主题", "Reload theme");
         m.put("重新安装带清单的包；或改用「快速自检」做基础项检查。", "Reinstall a package with manifest, or use \"Quick Check\" for basic checks instead.");
@@ -2488,9 +2390,9 @@ final class I18nEn {
         m.put("面板 + 小人", "Panel + Avatar");
         m.put("面板宽度", "Panel width");
         m.put("页签", "Tabs");
-        m.put("页面底色与当前明暗一致", "The background color of the page is consistent with the current light and dark");
-        m.put("页面快照失败（可能在导航中）", "Page snapshot failed (probably in navigation)");
-        m.put("页面没变化：可能不是可点元素、或点击被遮挡；可用 browser_snapshot{since} 复核", "The page has not changed: it may not be a clickable element, or the click is blocked; you can use browser_snapshot{since} to check");
+        m.put("页面底色与当前明暗一致", "Page background matches current light/dark mode");
+        m.put("页面快照失败（可能在导航中）", "Page snapshot failed (page may be navigating)");
+        m.put("页面没变化：可能不是可点元素、或点击被遮挡；可用 browser_snapshot{since} 复核", "Page did not change: element may not be clickable or click was intercepted; verify with browser_snapshot{since}");
         m.put("预览", "Preview");
         m.put("预览帧继续在小鲸鱼面板里拉", "Preview frames continue streaming inside Floating Whale panel");
         m.put("预览窗需要悬浮窗权限（设置→应用→显示在其他应用上层）", "Preview window requires overlay permission (Settings → Apps → Display over other apps)");
@@ -2498,14 +2400,14 @@ final class I18nEn {
         m.put("预览编码失败: ", "Preview encoding failed: ");
         m.put("颜色无法解析", "Color cannot be resolved");
         m.put("首次使用 · 配置手机权限", "First Launch · Permissions Setup");
+    }
+
+    private static void load23(Map<String, String> m) {
         m.put("首次启动 · 正在解压运行时", "First Launch · Extracting Runtime");
         m.put("首次启动需要多等一会儿", "It takes a while to start up for the first time.");
         m.put("首次启动需要多等一会儿…", "It takes a while to start up for the first time...");
         m.put("高度 dp", "height dp");
         m.put("高级", "Advanced");
-    }
-
-    private static void load24(Map<String, String> m) {
         m.put("麦克风", "Microphone");
         m.put("黑鲸鱼悬浮窗", "Floating Whale Overlay");
         m.put("黑鲸鱼悬浮窗 / 虚拟屏预览", "Floating Whale / Virtual display preview");
@@ -2516,6 +2418,7 @@ final class I18nEn {
         m.put("默认工作区建立失败", "Default workspace creation failed");
         m.put("默认工作区无法设置", "Default workspace cannot be set");
         m.put("默认：空闲「摸鱼中…」· 思考「思考中…」· 工具「正在调用 {tool}…」· 结束「任务已完成」。", "Default: idle \"Idle…\" · thinking \"Thinking…\" · tool \"Calling {tool}…\" · finished \"Task completed\".");
+        m.put("默认：空闲「摸鱼中…」· 思考「思考中…」· 工具「正在调用 {tool}…」· 结束「任务已完成」。「结束」同时管插件的 done 与 ended 两种结束状态；「在等你回答」「出错」这两类状态不套模板，原样显示。", "Defaults: Idle \"Idle…\" · Thinking \"Thinking…\" · Tool \"Calling {tool}…\" · Done \"Task completed\". \"Done\" covers both the done and ended plugin states; \"Waiting for your reply\" and \"Error\" states do not use templates and are shown as-is.");
         m.put("（AI 只能提建议，不能自己造动作；白名单写死在 App 里。）", "(AI can only make suggestions and cannot create actions on its own; the whitelist is written in the App.)");
         m.put("（API Key 要在 DSH 界面里设置过）", "(API Key must be set in the DSH interface)");
         m.put("（Android 10+ 后台启动 Activity 可能被系统拦截：可先把 App 切到前台再试）", "(Activities launched in the background of Android 10+ may be intercepted by the system: you can switch the app to the foreground and try again)");
@@ -2525,10 +2428,9 @@ final class I18nEn {
         m.put("（不关窗）", "(Keep window open)");
         m.put("（不需要 root 或 Shizuku）", "(No Root or Shizuku required)");
         m.put("（与本提案一致）\n", "(Consistent with this proposal)\n");
-        m.put("（与本提案一致）\\n", "(Consistent with this proposal)\\n");
+        m.put("（与本提案一致）\n这一份源上已执行：", " (matches this proposal)\nExecuted on this source: ");
         m.put("（也可展开本通知点『显示悬浮窗』）", " (or expand this notification and tap \"Show Overlay\")");
         m.put("（保留文件名与尺寸，不删消息、不动其他内容）：\n", "(Keep the file name and size, do not delete messages, and do not move other content):\n");
-        m.put("（保留文件名与尺寸，不删消息、不动其他内容）：\\n", "(Keep the file name and size, do not delete messages, and do not move other content):\\n");
         m.put("（先 tabs.list）", "(tabs.list first)");
         m.put("（全量校验）", " (full verification)");
         m.put("（全量：大小 + sha256）", " (Full: size + sha256)");
@@ -2553,7 +2455,6 @@ final class I18nEn {
         m.put("（无标题）会话 ", "(Untitled) Session ");
         m.put("（无输出）", "(no output)");
         m.put("（没有 console.json，全部使用内置默认）\n", "(No console.json, all built-in defaults are used)\n");
-        m.put("（没有 console.json，全部使用内置默认）\\n", "(No console.json, all built-in defaults are used)\\n");
         m.put("（清单 ", "(list ");
         m.put("（清单在开发树上算的，天然比出货树少，多数是第三方依赖）；", "(manifest was calculated on development tree and may differ naturally; mostly third-party dependencies);");
         m.put("（点此更改或恢复默认）", "(Click here to change or restore default)");
@@ -2564,25 +2465,28 @@ final class I18nEn {
         m.put("（缺失 ", "(missing ");
         m.put("（跳过 ", "(jump over ");
         m.put("（还有 ", "(besides ");
-        m.put("（还没有日志：引擎没启动过）", "(No log yet: engine has not started)");
+        m.put("（还没有日志：引擎没启动过）", "(No logs yet: engine has never been started)");
         m.put("（这份备份里没有附件实体 —— 若会话里的图片打不开，去「会话修复」跑一次扫描，", "(This backup contains no attachment files — if images in sessions fail to open, run a scan in \"Session Repair\",");
+        m.put("（这份备份里没有附件实体 —— 若会话里的图片打不开，去「会话修复」跑一次扫描，它只会把坏掉的那几条消息降级成文字", " (this backup contains no attachment files — if images in sessions fail to open, run a scan in \"Session Repair\" to downgrade only the affected messages to text");
         m.put("（追加）", "(Additional)");
         m.put("（重启引擎生效）", " (restart engine to apply)");
         m.put("（需要存储权限后由 MainActivity 提取）", "(Extracted by MainActivity once storage permission is granted)");
         m.put("）—— 更高版本的规范需要更新的 App", ") - Apps that require updated versions of the specification");
         m.put("）→ 进控制台", ") → Enter the console");
+        m.put("）。\n\n这一步不可恢复，删完就找不回来了。当前正在用的会话不受影响。", ").\n\nThis action is irreversible and cannot be undone. Currently active sessions are not affected.");
         m.put("）上的修复动作已经执行过 ", ") has been performed. ");
         m.put("），已回到控制台，引擎就绪后会自动进入", "), has returned to the console, and will automatically enter when the engine is ready");
         m.put("），已打开控制台", "), the console is open");
         m.put("），已直接关闭安全模式", "), safe mode has been turned off directly");
         m.put("），签名与官方包不同，官方 APK 无法覆盖安装本变体；\n", "), the signature is different from the official package, and the official APK cannot overwrite and install this variant;\n");
-        m.put("），签名与官方包不同，官方 APK 无法覆盖安装本变体；\\n", "), the signature is different from the official package, and the official APK cannot overwrite and install this variant;\\n");
+        m.put("），签名与官方包不同，官方 APK 无法覆盖安装本变体；\n请用同变体源码自行构建，或先「导出全部数据」再卸载换装官方版。", "), whose signature differs from the official release, so the official APK cannot be installed over this variant;\nPlease build from the same variant's source code, or use \"Export All Data\" first and then uninstall before installing the official release.");
         m.put("），虚拟屏将被拒绝启动", "), virtual display startup will be rejected");
         m.put("），请重新解压", ", please re-extract");
         m.put("），重写一次", "), rewrite it once");
+        m.put("）：\n· console.json.disabled-*（点「恢复默认」时收起的）\n· console.json.replaced-*（恢复操作换下来的）\n· console.json.bak*（导入主题前的备份）\n\n只删这些备份，不动当前正在用的 console.json —— 你现在看到的主题不会变。\n删掉之后这些历史配置就找不回来了。", "):\n· console.json.disabled-* (stashed when resetting to default)\n· console.json.replaced-* (replaced during a restore operation)\n· console.json.bak* (backed up before importing a theme)\n\nOnly these backup files will be deleted; the active console.json remains untouched, so your current theme will not change.\nOnce deleted, these historical configurations cannot be recovered.");
         m.put("）；低版本请用 /dump 读屏幕文本", "); on earlier versions, use /dump to read on-screen text");
         m.put("）；可退化为点击页面上的提交按钮，或改用 android_input(keyevent) 发回车（需特权）", "); fallback to clicking submit button on page, or use android_input(keyevent) to send Enter (requires privileges)");
-        m.put("，DSH 引擎仅提供 arm64 版本，AI 引擎可能无法启动", ", the DSH engine only provides arm64 version, the AI ​​engine may not start");
+        m.put("，DSH 引擎仅提供 arm64 版本，AI 引擎可能无法启动", ", the DSH engine only provides arm64 version, the AI engine may not start");
         m.put("，只比大小", ", only compared to size");
         m.put("，实际 ", ",actual ");
         m.put("，已打开控制台", ", the console has been opened");
@@ -2595,10 +2499,13 @@ final class I18nEn {
         m.put("，输出尾部：", ", output the tail:");
         m.put("，逐个 sha256 校验", ", sha256 verification one by one");
         m.put("：这一页不存在（内置 0~4，自定义页从 5 起），已忽略", ": This page does not exist (built-in 0~4, custom page starting from 5), ignored");
-        m.put("；停引擎 + 停服务 + 清通知 + 结束进程）", "; Stop engine + stop service + clear notification + end process)");
+        m.put("；停引擎 + 停服务 + 清通知 + 结束进程）", "; stop engine + stop service + clear notification + terminate process)");
         m.put("；原文件已备份到同目录 ", ";The original file has been backed up to the same directory ");
         m.put("；另有 ", ";Also ");
         m.put("；含 ", "; including ");
+    }
+
+    private static void load24(Map<String, String> m) {
         m.put("；它有自己的 ref 体系，必要时重新 browser_snapshot", ";It has its own ref system, and browser_snapshot can be refreshed if necessary");
         m.put("；没有工作区文件", ";No workspace file");
         m.put("🐋 DeepSeek Harness 运行中", "🐋 DeepSeek Harness is running");

@@ -64,14 +64,20 @@ def unescape_literal(s):
         return s
 
 def write_java_dict(class_name, lang_map, out_path):
-    # Expand map so both raw and unescaped runtime strings are present
+    # Expand map so both raw and unescaped runtime strings are present,
+    # always preferring canonical unescaped keys over raw escaped keys.
     expanded = {}
     for k, v in lang_map.items():
         uk = unescape_literal(k)
         uv = unescape_literal(v)
-        expanded[uk] = uv
         if k != uk:
+            expanded[uk] = uv
             expanded[k] = v
+    for k, v in lang_map.items():
+        uk = unescape_literal(k)
+        uv = unescape_literal(v)
+        if k == uk:
+            expanded[uk] = uv
 
     items = sorted(expanded.items(), key=lambda x: x[0])
     chunk_size = 100
