@@ -8,6 +8,8 @@ name: build-apk (manual)
 # ② 产物 SHA-256 与 .build-info.txt 一并上传。目标是"输入可验证 + 哈希公示 + 差异可解释"，
 # **不追求逐字节可复现**（aapt/签名含时间戳，Android 打包链做不到 bit-identical）。
 on:
+  push:
+    branches: [ master ]
   workflow_dispatch:
     inputs:
       original_look:
