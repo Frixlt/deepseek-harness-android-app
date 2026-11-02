@@ -12806,6 +12806,37 @@ public class MainActivity extends Activity {
         col.addView(box, cTop(cGap(8)));
     }
 
+    private View cAvatarModeRow(String title, String desc, final int mode, boolean selected) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(0, dp(10), 0, dp(10));
+        row.setClickable(true);
+        row.setFocusable(true);
+
+        LinearLayout textCol = new LinearLayout(this);
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        textCol.addView(cText(title, 14f, selected ? cAccent() : cText(), selected));
+        textCol.addView(cText(desc, 11.5f, cSub(), false));
+        row.addView(textCol, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView mark = new TextView(this);
+        mark.setText(selected ? "●" : "○");
+        mark.setTextSize(16f);
+        mark.setTextColor(selected ? cAccent() : cSub());
+        mark.setPadding(dp(10), 0, dp(4), 0);
+        row.addView(mark);
+
+        row.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                OverlayService.setAvatarMode(MainActivity.this, mode);
+                conToast(t("ovl.avatar.applied", "已切换悬浮窗形象"));
+                renderConsole();
+            }
+        });
+        return row;
+    }
+
     private void renderConsoleOverlayMsg() {
         LinearLayout col = consoleBody;
         col.addView(conBackRow(t("card.overlay", "悬浮窗")));
@@ -12919,6 +12950,33 @@ public class MainActivity extends Activity {
 
             col.addView(seekRow, cTop(cGap(32)));    // 与上一组（开关行）之间留间距
         }
+
+        // ── 形象与外观（3 种模式） ──
+        final int curAvatarMode = OverlayService.avatarMode();
+        final boolean live2dReady = OverlayService.isLive2DInstalled(this);
+
+        LinearLayout avatarBox = cCardBox();
+        avatarBox.addView(cText(t("ovl.avatar.header", "悬浮窗形象 / 助理外观"), 14.5f, cText(), true), cTop(cGap(6)));
+        avatarBox.addView(cAvatarModeRow(
+                t("ovl.avatar.classic", "1. 经典图标（小鲸鱼 / 默认）"),
+                t("ovl.avatar.classic.sub", "默认静态图标 (overlay_look)"),
+                OverlayService.AVATAR_MODE_CLASSIC,
+                curAvatarMode == OverlayService.AVATAR_MODE_CLASSIC));
+        avatarBox.addView(cCardSep());
+        avatarBox.addView(cAvatarModeRow(
+                t("ovl.avatar.lotus", "2. DeepSeek-chan：莲花坐姿（动态表情）"),
+                t("ovl.avatar.lotus.sub", "盘腿莲花坐姿 Q版形象，实时反映思考、工具调用、完成、错误等所有状态"),
+                OverlayService.AVATAR_MODE_LOTUS_SPRITES,
+                curAvatarMode == OverlayService.AVATAR_MODE_LOTUS_SPRITES));
+        avatarBox.addView(cCardSep());
+        avatarBox.addView(cAvatarModeRow(
+                t("ovl.avatar.live2d", "3. DeepSeek-chan：Live2D 交互模型 (WebGL)"),
+                live2dReady
+                    ? t("ovl.avatar.live2d.ready", "基于 WebGL 的全动态 Live2D 模型，支持物理摇摆与动作交互（✓ 模型已就绪）")
+                    : t("ovl.avatar.live2d.not_ready", "Live2D WebGL 模型。未检测到模型文件：请将模型放入 /sdcard/deepseek-harness/live2d/"),
+                OverlayService.AVATAR_MODE_LIVE2D,
+                curAvatarMode == OverlayService.AVATAR_MODE_LIVE2D));
+        col.addView(avatarBox, cTop(cGap(20)));
 
         final EditText eIdle  = cMsgInput(OverlayService.msgIdle(),  "摸鱼中…");
         final EditText eThink = cMsgInput(OverlayService.msgThink(), "思考中…");

@@ -31,6 +31,28 @@ final class I18nEn {
         load22(m);
         load23(m);
         load24(m);
+        loadAvatarTranslations(m);
+    }
+
+    private static void loadAvatarTranslations(Map<String, String> m) {
+        m.put("ovl.avatar.header", "Assistant Avatar / Appearance");
+        m.put("悬浮窗形象 / 助理外观", "Assistant Avatar / Appearance");
+        m.put("ovl.avatar.classic", "1. Classic Look (Whale / Default)");
+        m.put("1. 经典图标（小鲸鱼 / 默认）", "1. Classic Look (Whale / Default)");
+        m.put("ovl.avatar.classic.sub", "Standard blue whale overlay icon");
+        m.put("默认静态图标 (overlay_look)", "Standard blue whale overlay icon");
+        m.put("ovl.avatar.lotus", "2. DeepSeek-chan: Lotus Pose (Emotions)");
+        m.put("2. DeepSeek-chan：莲花坐姿（动态表情）", "2. DeepSeek-chan: Lotus Pose (Emotions)");
+        m.put("ovl.avatar.lotus.sub", "Chibi DeepSeek-chan in lotus pose with reactive emotions for all states (thinking, tool execution, done, error, asking)");
+        m.put("盘腿莲花坐姿 Q版形象，实时反映思考、工具调用、完成、错误等所有状态", "Chibi DeepSeek-chan in lotus pose with reactive emotions for all states (thinking, tool execution, done, error, asking)");
+        m.put("ovl.avatar.live2d", "3. DeepSeek-chan: Live2D WebGL (Interactive 2D)");
+        m.put("3. DeepSeek-chan：Live2D 交互模型 (WebGL)", "3. DeepSeek-chan: Live2D WebGL (Interactive 2D)");
+        m.put("ovl.avatar.live2d.ready", "Interactive 2D model with real-time physics and animations (✓ Model installed)");
+        m.put("基于 WebGL 的全动态 Live2D 模型，支持物理摇摆与动作交互（✓ 模型已就绪）", "Interactive 2D model with real-time physics and animations (✓ Model installed)");
+        m.put("ovl.avatar.live2d.not_ready", "Live2D WebGL model. Model files not found: place model in /sdcard/deepseek-harness/live2d/");
+        m.put("Live2D WebGL 模型。未检测到模型文件：请将模型放入 /sdcard/deepseek-harness/live2d/", "Live2D WebGL model. Model files not found: place model in /sdcard/deepseek-harness/live2d/");
+        m.put("ovl.avatar.applied", "Avatar updated");
+        m.put("已切换悬浮窗形象", "Avatar updated");
     }
 
     private static void load0(Map<String, String> m) {

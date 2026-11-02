@@ -31,6 +31,28 @@ final class I18nRu {
         load22(m);
         load23(m);
         load24(m);
+        loadAvatarTranslations(m);
+    }
+
+    private static void loadAvatarTranslations(Map<String, String> m) {
+        m.put("ovl.avatar.header", "Аватар ассистента / Внешний вид");
+        m.put("悬浮窗形象 / 助理外观", "Аватар ассистента / Внешний вид");
+        m.put("ovl.avatar.classic", "1. Классический вид (Classic)");
+        m.put("1. 经典图标（小鲸鱼 / 默认）", "1. Классический вид (Classic)");
+        m.put("ovl.avatar.classic.sub", "Стандартная иконка синего кита");
+        m.put("默认静态图标 (overlay_look)", "Стандартная иконка синего кита");
+        m.put("ovl.avatar.lotus", "2. DeepSeek-chan: Поза лотоса (Эмоции)");
+        m.put("2. DeepSeek-chan：莲花坐姿（动态表情）", "2. DeepSeek-chan: Поза лотоса (Эмоции)");
+        m.put("ovl.avatar.lotus.sub", "Чиби DeepSeek-chan в позе лотоса с живыми эмоциями на каждый статус (думает, выполняет команду, завершено, ошибка, вопрос)");
+        m.put("盘腿莲花坐姿 Q版形象，实时反映思考、工具调用、完成、错误等所有状态", "Чиби DeepSeek-chan в позе лотоса с живыми эмоциями на каждый статус (думает, выполняет команду, завершено, ошибка, вопрос)");
+        m.put("ovl.avatar.live2d", "3. DeepSeek-chan: Live2D WebGL (Интерактивная 2D)");
+        m.put("3. DeepSeek-chan：Live2D 交互模型 (WebGL)", "3. DeepSeek-chan: Live2D WebGL (Интерактивная 2D)");
+        m.put("ovl.avatar.live2d.ready", "Интерактивная 2D-модель с физикой и анимациями в реальном времени (✓ Модель установлена)");
+        m.put("基于 WebGL 的全动态 Live2D 模型，支持物理摇摆与动作交互（✓ 模型已就绪）", "Интерактивная 2D-модель с физикой и анимациями в реальном времени (✓ Модель установлена)");
+        m.put("ovl.avatar.live2d.not_ready", "Live2D WebGL модель. Файлы не найдены: скопируйте модель в /sdcard/deepseek-harness/live2d/");
+        m.put("Live2D WebGL 模型。未检测到模型文件：请将模型放入 /sdcard/deepseek-harness/live2d/", "Live2D WebGL модель. Файлы не найдены: скопируйте модель в /sdcard/deepseek-harness/live2d/");
+        m.put("ovl.avatar.applied", "Аватар изменен");
+        m.put("已切换悬浮窗形象", "Аватар изменен");
     }
 
     private static void load0(Map<String, String> m) {

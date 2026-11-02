@@ -15,13 +15,17 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -92,6 +96,49 @@ public class OverlayService extends Service {
     /** 「在 App 内也显示悬浮窗」：默认关（前台时悬浮窗隐藏、不挡界面，是原有行为）。 */
     private static final String KEY_SHOW_IN_APP = "overlay_show_in_app";
     private static volatile boolean sShowInApp = false;
+
+    /** 悬浮窗形象模式：0=经典图标，1=DeepSeek-chan莲花坐姿动态表情，2=DeepSeek-chan Live2D WebGL交互模型 */
+    public static final int AVATAR_MODE_CLASSIC = 0;
+    public static final int AVATAR_MODE_LOTUS_SPRITES = 1;
+    public static final int AVATAR_MODE_LIVE2D = 2;
+    public static final String KEY_AVATAR_MODE = "overlay_avatar_mode";
+    private static volatile int sAvatarMode = AVATAR_MODE_LOTUS_SPRITES;
+
+    public static int avatarMode() { return sAvatarMode; }
+
+    public static void setAvatarMode(Context ctx, int mode) {
+        sAvatarMode = mode;
+        try {
+            ctx.getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt(KEY_AVATAR_MODE, mode).apply();
+        } catch (Throwable ignored) {}
+        final OverlayService s = instance;
+        if (s != null) {
+            s.handler.post(new Runnable() {
+                @Override public void run() {
+                    s.applyAvatarMode();
+                }
+            });
+        }
+    }
+
+    public static File getLive2DDir(Context ctx) {
+        try {
+            File f1 = new File(ctx.getExternalFilesDir(null), "live2d");
+            if (new File(f1, "index.html").exists()) return f1;
+        } catch (Throwable ignored) {}
+        File f2 = new File("/sdcard/deepseek-harness/live2d");
+        if (new File(f2, "index.html").exists()) return f2;
+        try {
+            File f3 = new File(ctx.getFilesDir(), "live2d");
+            if (new File(f3, "index.html").exists()) return f3;
+        } catch (Throwable ignored) {}
+        return f2;
+    }
+
+    public static boolean isLive2DInstalled(Context ctx) {
+        File dir = getLive2DDir(ctx);
+        return new File(dir, "index.html").exists();
+    }
     /**
      * v1.21：静置（半藏）时，整体再朝**屏幕内侧**平移的比例（按屏幕宽度算）。
      * 用户要求"静止小人整体右移 5% 左右" —— 贴左边时就是往右挪，贴右边时对称地往左挪。
@@ -154,6 +201,7 @@ public class OverlayService extends Service {
             float a = sp.getFloat(KEY_ALPHA, DEF_ALPHA);
             sAlpha = a < 0.2f ? 0.2f : (a > 1f ? 1f : a);
             sShowInApp = sp.getBoolean(KEY_SHOW_IN_APP, false);
+            sAvatarMode = sp.getInt(KEY_AVATAR_MODE, AVATAR_MODE_LOTUS_SPRITES);
         } catch (Throwable ignored) {}
     }
 
@@ -201,6 +249,7 @@ public class OverlayService extends Service {
     private void applyOverlayLook() {
         try {
             if (rootView != null) rootView.setAlpha(sAlpha);
+            applyAvatarMode();
             // ⚠ 必须走 snapToEdge()：它用 edgeXFor(w) 按**当前**露出比例重算贴边 x
             //   （updateAvatarWindow 只同步气泡/面板，不重算位置 —— 实测"保存后不生效"就是这里）。
             snapToEdge();
@@ -226,7 +275,10 @@ public class OverlayService extends Service {
     private boolean rootAdded = false;
     private WindowManager.LayoutParams lp;
     private LinearLayout rootView;
+    private FrameLayout avatarContainer;
     private ImageView iconView;
+    private WebView live2dWebView;
+    private String currentEmotion = "idle";
     private LinearLayout panelView;
     private TextView statusText;
     /** v1.21：会话数行（`N 个会话运行中…` / 暂无会话运行 / 会话已完成 ✓）。 */
@@ -492,14 +544,15 @@ public class OverlayService extends Service {
             int[] aLoc = new int[2];
             int[] bLoc = new int[2];
             int[] pLoc = new int[2];
-            if (iconView != null) iconView.getLocationOnScreen(aLoc);
+            View aView = avatarContainer != null ? avatarContainer : iconView;
+            if (aView != null) aView.getLocationOnScreen(aLoc);
             if (statusBubble != null) statusBubble.getLocationOnScreen(bLoc);
             if (panelView != null) panelView.getLocationOnScreen(pLoc);
             lastGeom = "{\"dock\":\"" + (snappedRight ? "R" : "L") + "\""
                     + ",\"panel\":" + panelVisible
                     + ",\"screenW\":" + getResources().getDisplayMetrics().widthPixels
                     + ",\"win\":[" + lp.x + "," + (lp.x + w) + "]"
-                    + ",\"avatar\":[" + aLoc[0] + "," + (aLoc[0] + (iconView != null ? iconView.getWidth() : 0)) + "]"
+                    + ",\"avatar\":[" + aLoc[0] + "," + (aLoc[0] + (aView != null ? aView.getWidth() : 0)) + "]"
                     + ",\"bubble\":[" + bLoc[0] + "," + (bLoc[0] + (statusBubble != null ? statusBubble.getWidth() : 0)) + "]"
                     + ",\"bubbleVis\":" + (statusBubble != null ? statusBubble.getVisibility() : -1)
                     + ",\"panelRect\":[" + pLoc[0] + "," + (pLoc[0] + (panelView != null ? panelView.getWidth() : 0)) + "]}";
@@ -704,14 +757,37 @@ public class OverlayService extends Service {
         iconRow.setGravity(Gravity.CENTER_VERTICAL);
         iconRow.setPadding(dp(4), dp(2), dp(4), dp(2));
 
+        avatarContainer = new FrameLayout(this);
+        avatarContainer.setLayoutParams(new LinearLayout.LayoutParams(dp(44), dp(44)));
+
         iconView = new ImageView(this);
-        // 悬浮窗形象由**构建期**的 res/values/look.xml 决定（运行期零分支）：
-        //   · 默认卡通：icon-src/source.png 全身立绘（res/drawable-nodpi/overlay_avatar.png，
-        //     由 tools/gen-icons.py 生成）
-        //   · --original-look 原版：drawable/ic_whale_black（上游 OverlayService 用的那只鲸鱼）
+        iconView.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         iconView.setImageResource(R.drawable.overlay_look);
-        iconView.setLayoutParams(new LinearLayout.LayoutParams(dp(40), dp(40)));
-        iconRow.addView(iconView);
+        avatarContainer.addView(iconView);
+
+        try {
+            live2dWebView = new WebView(this);
+            live2dWebView.setLayoutParams(new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+            live2dWebView.setBackgroundColor(0);
+            live2dWebView.setClickable(false);
+            live2dWebView.setFocusable(false);
+            WebSettings ws = live2dWebView.getSettings();
+            ws.setJavaScriptEnabled(true);
+            ws.setAllowFileAccess(true);
+            ws.setAllowFileAccessFromFileURLs(true);
+            ws.setAllowUniversalAccessFromFileURLs(true);
+            ws.setDomStorageEnabled(true);
+            live2dWebView.setVisibility(View.GONE);
+            avatarContainer.addView(live2dWebView);
+        } catch (Throwable t) {
+            Log.w("OverlayService", "Live2D WebView creation failed", t);
+        }
+
+        iconRow.addView(avatarContainer);
+        applyAvatarMode();
 
         // ===== v1.21 需求 2：agent 状态气泡（贴在小人上方；透明底、尽量小，默认隐藏）=====
         statusBubble = new TextView(this);
@@ -1276,7 +1352,8 @@ public class OverlayService extends Service {
     private int edgeXFor(int viewWidth) {
         int screenW = getResources().getDisplayMetrics().widthPixels;
         if (!panelVisible) {
-            int avatarW = (iconView != null && iconView.getWidth() > 0) ? iconView.getWidth() : dp(40);
+            int avatarW = (avatarContainer != null && avatarContainer.getWidth() > 0) ? avatarContainer.getWidth()
+                    : ((iconView != null && iconView.getWidth() > 0) ? iconView.getWidth() : dp(44));
             int inset = avatarInsetInWindow();
             int off = tuckOffsetPx(avatarW);
             // v1.21（用户报障修复·二）：停靠右侧不能再用 "screenW + off - (inset + avatarW)"。
@@ -1311,7 +1388,7 @@ public class OverlayService extends Service {
     private int avatarInsetInWindow() {
         try {
             int sum = 0;
-            View v = iconView;
+            View v = avatarContainer != null ? avatarContainer : iconView;
             while (v != null && v != rootView) {
                 sum += v.getLeft();
                 android.view.ViewParent p = v.getParent();
@@ -1327,7 +1404,8 @@ public class OverlayService extends Service {
     /** v1.21：小人右边界相对 rootView 左边缘的距离（用于把窗口定位成"小人贴屏幕右缘"）。 */
     private int avatarRightInWindow() {
         int inset = avatarInsetInWindow();
-        int w = (iconView != null && iconView.getWidth() > 0) ? iconView.getWidth() : dp(40);
+        int w = (avatarContainer != null && avatarContainer.getWidth() > 0) ? avatarContainer.getWidth()
+                : ((iconView != null && iconView.getWidth() > 0) ? iconView.getWidth() : dp(44));
         return inset + w;
     }
 
@@ -1536,9 +1614,10 @@ public class OverlayService extends Service {
     /** 旋转抖动动画（唤出/收起时的"小鲸鱼摆尾巴"）。只转图标，不转整块面板。 */
     private void wiggle() {
         try {
-            if (iconView == null) return;
+            View target = avatarContainer != null ? avatarContainer : iconView;
+            if (target == null) return;
             android.animation.ObjectAnimator.ofFloat(
-                    iconView, View.ROTATION, 0f, -14f, 11f, -8f, 5f, 0f)
+                    target, View.ROTATION, 0f, -14f, 11f, -8f, 5f, 0f)
                     .setDuration(420)
                     .start();
         } catch (Throwable ignored) {}
@@ -1554,8 +1633,9 @@ public class OverlayService extends Service {
     private void setDismissHintInternal(boolean on) {
         dismissHint = on;
         try {
-            if (iconView == null) return;
-            iconView.animate().scaleX(on ? 0.62f : 1f).scaleY(on ? 0.62f : 1f)
+            View target = avatarContainer != null ? avatarContainer : iconView;
+            if (target == null) return;
+            target.animate().scaleX(on ? 0.62f : 1f).scaleY(on ? 0.62f : 1f)
                     .alpha(on ? 0.7f : 1f).setDuration(140).start();
         } catch (Throwable ignored) {}
     }
@@ -1730,7 +1810,90 @@ public class OverlayService extends Service {
         }
     }
 
-    // ==================== v1.21（需求 2）：agent 状态气泡 ====================
+    // ==================== v1.21（需求 2）：agent 状态气泡 与 形象切换 ====================
+
+    private void applyAvatarMode() {
+        if (sAvatarMode == AVATAR_MODE_LIVE2D) {
+            File live2dDir = getLive2DDir(this);
+            File indexFile = new File(live2dDir, "index.html");
+            if (indexFile.exists() && live2dWebView != null) {
+                if (iconView != null) iconView.setVisibility(View.GONE);
+                live2dWebView.setVisibility(View.VISIBLE);
+                String targetUrl = "file://" + indexFile.getAbsolutePath();
+                if (live2dWebView.getUrl() == null || !live2dWebView.getUrl().startsWith("file://")) {
+                    live2dWebView.loadUrl(targetUrl);
+                }
+                updateAvatarEmotion(currentEmotion, lastKind, null);
+                return;
+            }
+        }
+
+        if (live2dWebView != null) live2dWebView.setVisibility(View.GONE);
+        if (iconView != null) iconView.setVisibility(View.VISIBLE);
+        updateAvatarEmotion(currentEmotion, lastKind, null);
+    }
+
+    private void updateAvatarEmotion(String state, int kind, String tool) {
+        String emotion = "idle";
+        if (state != null && !state.isEmpty()) {
+            if ("thinking".equals(state)) emotion = "thinking";
+            else if ("tool".equals(state)) emotion = "tool";
+            else if ("done".equals(state) || "ended".equals(state)) emotion = "done";
+            else if ("error".equals(state)) emotion = "error";
+            else if ("ask".equals(state)) emotion = "ask";
+            else if ("idle".equals(state)) emotion = "idle";
+        } else {
+            switch (kind) {
+                case KIND_THINK: emotion = "thinking"; break;
+                case KIND_TOOL:  emotion = "tool"; break;
+                case KIND_DONE:  emotion = "done"; break;
+                case KIND_IDLE:  emotion = "idle"; break;
+                default:
+                    if (lastText != null) {
+                        if (lastText.contains("?") || lastText.contains("提问") || lastText.contains("Ask") || lastText.contains("Вопрос")) {
+                            emotion = "ask";
+                        } else if (lastText.contains("错") || lastText.contains("Error") || lastText.contains("Ошибк")) {
+                            emotion = "error";
+                        }
+                    }
+                    break;
+            }
+        }
+        currentEmotion = emotion;
+
+        if (sAvatarMode == AVATAR_MODE_LIVE2D && live2dWebView != null && live2dWebView.getVisibility() == View.VISIBLE) {
+            String toolParam = (tool != null) ? tool.replace("'", "\\'") : "";
+            final String js = "if(window.setLive2DEmotion) window.setLive2DEmotion('" + emotion + "', '" + toolParam + "');";
+            live2dWebView.post(new Runnable() {
+                @Override public void run() {
+                    live2dWebView.evaluateJavascript(js, null);
+                }
+            });
+            return;
+        }
+
+        if (iconView == null) return;
+
+        if (sAvatarMode == AVATAR_MODE_CLASSIC) {
+            iconView.setImageResource(R.drawable.overlay_look);
+            return;
+        }
+
+        // AVATAR_MODE_LOTUS_SPRITES (Option 2)
+        int resId = R.drawable.overlay_lotus_idle;
+        if ("thinking".equals(emotion)) {
+            resId = R.drawable.overlay_lotus_thinking;
+        } else if ("tool".equals(emotion)) {
+            resId = R.drawable.overlay_lotus_tool;
+        } else if ("done".equals(emotion)) {
+            resId = R.drawable.overlay_lotus_done;
+        } else if ("error".equals(emotion)) {
+            resId = R.drawable.overlay_lotus_error;
+        } else if ("ask".equals(emotion)) {
+            resId = R.drawable.overlay_lotus_ask;
+        }
+        iconView.setImageResource(resId);
+    }
 
     /**
      * 更新气泡内容（必须主线程）。
@@ -1740,8 +1903,13 @@ public class OverlayService extends Service {
      * @param ttlMs 瞬时状态的停留时长（0 → 默认 8 秒）
      */
     private void applyBubble(String text, boolean sticky, long ttlMs, int kind) {
+        applyBubble(text, sticky, ttlMs, kind, null, null);
+    }
+
+    private void applyBubble(String text, boolean sticky, long ttlMs, int kind, String state, String tool) {
         if (statusBubble == null) return;
         if (text == null || text.isEmpty()) { hideBubble(); return; }
+        updateAvatarEmotion(state, kind, tool);
         // 面板里的"任务"行与气泡同源：气泡被点掉/超时收起后，展开面板仍能看到最近状态。
         if (agentText != null) agentText.setText(I18n.tr("任务：—").replace("—", I18n.tr(text)));
         // v1.21（ANR 修正）：文案与当前显示完全相同时**不重绘**。
@@ -1772,6 +1940,7 @@ public class OverlayService extends Service {
         // v1.21（重构）：气泡是独立窗口，直接把自己的窗口收起来 —— 不再需要"占位保留"这类技巧。
         bubbleShowing = false;
         layoutCompanions();
+        updateAvatarEmotion("idle", KIND_IDLE, null);
     }
 
     /**
@@ -1794,11 +1963,16 @@ public class OverlayService extends Service {
         // 判类只看 state → 套用户模板 → 再按气泡真实宽度裁一次。
         final int kind = kindOf(state);
         final String shown = fitBubbleWidth(renderBubble(text, kind, tool), 400);
-        pushRendered(shown, sticky, ttlMs, kind);
+        pushRendered(shown, sticky, ttlMs, kind, state, tool);
     }
 
     /** v1.24：已经把模板渲染好的文案直接推（控制台预览走这条，不再二次套模板）。 */
     static void pushRendered(final String shown, final boolean sticky, final long ttlMs, final int kind) {
+        pushRendered(shown, sticky, ttlMs, kind, null, null);
+    }
+
+    static void pushRendered(final String shown, final boolean sticky, final long ttlMs, final int kind,
+                             final String state, final String tool) {
         lastText = shown;
         lastSticky = sticky;
         lastKind = kind;
@@ -1806,7 +1980,7 @@ public class OverlayService extends Service {
         final OverlayService s = instance;
         if (s == null) return;   // 悬浮窗没在跑：静默忽略（用户没开悬浮窗就不打扰）
         s.handler.post(new Runnable() {
-            @Override public void run() { s.applyBubble(shown, sticky, ttlMs, kind); }
+            @Override public void run() { s.applyBubble(shown, sticky, ttlMs, kind, state, tool); }
         });
     }
 
