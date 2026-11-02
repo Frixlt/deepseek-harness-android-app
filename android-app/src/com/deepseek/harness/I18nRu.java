@@ -53,6 +53,12 @@ final class I18nRu {
         m.put("Live2D WebGL 模型。未检测到模型文件：请将模型放入 /sdcard/deepseek-harness/live2d/", "Live2D WebGL модель. Файлы не найдены: скопируйте модель в /sdcard/deepseek-harness/live2d/");
         m.put("ovl.avatar.applied", "Аватар изменен");
         m.put("已切换悬浮窗形象", "Аватар изменен");
+        m.put("ovl.avatar.size", "Размер аватара: %d dp");
+        m.put("头像尺寸：%d dp", "Размер аватара: %d dp");
+        m.put("ovl.avatar.sizeDef", "По умолчанию");
+        m.put("恢复默认值", "По умолчанию");
+        m.put("ovl.avatar.sizeSave", "Сохранить");
+        m.put("ovl.avatar.sizeSaved", "Размер аватара %d dp сохранён и применён");
     }
 
     private static void load0(Map<String, String> m) {

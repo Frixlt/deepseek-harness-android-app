@@ -20,10 +20,14 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -104,7 +108,47 @@ public class OverlayService extends Service {
     public static final String KEY_AVATAR_MODE = "overlay_avatar_mode";
     private static volatile int sAvatarMode = AVATAR_MODE_LOTUS_SPRITES;
 
+    /** 悬浮窗形象尺寸（dp）：默认 -1（由形象模式自动决定：经典44dp，DeepSeek-chan 80dp） */
+    public static final String KEY_AVATAR_SIZE = "overlay_avatar_size";
+    public static final int DEF_AVATAR_SIZE_CLASSIC = 44;
+    public static final int DEF_AVATAR_SIZE_DEEPSEEK = 80;
+    public static final int MIN_AVATAR_SIZE = 40;
+    public static final int MAX_AVATAR_SIZE = 140;
+    private static volatile int sAvatarSize = -1;
+
     public static int avatarMode() { return sAvatarMode; }
+
+    public static int avatarSize() {
+        if (sAvatarSize >= MIN_AVATAR_SIZE && sAvatarSize <= MAX_AVATAR_SIZE) return sAvatarSize;
+        return defaultAvatarSize();
+    }
+
+    public static int defaultAvatarSize() {
+        return sAvatarMode == AVATAR_MODE_CLASSIC ? DEF_AVATAR_SIZE_CLASSIC : DEF_AVATAR_SIZE_DEEPSEEK;
+    }
+
+    public static void setAvatarSize(Context ctx, int sizeDp) {
+        if (sizeDp != -1) {
+            if (sizeDp < MIN_AVATAR_SIZE) sizeDp = MIN_AVATAR_SIZE;
+            if (sizeDp > MAX_AVATAR_SIZE) sizeDp = MAX_AVATAR_SIZE;
+        }
+        sAvatarSize = sizeDp;
+        try {
+            if (sizeDp == -1) {
+                ctx.getSharedPreferences(PREFS, MODE_PRIVATE).edit().remove(KEY_AVATAR_SIZE).apply();
+            } else {
+                ctx.getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt(KEY_AVATAR_SIZE, sizeDp).apply();
+            }
+        } catch (Throwable ignored) {}
+        final OverlayService s = instance;
+        if (s != null) {
+            s.handler.post(new Runnable() {
+                @Override public void run() {
+                    s.applyAvatarSize();
+                }
+            });
+        }
+    }
 
     public static void setAvatarMode(Context ctx, int mode) {
         sAvatarMode = mode;
@@ -202,7 +246,27 @@ public class OverlayService extends Service {
             sAlpha = a < 0.2f ? 0.2f : (a > 1f ? 1f : a);
             sShowInApp = sp.getBoolean(KEY_SHOW_IN_APP, false);
             sAvatarMode = sp.getInt(KEY_AVATAR_MODE, AVATAR_MODE_LOTUS_SPRITES);
+            sAvatarSize = sp.getInt(KEY_AVATAR_SIZE, -1);
         } catch (Throwable ignored) {}
+    }
+
+    public void applyAvatarSize() {
+        int sz = avatarSize();
+        int px = dp(sz);
+        if (avatarContainer != null) {
+            ViewGroup.LayoutParams lpBox = avatarContainer.getLayoutParams();
+            if (lpBox != null) {
+                lpBox.width = px;
+                lpBox.height = px;
+                avatarContainer.setLayoutParams(lpBox);
+            }
+        }
+        if (rootView != null) {
+            rootView.requestLayout();
+        }
+        updateAvatarWindow();
+        snapToEdge();
+        layoutCompanions();
     }
 
     static boolean showInApp() { return sShowInApp; }
@@ -757,8 +821,9 @@ public class OverlayService extends Service {
         iconRow.setGravity(Gravity.CENTER_VERTICAL);
         iconRow.setPadding(dp(4), dp(2), dp(4), dp(2));
 
+        int initSize = dp(avatarSize());
         avatarContainer = new FrameLayout(this);
-        avatarContainer.setLayoutParams(new LinearLayout.LayoutParams(dp(44), dp(44)));
+        avatarContainer.setLayoutParams(new LinearLayout.LayoutParams(initSize, initSize));
 
         iconView = new ImageView(this);
         iconView.setLayoutParams(new FrameLayout.LayoutParams(
@@ -768,18 +833,27 @@ public class OverlayService extends Service {
         avatarContainer.addView(iconView);
 
         try {
+            WebView.setWebContentsDebuggingEnabled(true);
             live2dWebView = new WebView(this);
             live2dWebView.setLayoutParams(new FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
             live2dWebView.setBackgroundColor(0);
             live2dWebView.setClickable(false);
             live2dWebView.setFocusable(false);
+            live2dWebView.setWebChromeClient(new WebChromeClient() {
+                @Override public boolean onConsoleMessage(ConsoleMessage cm) {
+                    Log.i("Live2D_JS", cm.message() + " [" + cm.sourceId() + ":" + cm.lineNumber() + "]");
+                    return true;
+                }
+            });
+            live2dWebView.setWebViewClient(new WebViewClient());
             WebSettings ws = live2dWebView.getSettings();
             ws.setJavaScriptEnabled(true);
             ws.setAllowFileAccess(true);
             ws.setAllowFileAccessFromFileURLs(true);
             ws.setAllowUniversalAccessFromFileURLs(true);
             ws.setDomStorageEnabled(true);
+            ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
             live2dWebView.setVisibility(View.GONE);
             avatarContainer.addView(live2dWebView);
         } catch (Throwable t) {
@@ -1813,6 +1887,7 @@ public class OverlayService extends Service {
     // ==================== v1.21（需求 2）：agent 状态气泡 与 形象切换 ====================
 
     private void applyAvatarMode() {
+        applyAvatarSize();
         if (sAvatarMode == AVATAR_MODE_LIVE2D) {
             File live2dDir = getLive2DDir(this);
             File indexFile = new File(live2dDir, "index.html");

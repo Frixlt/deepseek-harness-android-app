@@ -12978,6 +12978,47 @@ public class MainActivity extends Activity {
                 curAvatarMode == OverlayService.AVATAR_MODE_LIVE2D));
         col.addView(avatarBox, cTop(cGap(20)));
 
+        // ── 悬浮窗尺寸（40dp ~ 140dp）──
+        final int[] curSize = new int[] { OverlayService.avatarSize() };
+        final TextView sizeLab = cText(String.format(t("ovl.avatar.size", "头像尺寸：%d dp"), curSize[0]), 13.5f, cText(), false);
+        final SeekBar sbSize = cStyledSeek(100, curSize[0] - 40); // 40~140
+        sbSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar bar, int p, boolean fromUser) {
+                curSize[0] = p + 40;
+                sizeLab.setText(String.format(t("ovl.avatar.size", "头像尺寸：%d dp"), curSize[0]));
+                if (fromUser) {
+                    OverlayService.setAvatarSize(MainActivity.this, curSize[0]);
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {}
+        });
+        LinearLayout sActs = new LinearLayout(this);
+        sActs.setOrientation(LinearLayout.HORIZONTAL);
+        Button sDef = cButton(t("ovl.avatar.sizeDef", "恢复默认值"), false);
+        relaxButtonMin(sDef);
+        sDef.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
+            int defSize = OverlayService.defaultAvatarSize();
+            curSize[0] = defSize;
+            sbSize.setProgress(defSize - 40);
+            OverlayService.setAvatarSize(MainActivity.this, defSize);
+        }});
+        Button sSave = cButton(t("ovl.avatar.sizeSave", "保存"), true);
+        relaxButtonMin(sSave);
+        sSave.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
+            OverlayService.setAvatarSize(MainActivity.this, curSize[0]);
+            conToast(String.format(t("ovl.avatar.sizeSaved", "头像尺寸 %d dp 已保存并生效"), curSize[0]));
+            renderConsole();
+        }});
+        sActs.addView(sDef, cWidth(1f, 8));
+        sActs.addView(sSave, cWidth(1f, 0));
+
+        LinearLayout sizeBox = cCardBox();
+        sizeBox.addView(sizeLab, cTop(cGap(6)));
+        sizeBox.addView(sbSize, cTop(cGap(6)));
+        sizeBox.addView(sActs, cTop(cGap(6)));
+        col.addView(sizeBox, cTop(cGap(14)));
+
         final EditText eIdle  = cMsgInput(OverlayService.msgIdle(),  "摸鱼中…");
         final EditText eThink = cMsgInput(OverlayService.msgThink(), "思考中…");
         final EditText eTool  = cMsgInput(OverlayService.msgTool(),  "正在调用 {tool}…");

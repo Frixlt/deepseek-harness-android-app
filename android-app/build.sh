@@ -47,14 +47,14 @@ APK_OUT="${DSH_APK_OUT:-$P/DeepSeekHarness${V_SUFFIX}.apk}"
 #   · 所以这里用 `tr '\n' '\001'` 先把 LF 换成 SOH，再找 "\r\001"：只命中真正的 CRLF 行尾，
 #     不受文本模式影响，也不会撞上二进制里的孤立 0x0D。
 _lf_hit=""
-for _f in $(find "$P/../dsh-patches/apply.sh" "$P/../dsh-patches/overlay" "$P/../mobile-patch" \
-              "$P/../payload-extra" "$P/../tools/diag" \
-              -type f ! -name '*.md' 2>/dev/null); do
+while IFS= read -r -d '' _f; do
   if LC_ALL=C tr '\n' '\001' < "$_f" 2>/dev/null | LC_ALL=C grep -q "$(printf '\r\001')"; then
     _lf_hit="$_lf_hit$_f
 "
   fi
-done
+done < <(find "$P/../dsh-patches/apply.sh" "$P/../dsh-patches/overlay" "$P/../mobile-patch" \
+              "$P/../payload-extra" "$P/../tools/diag" \
+              -type f ! -name '*.md' -print0 2>/dev/null)
 if [ -n "$_lf_hit" ]; then
   echo "!! 以下文件是 CRLF 行尾（设备端/overlay 必须纯 LF）："
   printf '%s' "$_lf_hit" | head -5
@@ -73,8 +73,11 @@ for _c in python3 python py; do
   if [ -n "$_p" ] && "$_p" -c 'import sys' >/dev/null 2>&1; then PY_BIN="$_p"; break; fi
 done
 if [ -n "$PY_BIN" ]; then
-  _java_files=$(find "$P/src" -name '*.java' 2>/dev/null)
-  # shellcheck disable=SC2086
+  find "$P/src" -name '*.java' -print0 2>/dev/null | xargs -0 "$PY_BIN" "$P/../tools/java-syntax-sanity.py" || { echo "!! Java 语法体检未通过（见上）"; exit 1; }
+  echo "  Java 语法体检：通过 ✓（$PY_BIN）"
+else
+  echo "  Java 语法体检：跳过（没找到可用的 python3/python/py）"
+fi
 
 # ── ESM 语法闸门（本版新增）──────────────────────────────────────────────────
 # 我们把「Android 环境陷阱」注入到内核插件的**工具描述模板字面量**里，一旦文本含反引号，
@@ -99,11 +102,7 @@ else
   echo "  （本机没有 node：跳过 ESM 语法闸门）"
 fi
 
-  "$PY_BIN" "$P/../tools/java-syntax-sanity.py" $_java_files || { echo "!! Java 语法体检未通过（见上）"; exit 1; }
-  echo "  Java 语法体检：$(printf '%s\n' "$_java_files" | grep -c . ) 个文件 ✓（$PY_BIN）"
-else
-  echo "  Java 语法体检：跳过（没找到可用的 python3/python/py）"
-fi
+
 
 echo "== 0/7 组装 payload =="
 # v1.19.0 硬闸门：payload 里的 JSON/YAML 绝不能带 UTF-8 BOM ——
