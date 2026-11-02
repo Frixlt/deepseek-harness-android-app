@@ -1,3 +1,21 @@
+# Публикация в этом форке
+
+Рабочий репозиторий: `Frixlt/deepseek-harness-android-app`, ветка `master`.
+При push GitHub Actions запускает проверки, собирает обычный arm64 community APK и публикует релиз.
+
+1. Увеличьте `versionCode` и `versionName` в `android-app/AndroidManifest.xml`.
+2. Добавьте `docs/releases/<versionName>.md` и обновите `CHANGES.md`.
+3. Запустите проверки из `docs/AVATAR.md`, соберите APK и отправьте коммит в `master`.
+4. Дождитесь успешного workflow `Build and release APK`. Проверьте тег `v<versionName>-community`, описание и три файла: APK, SHA-256 и сведения о сборке.
+
+APK не коммитится в Git. Для каждой новой публикации используйте новую версию.
+Через `workflow_dispatch` можно выбрать эмулятор, исходный дизайн, публикацию и другой тег.
+Предкомпиляция ART `speed` выполняется на устройстве после установки APK (см. `AVATAR.md`).
+
+---
+
+Далее сохранена справка исходного проекта по ручной публикации и дополнительным вариантам сборки.
+
 # 发版流程
 
 > 发布物只有 **社区版**，每版三个 APK：`arm64`、`arm64-original-look`、`x86_64`（模拟器包，

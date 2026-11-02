@@ -35,6 +35,31 @@ final class I18nEn {
     }
 
     private static void loadAvatarTranslations(Map<String, String> m) {
+        m.put("ovl.avatar.quality", "Model quality");
+        m.put("ovl.avatar.quality.desc", "Higher quality improves sharpness. Battery saver reduces power use.");
+        m.put("ovl.avatar.quality.0", "Battery saver");
+        m.put("ovl.avatar.quality.1", "Standard");
+        m.put("ovl.avatar.quality.2", "High");
+        m.put("ovl.avatar.quality.3", "Maximum");
+        m.put("ovl.avatar.pose", "Body type");
+        m.put("ovl.avatar.pose.chibi", "Chibi · standing");
+        m.put("ovl.avatar.pose.standing", "Full-size · standing");
+        m.put("ovl.avatar.emotions", "Preview emotions");
+        m.put("ovl.avatar.state.idle", "Idle");
+        m.put("ovl.avatar.state.thinking", "Thinking");
+        m.put("ovl.avatar.state.responding", "Speaking");
+        m.put("ovl.avatar.state.searching", "Searching");
+        m.put("ovl.avatar.state.reading", "Reading");
+        m.put("ovl.avatar.state.writing", "Writing");
+        m.put("ovl.avatar.state.browsing", "Browsing");
+        m.put("ovl.avatar.state.watching", "Watching");
+        m.put("ovl.avatar.state.terminal", "Terminal");
+        m.put("ovl.avatar.state.ask", "Question");
+        m.put("ovl.avatar.state.done", "Done");
+        m.put("ovl.avatar.state.error", "Error");
+        m.put("ovl.avatar.state.paused", "Paused");
+        m.put("ovl.avatar.state.sleepy", "Sleepy");
+        m.put("ovl.avatar.state.ended", "Goodbye");
         m.put("ovl.avatar.header", "Assistant Avatar / Appearance");
         m.put("悬浮窗形象 / 助理外观", "Assistant Avatar / Appearance");
         m.put("ovl.avatar.classic", "1. Classic Look (Whale / Default)");

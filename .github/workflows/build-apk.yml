@@ -1,12 +1,6 @@
-name: build-apk (manual)
+name: Build and release APK
 
-# B6：只支持**手动触发**（workflow_dispatch）——刻意不加 push / pull_request 触发器，
-# 避免每次提交都跑一遍十几分钟的完整构建。用途是"按需产出可核对哈希的构建物"。
-#
-# 来源信号约定：社区密钥（android-app/community.jks）是公开的，因此"谁签的"不再等于"谁发的"；
-# 真正的凭据是 —— ① 本 workflow 公开跑、输入可核对（commit + 上游 tag/md5 + JDK/build-tools 版本）；
-# ② 产物 SHA-256 与 .build-info.txt 一并上传。目标是"输入可验证 + 哈希公示 + 差异可解释"，
-# **不追求逐字节可复现**（aapt/签名含时间戳，Android 打包链做不到 bit-identical）。
+# Community signing identity is public; retain source SHA and build/hash sidecars.
 on:
   push:
     branches: [ master ]
@@ -28,9 +22,9 @@ on:
         default: true
         type: boolean
       release_tag:
-        description: 'Имя тега для релиза (Release tag name)'
+        description: 'Тег релиза (пусто = v<versionName>-community)'
         required: false
-        default: 'v1.21.2-localized'
+        default: ''
         type: string
 
 permissions:
@@ -48,6 +42,33 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+
+      - name: Avatar regression checks
+        run: |
+          javac -d "$RUNNER_TEMP/avatar-state" android-app/src/com/deepseek/harness/AvatarState.java tools/tests/AvatarStateTest.java
+          java -cp "$RUNNER_TEMP/avatar-state" com.deepseek.harness.AvatarStateTest
+          node tools/tests/overlay-events.cjs
+          node tools/tests/avatar-rendering.cjs
+
+      - name: Release metadata
+        id: release
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          python3 - <<'PYMETA'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          version = ET.parse('android-app/AndroidManifest.xml').getroot().get('{http://schemas.android.com/apk/res/android}versionName')
+          notes = Path('docs/releases') / (version + '.md')
+          if not notes.is_file():
+              raise SystemExit('Missing release changelog: ' + str(notes))
+          tag = os.environ.get('RELEASE_TAG') or 'v' + version + '-community'
+          if any(c.isspace() for c in tag):
+              raise SystemExit('Release tag must not contain whitespace')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write('tag=' + tag + '\nnotes=' + str(notes) + '\n')
+          PYMETA
 
       - name: Set up Android SDK（只要 build-tools + 任一 platform，不需要 Gradle/AGP）
         uses: android-actions/setup-android@v3
@@ -87,19 +108,11 @@ jobs:
         if: ${{ inputs.publish_release || github.event_name == 'push' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag || 'v1.21.2-localized' }}
-          name: ${{ inputs.release_tag || 'v1.21.2-localized' }} (Full EN/RU Localization)
-          body: |
-            ## DeepSeek Harness Android (Community Fork) — Полная русская и английская локализация
-
-            ### Основные изменения / Highlights:
-            - 🌐 **Полная русская и английская локализация (Full RU/EN/ZH Localization)**:
-              - Поддержка автоопределения языка системы (`ru` / `en` / `zh`).
-              - Мгновенный переключатель языка в консоли управления (`Auto`, `Русский`, `English`, `中文`).
-              - 100% ручная вычитка интерфейса, диалогов, онбординга, подсказок и плавающего ассистента.
-              - Переведены службы `EngineService`, `OverlayService`, `AccessibilityService`, `VsreenBridgeService`, плагин `ds-harness-remote` и системные уведомления.
-            - 📱 **Готовый APK для установки на устройства**:
-              - Установите APK и запустите. При первом запуске среда распакуется автоматически (1–3 минуты).
+          tag_name: ${{ steps.release.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.release.outputs.tag }}
+          body_path: ${{ steps.release.outputs.notes }}
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
           files: |

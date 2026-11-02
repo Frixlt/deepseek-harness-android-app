@@ -35,6 +35,31 @@ final class I18nRu {
     }
 
     private static void loadAvatarTranslations(Map<String, String> m) {
+        m.put("ovl.avatar.quality", "Качество модели");
+        m.put("ovl.avatar.quality.desc", "Высокое качество повышает чёткость. Режим экономии снижает расход батареи.");
+        m.put("ovl.avatar.quality.0", "Экономия");
+        m.put("ovl.avatar.quality.1", "Стандартное");
+        m.put("ovl.avatar.quality.2", "Высокое");
+        m.put("ovl.avatar.quality.3", "Максимальное");
+        m.put("ovl.avatar.pose", "Телосложение");
+        m.put("ovl.avatar.pose.chibi", "Чиби · стоя");
+        m.put("ovl.avatar.pose.standing", "Полноразмерная · стоя");
+        m.put("ovl.avatar.emotions", "Предпросмотр эмоций");
+        m.put("ovl.avatar.state.idle", "Покой");
+        m.put("ovl.avatar.state.thinking", "Думает");
+        m.put("ovl.avatar.state.responding", "Отвечает");
+        m.put("ovl.avatar.state.searching", "Ищет");
+        m.put("ovl.avatar.state.reading", "Читает");
+        m.put("ovl.avatar.state.writing", "Пишет");
+        m.put("ovl.avatar.state.browsing", "Браузер");
+        m.put("ovl.avatar.state.watching", "Смотрит");
+        m.put("ovl.avatar.state.terminal", "Терминал");
+        m.put("ovl.avatar.state.ask", "Вопрос");
+        m.put("ovl.avatar.state.done", "Радость");
+        m.put("ovl.avatar.state.error", "Ошибка");
+        m.put("ovl.avatar.state.paused", "Пауза");
+        m.put("ovl.avatar.state.sleepy", "Сонная");
+        m.put("ovl.avatar.state.ended", "Прощается");
         m.put("ovl.avatar.header", "Аватар ассистента / Внешний вид");
         m.put("悬浮窗形象 / 助理外观", "Аватар ассистента / Внешний вид");
         m.put("ovl.avatar.classic", "1. Классический вид (Classic)");

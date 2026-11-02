@@ -12978,13 +12978,54 @@ public class MainActivity extends Activity {
                 curAvatarMode == OverlayService.AVATAR_MODE_LIVE2D));
         col.addView(avatarBox, cTop(cGap(20)));
 
-        // ── 悬浮窗尺寸（40dp ~ 140dp）──
-        final int[] curSize = new int[] { OverlayService.avatarSize() };
+        if (curAvatarMode == OverlayService.AVATAR_MODE_LIVE2D) {
+            LinearLayout poses = cCardBox();
+            poses.addView(cText(t("ovl.avatar.pose", "体型（站姿）"), 14.5f, cText(), true));
+            String[] poseIds = {"chibi", "standing"};
+            String[] poseLabels = {"Q版 · 站姿", "正常体型 · 站姿"};
+            for (int i = 0; i < poseIds.length; i++) {
+                final String id = poseIds[i];
+                Button choice = cButton(t("ovl.avatar.pose." + id, poseLabels[i]), id.equals(OverlayService.avatarPose()));
+                choice.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
+                    OverlayService.setAvatarPose(MainActivity.this, id);
+                    renderConsole();
+                }});
+                poses.addView(choice, cTop(cGap(4)));
+            }
+            col.addView(poses, cTop(cGap(14)));
+            LinearLayout qualityBox = cCardBox();
+            qualityBox.addView(cText(t("ovl.avatar.quality", "模型画质"), 14.5f, cText(), true));
+            qualityBox.addView(cText(t("ovl.avatar.quality.desc", "高画质更清晰；省电模式降低耗电。"), 11.5f, cSub(), false), cTop(cGap(4)));
+            String[] qualityLabels = {"省电", "标准", "高", "最高"};
+            for (int row = 0; row < 2; row++) {
+                LinearLayout choices = new LinearLayout(this);
+                choices.setOrientation(LinearLayout.HORIZONTAL);
+                for (int column = 0; column < 2; column++) {
+                    final int quality = row * 2 + column;
+                    Button choice = cButton(t("ovl.avatar.quality." + quality, qualityLabels[quality]),
+                            quality == OverlayService.avatarQuality());
+                    relaxButtonMin(choice);
+                    choice.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
+                        OverlayService.setAvatarQuality(MainActivity.this, quality);
+                        renderConsole();
+                    }});
+                    choices.addView(choice, cWidth(1f, column == 0 ? 6 : 0));
+                }
+                qualityBox.addView(choices, cTop(cGap(4)));
+            }
+            col.addView(qualityBox, cTop(cGap(14)));
+
+        }
+
+        // Avatar size: 40–360 dp, bounded by the current screen.
+        final int minSize = OverlayService.MIN_AVATAR_SIZE;
+        final int maxSize = OverlayService.maxAvatarSize(this);
+        final int[] curSize = new int[] { Math.min(maxSize, OverlayService.avatarSize()) };
         final TextView sizeLab = cText(String.format(t("ovl.avatar.size", "头像尺寸：%d dp"), curSize[0]), 13.5f, cText(), false);
-        final SeekBar sbSize = cStyledSeek(100, curSize[0] - 40); // 40~140
+        final SeekBar sbSize = cStyledSeek(maxSize - minSize, curSize[0] - minSize);
         sbSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar bar, int p, boolean fromUser) {
-                curSize[0] = p + 40;
+                curSize[0] = p + minSize;
                 sizeLab.setText(String.format(t("ovl.avatar.size", "头像尺寸：%d dp"), curSize[0]));
             }
             @Override public void onStartTrackingTouch(SeekBar bar) {}
@@ -12999,7 +13040,7 @@ public class MainActivity extends Activity {
         sDef.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
             int defSize = OverlayService.defaultAvatarSize();
             curSize[0] = defSize;
-            sbSize.setProgress(defSize - 40);
+            sbSize.setProgress(defSize - minSize);
             OverlayService.setAvatarSize(MainActivity.this, defSize);
         }});
         Button sSave = cButton(t("ovl.avatar.sizeSave", "保存"), true);
@@ -13017,6 +13058,29 @@ public class MainActivity extends Activity {
         sizeBox.addView(sbSize, cTop(cGap(6)));
         sizeBox.addView(sActs, cTop(cGap(6)));
         col.addView(sizeBox, cTop(cGap(14)));
+
+        LinearLayout emotions = cCardBox();
+        emotions.addView(cText(t("ovl.avatar.emotions", "表情预览"), 14.5f, cText(), true));
+        String[] previewStates = {"idle", "thinking", "responding", "searching", "reading", "writing",
+                "browsing", "watching", "terminal", "ask", "done", "error", "paused", "sleepy", "ended"};
+        String[] previewLabels = {"空闲", "思考", "回答", "搜索", "阅读", "编辑", "浏览", "观察", "终端",
+                "等待回答", "完成", "错误", "暂停", "困倦", "会话结束"};
+        for (int i = 0; i < previewStates.length; i += 3) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            for (int j = i; j < Math.min(i + 3, previewStates.length); j++) {
+                final String state = previewStates[j];
+                final String label = t("ovl.avatar.state." + state, previewLabels[j]);
+                Button preview = cButton(label, false);
+                relaxButtonMin(preview);
+                preview.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
+                    OverlayService.previewEmotion(state);
+                }});
+                row.addView(preview, cWidth(1f, 4));
+            }
+            emotions.addView(row, cTop(cGap(4)));
+        }
+        col.addView(emotions, cTop(cGap(14)));
 
         final EditText eIdle  = cMsgInput(OverlayService.msgIdle(),  "摸鱼中…");
         final EditText eThink = cMsgInput(OverlayService.msgThink(), "思考中…");

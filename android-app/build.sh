@@ -252,9 +252,9 @@ else
   echo "  !! 找不到 $APKSIG_JAR（build-tools 的 lib/apksigner.jar）—— 跳过设备内 apksig"
 fi
 
-for f in $(find "$H/runtime/lib" -maxdepth 1 -type f); do
+while IFS= read -r -d '' f; do
   cp -L "$f" "$P/staging/runtime/lib/"
-done
+done < <(find "$H/runtime/lib" -maxdepth 1 -type f -print0)
 
 # ⚠ v1.18（B8）：devhome 里的 soname 别名（libicudata.so → libicudata.so.78.3 等）往往是**实体副本**
 #（payload.zip 存不了符号链接，解压出来就是真文件）。上面的批量复制会把它们一起带进包，
@@ -1424,10 +1424,11 @@ fi
 # v48：vscreen 全量源码编入 APK（App 进程内嵌 Operit server，不再单独 jar 部署）
 # 变体构建：源码来自 out/src（包名已改写为变体 appId），并额外编译生成的 BuildVariant.java
 VSC_SRC="$SRC_STAGE/$V_PKG_PATH/vscreen"
-JAVA_SRCS="$(find "$SRC_STAGE" -name '*.java')"
+JAVA_SRCS=()
+while IFS= read -r -d '' _src; do JAVA_SRCS+=("$_src"); done < <(find "$SRC_STAGE" -name '*.java' -print0)
 if ! "$JAVA/javac" -source 1.8 -target 1.8 -bootclasspath "$AJ" \
   -classpath "$GEN_CP${CP_SEP}$SHIZUKU_JARS" -d "$P/out/classes" \
-  $JAVA_SRCS \
+  "${JAVA_SRCS[@]}" \
   "$R_JAVA" \
   >"$P/out/javac.log" 2>&1; then
   echo "!! javac 编译失败，日志：$P/out/javac.log"
@@ -1456,6 +1457,8 @@ fi
 echo "  classes.dex 含 MainActivity，$(stat -c%s "$P/out/dex/classes.dex") bytes"
 
 echo "== 4/7 aapt 打包 + assets =="
+mkdir -p "$P/assets/avatar-player"
+cp "$P/overlay-player/"*.html "$P/overlay-player/"*.js "$P/assets/avatar-player/"
 aapt package -f -M "$MANIFEST" -S "$RES_DIR" -I "$AJ" -A "$P/assets" -0 zip -F "$P/out/unsigned.apk"
 ( cd "$P/out/dex" && aapt add "$P/out/unsigned.apk" classes.dex )
 

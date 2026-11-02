@@ -423,10 +423,11 @@ if [ "$DO_VERIFY" = 1 ]; then
       [ -z "$rel" ] && continue
       case "$rel" in \#*) continue ;; esac
       matched=0
-      for f in $LAYER/$rel; do            # 通配展开（无通配时就是它自己）
+      # Keep spaces in the workspace path while allowing the repository's glob patterns.
+      while IFS= read -r f; do
         [ -f "$f" ] || continue
         if grep -qF -- "$sig" "$f" 2>/dev/null; then matched=1; break; fi
-      done
+      done < <(compgen -G "$LAYER/$rel")
       [ "$matched" = "1" ] || echo "$rel  ($sig)"
     done)"
   TOTAL=$(printf '%s\n' "$PATCHES" | grep -c '[^ 	]' || true)

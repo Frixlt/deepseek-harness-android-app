@@ -498,14 +498,30 @@ function apply(ctx) {
     let lastText = "";
     let lastAt = 0;
     const MIN_GAP_MS = 1200;
+    let pendingBubble = null, bubbleTimer = null;
     // v1.24 bubble: 结构化 state/tool —— App 侧据此套用户模板（控制台「悬浮窗消息」），
     // 不再靠中文文案匹配；text 仍然保留（老版本 App、日志、兼容都靠它）。
-    // state 取值：thinking / tool / ask / done / ended / error
+    // Structured state is independent of the displayed/localized text.
     const bubble = (text, sticky, state, tool) => {
       try {
         const now = Date.now();
         if (text === lastText && now - lastAt < 5000) return;   // 文案没变，别刷新
-        if (now - lastAt < MIN_GAP_MS && !sticky) return;       // 节流（终态不丢）
+        if (now - lastAt < MIN_GAP_MS && !sticky) {
+          pendingBubble = [text, sticky, state, tool];
+          if (!bubbleTimer) {
+            bubbleTimer = setTimeout(() => {
+              bubbleTimer = null;
+              const latest = pendingBubble;
+              pendingBubble = null;
+              if (latest) bubble(...latest);
+            }, MIN_GAP_MS - (now - lastAt));
+            bubbleTimer.unref?.();
+          }
+          return;
+        }
+        if (bubbleTimer) clearTimeout(bubbleTimer);
+        bubbleTimer = null;
+        pendingBubble = null;
         lastText = text;
         lastAt = now;
           // 诊断日志已按维护者要求移除（不再往 dsh-web.log 刷气泡文案）
@@ -561,7 +577,10 @@ function apply(ctx) {
         }
       } else {
         busy = true;
-        bubble("思考中…", false, "thinking");
+        const chunk = f && (f.chunk || f);
+        const type = String((chunk && ((chunk.content && chunk.content.type) || chunk.type || chunk.kind)) || "");
+        const answering = /text|content|answer/.test(type) && !/reason|think/.test(type);
+        bubble(answering ? "正在回答…" : "思考中…", false, answering ? "responding" : "thinking");
       }
     });
     // agent 状态机：由"忙"回到 idle 才算任务完成（避免启动时的初始 idle 误报）
@@ -572,6 +591,16 @@ function apply(ctx) {
       if (s === "waiting-input" || s === "waiting-for-input") {
         busy = false;
         bubble("正在向用户提问...", true, "ask");
+        return;
+      }
+      if (s === "paused" || s === "stopped" || s === "cancelled") {
+        busy = false;
+        bubble("已暂停", true, "paused");
+        return;
+      }
+      if (s === "connecting" || s === "reconnecting") {
+        busy = true;
+        bubble("正在连接…", false, "connecting");
         return;
       }
       if (s === "idle" || s === "waiting") {

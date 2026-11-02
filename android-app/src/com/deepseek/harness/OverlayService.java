@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.net.Uri;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -37,6 +38,8 @@ import android.widget.TextView;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -108,13 +111,37 @@ public class OverlayService extends Service {
     public static final String KEY_AVATAR_MODE = "overlay_avatar_mode";
     private static volatile int sAvatarMode = AVATAR_MODE_LOTUS_SPRITES;
 
-    /** 悬浮窗形象尺寸（dp）：默认 -1（由形象模式自动决定：经典44dp，DeepSeek-chan 80dp） */
+    /** 悬浮窗形象尺寸（dp）：默认 -1（由形象模式自动决定：经典44dp，DeepSeek-chan 160dp） */
     public static final String KEY_AVATAR_SIZE = "overlay_avatar_size";
     public static final int DEF_AVATAR_SIZE_CLASSIC = 44;
-    public static final int DEF_AVATAR_SIZE_DEEPSEEK = 80;
+    public static final int DEF_AVATAR_SIZE_DEEPSEEK = 160;
     public static final int MIN_AVATAR_SIZE = 40;
-    public static final int MAX_AVATAR_SIZE = 140;
+    public static final int MAX_AVATAR_SIZE = 360;
     private static volatile int sAvatarSize = -1;
+    private static final String KEY_AVATAR_POSE = "overlay_avatar_pose";
+    private static volatile String sAvatarPose = "chibi";
+    private static final String KEY_AVATAR_QUALITY = "overlay_avatar_quality";
+    private static volatile int sAvatarQuality = 2;
+
+    public static int avatarQuality() { return sAvatarQuality; }
+    public static void setAvatarQuality(Context ctx, int quality) {
+        sAvatarQuality = Math.max(0, Math.min(3, quality));
+        ctx.getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt(KEY_AVATAR_QUALITY, sAvatarQuality).apply();
+        final OverlayService s = instance;
+        if (s != null) s.handler.post(new Runnable() {
+            @Override public void run() { s.sendLive2DState(); }
+        });
+    }
+
+    public static String avatarPose() { return sAvatarPose; }
+    public static void setAvatarPose(Context ctx, String pose) {
+        sAvatarPose = "chibi".equals(pose) ? "chibi" : "standing";
+        ctx.getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(KEY_AVATAR_POSE, sAvatarPose).apply();
+        final OverlayService s = instance;
+        if (s != null) s.handler.post(new Runnable() {
+            @Override public void run() { s.sendLive2DState(); }
+        });
+    }
 
     public static int avatarMode() { return sAvatarMode; }
 
@@ -125,6 +152,12 @@ public class OverlayService extends Service {
 
     public static int defaultAvatarSize() {
         return sAvatarMode == AVATAR_MODE_CLASSIC ? DEF_AVATAR_SIZE_CLASSIC : DEF_AVATAR_SIZE_DEEPSEEK;
+    }
+
+    public static int maxAvatarSize(Context ctx) {
+        android.util.DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
+        return Math.max(MIN_AVATAR_SIZE, Math.min(MAX_AVATAR_SIZE,
+                (int) (Math.min(dm.widthPixels, dm.heightPixels) / dm.density) - 24));
     }
 
     public static void setAvatarSize(Context ctx, int sizeDp) {
@@ -181,7 +214,16 @@ public class OverlayService extends Service {
 
     public static boolean isLive2DInstalled(Context ctx) {
         File dir = getLive2DDir(ctx);
-        return new File(dir, "index.html").exists();
+        return findLive2DModel(dir) != null && new File(dir, "pixi.min.js").isFile()
+                && new File(dir, "cubism4.min.js").isFile()
+                && new File(dir, "live2dcubismcore.min.js").isFile();
+    }
+
+    private static File findLive2DModel(File dir) {
+        File[] models = new File(dir, "model").listFiles();
+        if (models != null) for (File model : models)
+            if (model.isFile() && model.getName().endsWith(".model3.json")) return model;
+        return null;
     }
     /**
      * v1.21：静置（半藏）时，整体再朝**屏幕内侧**平移的比例（按屏幕宽度算）。
@@ -247,16 +289,20 @@ public class OverlayService extends Service {
             sShowInApp = sp.getBoolean(KEY_SHOW_IN_APP, false);
             sAvatarMode = sp.getInt(KEY_AVATAR_MODE, AVATAR_MODE_LOTUS_SPRITES);
             sAvatarSize = sp.getInt(KEY_AVATAR_SIZE, -1);
+            sAvatarPose = sp.getString(KEY_AVATAR_POSE, "chibi");
+            if (!"chibi".equals(sAvatarPose)) sAvatarPose = "standing";
+            sAvatarQuality = Math.max(0, Math.min(3, sp.getInt(KEY_AVATAR_QUALITY, 2)));
         } catch (Throwable ignored) {}
     }
 
     public void applyAvatarSize() {
-        int sz = avatarSize();
+        int sz = Math.min(avatarSize(), maxAvatarSize(this));
         int px = dp(sz);
         if (avatarContainer != null) {
             ViewGroup.LayoutParams lpBox = avatarContainer.getLayoutParams();
             if (lpBox != null) {
-                lpBox.width = px;
+                lpBox.width = sAvatarMode == AVATAR_MODE_LIVE2D
+                        ? Math.min(dp(maxAvatarSize(this)), Math.max(dp(24), Math.round(px * live2dAspect))) : px;
                 lpBox.height = px;
                 avatarContainer.setLayoutParams(lpBox);
             }
@@ -264,9 +310,17 @@ public class OverlayService extends Service {
         if (rootView != null) {
             rootView.requestLayout();
         }
+        if (rootView != null) rootView.post(new Runnable() {
+            @Override public void run() { positionOnCurrentEdge(); }
+        });
+    }
+
+    private void positionOnCurrentEdge() {
+        if (lp == null || rootView == null) return;
+        lp.x = edgeXFor(rootView.getWidth());
+        int available = getResources().getDisplayMetrics().heightPixels - rootView.getHeight();
+        lp.y = Math.max(0, Math.min(available, lp.y));
         updateAvatarWindow();
-        snapToEdge();
-        layoutCompanions();
     }
 
     static boolean showInApp() { return sShowInApp; }
@@ -340,9 +394,49 @@ public class OverlayService extends Service {
     private WindowManager.LayoutParams lp;
     private LinearLayout rootView;
     private FrameLayout avatarContainer;
+    private AvatarTouchRegion avatarTouchRegion;
     private ImageView iconView;
     private WebView live2dWebView;
     private String currentEmotion = "idle";
+    private String currentTool = "";
+    private boolean emotionPreview = false;
+    private String previewBaseEmotion, previewBaseTool;
+    private final Runnable restoreEmotionPreview = new Runnable() {
+        @Override public void run() {
+            if (!emotionPreview) return;
+            emotionPreview = false;
+            currentEmotion = previewBaseEmotion;
+            currentTool = previewBaseTool;
+            sendLive2DState();
+            updateAvatarSprite();
+        }
+    };
+
+    public static void previewEmotion(final String state) {
+        final OverlayService s = instance;
+        if (s == null) return;
+        s.handler.post(new Runnable() { @Override public void run() {
+            if (!s.emotionPreview) {
+                s.previewBaseEmotion = s.currentEmotion;
+                s.previewBaseTool = s.currentTool;
+            }
+            s.emotionPreview = true;
+            s.currentEmotion = AvatarState.resolve(state, null);
+            s.currentTool = "";
+            s.sendLive2DState();
+            s.updateAvatarSprite();
+            s.handler.removeCallbacks(s.restoreEmotionPreview);
+            s.handler.postDelayed(s.restoreEmotionPreview, 3000);
+        }});
+    }
+    private boolean live2dReady = false;
+    private float live2dAspect = 1f;
+    private String live2dUrl;
+    private int currentSprite = 0;
+    private long avatarDownCount, avatarTapCount;
+    private final Runnable modelTimeout = new Runnable() {
+        @Override public void run() { if (!live2dReady) live2dFallback("Model load timed out"); }
+    };
     private LinearLayout panelView;
     private TextView statusText;
     /** v1.21：会话数行（`N 个会话运行中…` / 暂无会话运行 / 会话已完成 ✓）。 */
@@ -396,6 +490,7 @@ public class OverlayService extends Service {
     private static volatile long lastStatusAt = 0L;
     /** v1.24：最近一次的类别 —— 恢复时要用它决定"常驻还是自动收"（不能再靠文案猜）。 */
     private static volatile int lastKind = 0;
+    private static volatile String lastState = "idle", lastTool = "";
 
     // ============ v1.24：气泡文案可自定义（控制台 →「悬浮窗消息」）============
     //
@@ -558,6 +653,8 @@ public class OverlayService extends Service {
             int avH = rootView.getHeight() > 0 ? rootView.getHeight() : dp(48);
             int avL = lp.x;
             int avR = lp.x + avW;
+            int screenW = getResources().getDisplayMetrics().widthPixels;
+            int screenH = getResources().getDisplayMetrics().heightPixels;
             boolean visible = rootView.getVisibility() == View.VISIBLE;
 
             if (bubbleWindowView != null && lpBubble != null) {
@@ -571,8 +668,8 @@ public class OverlayService extends Service {
                     lpBubble.height = WindowManager.LayoutParams.WRAP_CONTENT;
                     int bw = bubbleWindowView.getWidth() > 0 ? bubbleWindowView.getWidth() : dp(60);
                     int bh = bubbleWindowView.getHeight() > 0 ? bubbleWindowView.getHeight() : dp(22);
-                    lpBubble.x = snappedRight ? (avR - bw) : avL;
-                    lpBubble.y = lp.y - bh - dp(2);
+                    lpBubble.x = Math.max(0, Math.min(screenW - bw, snappedRight ? (avR - bw) : avL));
+                    lpBubble.y = Math.max(0, lp.y - bh - dp(2));
                     wm.updateViewLayout(bubbleWindowView, lpBubble);
                 }
             }
@@ -583,8 +680,10 @@ public class OverlayService extends Service {
                     lpPanel.width = WindowManager.LayoutParams.WRAP_CONTENT;
                     lpPanel.height = WindowManager.LayoutParams.WRAP_CONTENT;
                     int pw = panelWindowView.getWidth() > 0 ? panelWindowView.getWidth() : dp(200);
-                    lpPanel.x = snappedRight ? (avR - pw) : avL;
-                    lpPanel.y = lp.y + avH + dp(2);
+                    int ph = panelWindowView.getHeight() > 0 ? panelWindowView.getHeight() : dp(110);
+                    lpPanel.x = Math.max(0, Math.min(screenW - pw, snappedRight ? (avR - pw) : avL));
+                    int below = lp.y + avH + dp(2);
+                    lpPanel.y = below + ph <= screenH ? below : Math.max(0, lp.y - ph - dp(2));
                     wm.updateViewLayout(panelWindowView, lpPanel);
                 }
             }
@@ -646,9 +745,9 @@ public class OverlayService extends Service {
             new Thread(new Runnable() {
                 @Override public void run() {
                     final boolean up = engineAlive(enginePort);
+                    lastProbeAt = System.currentTimeMillis();
                     if (up && scanSessions) {
                         activeSessions = scanActiveSessions();
-                        lastProbeAt = System.currentTimeMillis();
                     }
                     handler.post(new Runnable() {
                         @Override public void run() {
@@ -657,12 +756,10 @@ public class OverlayService extends Service {
                             updateEngineStatusUi();
                             // v1.21（需求 2）：空闲超过 IDLE_FISH_MS → 摸鱼中…（只在没有活跃状态时补）
                             // ⚠ 例外：正在等用户回答（"正在向用户提问..."）时不能改成摸鱼 —— 那不是摸鱼，是在等你。
-                            if (up && System.currentTimeMillis() - lastAgentStatusAt > IDLE_FISH_MS) {
-                                String cur = (statusBubble != null && statusBubble.getText() != null)
-                                        ? statusBubble.getText().toString() : "";
-                                if (!cur.startsWith("正在向用户提问") && !cur.startsWith("Asking user") && !cur.startsWith("Вопрос пользователю")) {
-                                    applyBubble(msgIdle(), true, 0L, KIND_IDLE);
-                                }
+                            if (up && !AvatarState.isWorking(currentEmotion)
+                                    && !"ask".equals(currentEmotion) && !"error".equals(currentEmotion)
+                                    && System.currentTimeMillis() - lastAgentStatusAt > IDLE_FISH_MS) {
+                                applyBubble(msgIdle(), true, 0L, KIND_IDLE, "sleepy", null);
                             }
                         }
                     });
@@ -707,7 +804,7 @@ public class OverlayService extends Service {
                 final boolean st = lastSticky;
                 final int kd = lastKind;
                 handler.postDelayed(new Runnable() {
-                    @Override public void run() { applyBubble(t, st, 0L, kd); }
+                    @Override public void run() { applyBubble(t, st, 0L, kd, lastState, lastTool); }
                 }, 400);
             }
         } catch (Throwable ignored) {}
@@ -755,7 +852,12 @@ public class OverlayService extends Service {
         isRunning = false;
         if (instance == this) instance = null;
         stopVscreenPreview();
+        destroyLive2D();
         handler.removeCallbacksAndMessages(null);
+        if (wm != null) {
+            if (bubbleWindowView != null) try { wm.removeView(bubbleWindowView); } catch (Throwable ignored) {}
+            if (panelWindowView != null) try { wm.removeView(panelWindowView); } catch (Throwable ignored) {}
+        }
         if (rootView != null && wm != null) {
             try { wm.removeView(rootView); } catch (Throwable ignored) {}
         }
@@ -763,6 +865,46 @@ public class OverlayService extends Service {
     }
 
     @Override public IBinder onBind(Intent intent) { return null; }
+
+    /** Read-only device diagnostics: no preferences, credentials or conversation contents. */
+    @Override protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
+        try {
+            JSONObject d = new JSONObject();
+            d.put("pose", sAvatarPose).put("quality", sAvatarQuality).put("emotion", currentEmotion);
+            d.put("panelVisible", panelVisible).put("downCount", avatarDownCount).put("tapCount", avatarTapCount);
+            d.put("dock", snappedRight ? "right" : "left");
+            d.put("touchRegionAvailable", avatarTouchRegion != null && avatarTouchRegion.isAvailable());
+            d.put("maskRectangles", avatarTouchRegion == null ? 0 : avatarTouchRegion.rectangleCount());
+            if (rootView != null) {
+                int[] location = new int[2]; rootView.getLocationOnScreen(location);
+                d.put("x", location[0]).put("y", location[1]);
+                d.put("width", rootView.getWidth()).put("height", rootView.getHeight());
+            }
+            org.json.JSONArray buttons = new org.json.JSONArray();
+            if (panelView != null && panelVisible) dumpButtons(panelView, buttons);
+            d.put("buttons", buttons);
+            out.println("AVATAR_DIAGNOSTICS:" + d.toString());
+        } catch (Exception unavailable) { out.println("AVATAR_DIAGNOSTICS:unavailable"); }
+    }
+
+    private void dumpButtons(View view, org.json.JSONArray buttons) throws org.json.JSONException {
+        if (view instanceof Button && view.isShown()) {
+            Button b = (Button) view;
+            android.text.Layout text = b.getLayout();
+            float widest = 0;
+            if (text != null) for (int line = 0; line < text.getLineCount(); line++)
+                widest = Math.max(widest, text.getLineWidth(line));
+            int available = b.getWidth() - b.getCompoundPaddingLeft() - b.getCompoundPaddingRight();
+            buttons.put(new JSONObject().put("label", b.getText()).put("width", b.getWidth())
+                    .put("height", b.getHeight()).put("textFits", text != null && widest <= available + 1
+                    && text.getHeight() <= b.getHeight() - b.getCompoundPaddingTop() - b.getCompoundPaddingBottom()));
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) dumpButtons(group.getChildAt(i), buttons);
+        }
+    }
+
 
     /** 前台服务保活（引擎运行期间悬浮窗不被系统回收） */
     private void startForegroundCompat() {
@@ -821,6 +963,7 @@ public class OverlayService extends Service {
             }
         };
         rootView.setOrientation(LinearLayout.VERTICAL);
+        avatarTouchRegion = new AvatarTouchRegion(rootView);
         rootView.setPadding(dp(10), dp(8), dp(10), dp(8));
         // 收起态无背景（只留小鲸鱼图标）；背景移到展开面板 panelView 上
 
@@ -829,7 +972,7 @@ public class OverlayService extends Service {
         iconRowView = iconRow;
         iconRow.setOrientation(LinearLayout.HORIZONTAL);
         iconRow.setGravity(Gravity.CENTER_VERTICAL);
-        iconRow.setPadding(dp(4), dp(2), dp(4), dp(2));
+        iconRow.setPadding(0, 0, 0, 0);
 
         int initSize = dp(avatarSize());
         avatarContainer = new FrameLayout(this);
@@ -842,38 +985,6 @@ public class OverlayService extends Service {
         iconView.setImageResource(R.drawable.overlay_look);
         avatarContainer.addView(iconView);
 
-        try {
-            WebView.setWebContentsDebuggingEnabled(true);
-            live2dWebView = new WebView(this);
-            live2dWebView.setLayoutParams(new FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
-            live2dWebView.setBackgroundColor(0);
-            live2dWebView.setClickable(false);
-            live2dWebView.setFocusable(false);
-            live2dWebView.setOnTouchListener(new View.OnTouchListener() {
-                @Override public boolean onTouch(View v, MotionEvent ev) {
-                    return false;
-                }
-            });
-            live2dWebView.setWebChromeClient(new WebChromeClient() {
-                @Override public boolean onConsoleMessage(ConsoleMessage cm) {
-                    Log.i("Live2D_JS", cm.message() + " [" + cm.sourceId() + ":" + cm.lineNumber() + "]");
-                    return true;
-                }
-            });
-            live2dWebView.setWebViewClient(new WebViewClient());
-            WebSettings ws = live2dWebView.getSettings();
-            ws.setJavaScriptEnabled(true);
-            ws.setAllowFileAccess(true);
-            ws.setAllowFileAccessFromFileURLs(true);
-            ws.setAllowUniversalAccessFromFileURLs(true);
-            ws.setDomStorageEnabled(true);
-            ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
-            live2dWebView.setVisibility(View.GONE);
-            avatarContainer.addView(live2dWebView);
-        } catch (Throwable t) {
-            Log.w("OverlayService", "Live2D WebView creation failed", t);
-        }
 
         iconRow.addView(avatarContainer);
         applyAvatarMode();
@@ -929,7 +1040,8 @@ public class OverlayService extends Service {
         panelView.setOrientation(LinearLayout.VERTICAL);
         panelView.setPadding(dp(10), dp(8), dp(10), dp(8));
         panelView.setLayoutParams(new LinearLayout.LayoutParams(
-                dp(200), LinearLayout.LayoutParams.WRAP_CONTENT));   // 200dp：常态三枚按钮（打开应用/控制台/退出）放得下
+                Math.min(dp(260), getResources().getDisplayMetrics().widthPixels - dp(16)),
+                LinearLayout.LayoutParams.WRAP_CONTENT));
         GradientDrawable pbg = new GradientDrawable();
         pbg.setColor(getColor(R.color.panel_bg));              // 深蓝半透明（统一配色资源）
         pbg.setCornerRadius(dp(12));
@@ -1042,6 +1154,12 @@ public class OverlayService extends Service {
         // v1.21（重构）：面板也有自己的窗口，位置由 layoutCompanions() 从小人下方算出。
         panelWindowView = new android.widget.FrameLayout(this);
         panelWindowView.addView(panelView);
+        panelWindowView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override public void onLayoutChange(View v, int l, int t, int r, int b,
+                                                 int ol, int ot, int or, int ob) {
+                if (r - l != or - ol || b - t != ob - ot) layoutCompanions();
+            }
+        });
         panelWindowView.setVisibility(View.GONE);
         setPanelVisible(false, false);
 
@@ -1051,7 +1169,8 @@ public class OverlayService extends Service {
             @Override public boolean onTouch(View v, MotionEvent ev) {
                 switch (ev.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        downAt = System.currentTimeMillis();
+                        downAt = ev.getEventTime();
+                        avatarDownCount++;
                         touchX = ev.getRawX(); touchY = ev.getRawY();
                         startX = lp.x; startY = lp.y;
                         dragging = false;
@@ -1073,7 +1192,8 @@ public class OverlayService extends Service {
                         } else if (dragging) {
                             snapToEdge();      // 拖完自动吸到最近的左右边缘（静置态=半藏）
                             if (panelVisible) setPanelVisible(true, false);
-                        } else if (System.currentTimeMillis() - downAt < 400) {
+                        } else if (ev.getEventTime() - downAt < 400) {
+                            avatarTapCount++;
                             setPanelVisible(!panelVisible, true);
                             if (sAvatarMode == AVATAR_MODE_LIVE2D && live2dWebView != null) {
                                 live2dWebView.evaluateJavascript("if (window.triggerLive2DTap) window.triggerLive2DTap();", null);
@@ -1103,14 +1223,18 @@ public class OverlayService extends Service {
         bg.setColor(0xFFFFFFFF);
         bg.setCornerRadius(dp(11));
         b.setBackground(bg);
-        b.setSingleLine(true);
-        b.setPadding(dp(4), 0, dp(4), 0);
-        b.setMinHeight(0);
+        b.setSingleLine(false);
+        b.setMaxLines(2);
+        b.setHorizontallyScrolling(false);
+        b.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        b.setGravity(Gravity.CENTER);
+        b.setIncludeFontPadding(false);
+        b.setPadding(dp(8), dp(7), dp(8), dp(7));
+        b.setMinHeight(dp(36));
         b.setMinWidth(0);
-        b.setMinimumHeight(0);
+        b.setMinimumHeight(dp(36));
         b.setMinimumWidth(0);
-        b.setHeight(dp(25));
-        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(0, dp(25), 1f);
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
         lp2.leftMargin = dp(3);
         lp2.rightMargin = dp(3);
         b.setLayoutParams(lp2);
@@ -1201,7 +1325,7 @@ public class OverlayService extends Service {
                         android.util.Log.e("DSHOverlay", "overlay re-add failed", e);
                     }
                 }
-                rootView.setVisibility(show ? View.VISIBLE : View.GONE); layoutCompanions();   // v1.21（重构）：小人隐藏时气泡/面板一起收
+                rootView.setVisibility(show ? View.VISIBLE : View.GONE); syncLive2DVisibility(); layoutCompanions();   // v1.21（重构）：小人隐藏时气泡/面板一起收
             }
         } catch (Throwable ignored) {}
     }
@@ -1265,33 +1389,24 @@ public class OverlayService extends Service {
             // 钉住右缘后：气泡出现/消失只改变窗口左边界，小人始终贴着屏幕右缘；面板展开时
             // 窗口变宽也是向左长，小人跟着面板右边界一起动。
             // ⚠ 停靠左侧时**直接 return**，因此原来"半藏/可拖动"的行为完全不受影响。
-            installRightEdgePin();
+            installDockPin();
         } catch (Throwable t) {
             stopSelf();
         }
     }
 
     /** 停靠右侧时把窗口右缘钉在屏幕上（见 buildOverlay 里的说明）。 */
-    private void installRightEdgePin() {
+    private void installDockPin() {
         try {
             if (rootView == null) return;
             rootView.addOnLayoutChangeListener(new android.view.View.OnLayoutChangeListener() {
                 @Override public void onLayoutChange(android.view.View v, int l, int t, int r, int b,
                                                      int ol, int ot, int or, int ob) {
                     try {
-                        if (!snappedRight || dragging || lp == null || rootView == null) return;
+                        if (dragging || lp == null || rootView == null) return;
                         int w = rootView.getWidth();
                         if (w <= 0) return;
-                        int screenW = getResources().getDisplayMetrics().widthPixels;
-                        int want;
-                        if (panelVisible) {
-                            want = Math.max(dp(4), screenW - w - dp(4));
-                        } else {
-                            int avatarW = (iconView != null && iconView.getWidth() > 0)
-                                    ? iconView.getWidth() : dp(40);
-                            int off = tuckOffsetPx(avatarW);
-                            want = screenW + off - w;
-                        }
+                        int want = edgeXFor(w);
                         if (lp.x != want) {
                             lp.x = want;
                             updateAvatarWindow();   // v1.24：改 lp.x 必须走这个出口（同步气泡/面板）
@@ -1487,9 +1602,9 @@ public class OverlayService extends Service {
                 if (!(p instanceof View)) break;
                 v = (View) p;
             }
-            return sum > 0 ? sum : dp(14);
+            return sum;
         } catch (Throwable t) {
-            return dp(14);
+            return 0;
         }
     }
 
@@ -1904,88 +2019,170 @@ public class OverlayService extends Service {
 
     // ==================== v1.21（需求 2）：agent 状态气泡 与 形象切换 ====================
 
+    private void createLive2D() {
+        if (live2dWebView != null) return;
+        live2dWebView = new WebView(this);
+        live2dWebView.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        live2dWebView.setBackgroundColor(0);
+        live2dWebView.setAlpha(0f);
+        live2dWebView.setFocusable(false);
+        live2dWebView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        WebSettings ws = live2dWebView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setAllowFileAccess(true);
+        ws.setAllowFileAccessFromFileURLs(true);
+        ws.setAllowUniversalAccessFromFileURLs(false);
+        ws.setCacheMode(WebSettings.LOAD_DEFAULT);
+        live2dWebView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onConsoleMessage(ConsoleMessage cm) {
+                if (cm.message().startsWith("AVATAR_MASK:")) {
+                    if (avatarTouchRegion != null) avatarTouchRegion.update(cm.message().substring(12));
+                    return true;
+                } else if (cm.message().startsWith("AVATAR_ASPECT:")) {
+                    try {
+                        float aspect = Float.parseFloat(cm.message().substring(14));
+                        if (Float.isFinite(aspect) && aspect >= 0.2f && aspect <= 2f
+                                && Math.abs(live2dAspect - aspect) > 0.005f) {
+                            live2dAspect = aspect;
+                            applyAvatarSize();
+                        }
+                    } catch (NumberFormatException ignored) {}
+                    return true;
+                } else if ("AVATAR_READY".equals(cm.message())) {
+                    live2dReady = true;
+                    handler.removeCallbacks(modelTimeout);
+                    live2dWebView.setAlpha(1f);
+                    if (iconView != null) iconView.setVisibility(View.GONE);
+                    sendLive2DState();
+                    syncLive2DVisibility();
+                } else if (cm.message().startsWith("AVATAR_ERROR:")) {
+                    handler.post(new Runnable() { @Override public void run() { live2dFallback(cm.message()); } });
+                }
+                Log.i("Live2D_JS", cm.message());
+                return true;
+            }
+        });
+        live2dWebView.setWebViewClient(new WebViewClient());
+        live2dWebView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override public void onLayoutChange(View v, int l, int t, int r, int b,
+                                                 int ol, int ot, int or, int ob) {
+                if (live2dReady && (r - l != or - ol || b - t != ob - ot)) resizeLive2D();
+            }
+        });
+        avatarContainer.addView(live2dWebView);
+    }
+
+    private void destroyLive2D() {
+        handler.removeCallbacks(modelTimeout);
+        live2dReady = false;
+        live2dAspect = 1f;
+        live2dUrl = null;
+        if (live2dWebView == null) return;
+        live2dWebView.stopLoading();
+        avatarContainer.removeView(live2dWebView);
+        live2dWebView.destroy();
+        live2dWebView = null;
+        if (avatarTouchRegion != null) avatarTouchRegion.reset();
+    }
+
+    private void live2dFallback(String reason) {
+        Log.w("DSHOverlay", "Live2D fallback: " + reason);
+        destroyLive2D();
+        if (iconView != null) { iconView.setVisibility(View.VISIBLE); updateAvatarSprite(); }
+    }
+
+    private void syncLive2DVisibility() {
+        if (live2dWebView == null) return;
+        boolean visible = rootView != null && rootView.getVisibility() == View.VISIBLE;
+        // Pause only this WebView, never the process-wide timers used by the chat/browser.
+        if (visible) live2dWebView.onResume(); else live2dWebView.onPause();
+        live2dWebView.evaluateJavascript("if(window.setAvatarVisible)window.setAvatarVisible(" + visible + ");", null);
+    }
+
+    private void sendLive2DState() {
+        if (live2dWebView == null || !live2dReady) return;
+        live2dWebView.evaluateJavascript("if(window.setAvatarPose)window.setAvatarPose("
+                + JSONObject.quote(sAvatarPose) + ");if(window.setAvatarQuality)window.setAvatarQuality("
+                + sAvatarQuality + ");if(window.setLive2DEmotion)window.setLive2DEmotion("
+                + JSONObject.quote(currentEmotion) + "," + JSONObject.quote(currentTool) + ");", null);
+        resizeLive2D();
+    }
+
+    private void resizeLive2D() {
+        if (!live2dReady || live2dWebView == null || live2dWebView.getWidth() <= 0) return;
+        float density = getResources().getDisplayMetrics().density;
+        live2dWebView.evaluateJavascript("if(window.resizeAvatar)window.resizeAvatar("
+                + (live2dWebView.getWidth() / density) + "," + (live2dWebView.getHeight() / density) + ");", null);
+    }
+
     private void applyAvatarMode() {
         applyAvatarSize();
-        if (sAvatarMode == AVATAR_MODE_LIVE2D) {
-            File live2dDir = getLive2DDir(this);
-            File indexFile = new File(live2dDir, "index.html");
-            if (indexFile.exists() && live2dWebView != null) {
-                if (iconView != null) iconView.setVisibility(View.GONE);
-                live2dWebView.setVisibility(View.VISIBLE);
-                String targetUrl = "file://" + indexFile.getAbsolutePath();
-                if (live2dWebView.getUrl() == null || !live2dWebView.getUrl().startsWith("file://")) {
-                    live2dWebView.loadUrl(targetUrl);
+        if (sAvatarMode == AVATAR_MODE_LIVE2D && isLive2DInstalled(this)) {
+            try {
+                updateAvatarSprite();
+                createLive2D();
+                File dir = getLive2DDir(this);
+                File model = findLive2DModel(dir);
+                String target = "file:///android_asset/avatar-player/index.html?base="
+                        + Uri.encode(Uri.fromFile(dir).toString() + "/")
+                        + "&model=" + Uri.encode("model/" + model.getName());
+                if (!target.equals(live2dUrl)) {
+                    live2dReady = false;
+                    live2dUrl = target;
+                    live2dWebView.loadUrl(target + "&pose=" + Uri.encode(sAvatarPose) + "&quality=" + sAvatarQuality);
+                    handler.removeCallbacks(modelTimeout);
+                    handler.postDelayed(modelTimeout, 30000);
                 }
-                updateAvatarEmotion(currentEmotion, lastKind, null);
+                sendLive2DState();
+                syncLive2DVisibility();
                 return;
-            }
-        }
-
-        if (live2dWebView != null) live2dWebView.setVisibility(View.GONE);
+            } catch (Throwable t) { live2dFallback(t.toString()); }
+        } else destroyLive2D();
         if (iconView != null) iconView.setVisibility(View.VISIBLE);
-        updateAvatarEmotion(currentEmotion, lastKind, null);
+        updateAvatarSprite();
     }
 
     private void updateAvatarEmotion(String state, int kind, String tool) {
-        String emotion = "idle";
-        if (state != null && !state.isEmpty()) {
-            if ("thinking".equals(state)) emotion = "thinking";
-            else if ("tool".equals(state)) emotion = "tool";
-            else if ("done".equals(state) || "ended".equals(state)) emotion = "done";
-            else if ("error".equals(state)) emotion = "error";
-            else if ("ask".equals(state)) emotion = "ask";
-            else if ("idle".equals(state)) emotion = "idle";
-        } else {
+        emotionPreview = false;
+        handler.removeCallbacks(restoreEmotionPreview);
+        if (state == null || state.isEmpty()) {
             switch (kind) {
-                case KIND_THINK: emotion = "thinking"; break;
-                case KIND_TOOL:  emotion = "tool"; break;
-                case KIND_DONE:  emotion = "done"; break;
-                case KIND_IDLE:  emotion = "idle"; break;
-                default:
-                    if (lastText != null) {
-                        if (lastText.contains("?") || lastText.contains("提问") || lastText.contains("Ask") || lastText.contains("Вопрос")) {
-                            emotion = "ask";
-                        } else if (lastText.contains("错") || lastText.contains("Error") || lastText.contains("Ошибк")) {
-                            emotion = "error";
-                        }
-                    }
-                    break;
+                case KIND_THINK: state = "thinking"; break;
+                case KIND_TOOL: state = "tool"; break;
+                case KIND_DONE: state = "done"; break;
+                default: state = "idle"; break;
             }
         }
+        String emotion = AvatarState.resolve(state, tool);
+        String nextTool = tool == null ? "" : tool;
+        boolean changed = !emotion.equals(currentEmotion) || !nextTool.equals(currentTool);
         currentEmotion = emotion;
+        currentTool = nextTool;
+        if (changed) sendLive2DState();
+        updateAvatarSprite();
+    }
 
-        if (sAvatarMode == AVATAR_MODE_LIVE2D && live2dWebView != null && live2dWebView.getVisibility() == View.VISIBLE) {
-            String toolParam = (tool != null) ? tool.replace("'", "\\'") : "";
-            final String js = "if(window.setLive2DEmotion) window.setLive2DEmotion('" + emotion + "', '" + toolParam + "');";
-            live2dWebView.post(new Runnable() {
-                @Override public void run() {
-                    live2dWebView.evaluateJavascript(js, null);
-                }
-            });
-            return;
-        }
-
+    private void updateAvatarSprite() {
         if (iconView == null) return;
-
-        if (sAvatarMode == AVATAR_MODE_CLASSIC) {
-            iconView.setImageResource(R.drawable.overlay_look);
-            return;
-        }
-
-        // AVATAR_MODE_LOTUS_SPRITES (Option 2)
         int resId = R.drawable.overlay_lotus_idle;
-        if ("thinking".equals(emotion)) {
-            resId = R.drawable.overlay_lotus_thinking;
-        } else if ("tool".equals(emotion)) {
-            resId = R.drawable.overlay_lotus_tool;
-        } else if ("done".equals(emotion)) {
-            resId = R.drawable.overlay_lotus_done;
-        } else if ("error".equals(emotion)) {
-            resId = R.drawable.overlay_lotus_error;
-        } else if ("ask".equals(emotion)) {
-            resId = R.drawable.overlay_lotus_ask;
+        switch (currentEmotion) {
+            case "thinking": case "searching": case "connecting":
+                resId = R.drawable.overlay_lotus_thinking; break;
+            case "tool": case "reading": case "writing": case "browsing": case "watching": case "terminal":
+                resId = R.drawable.overlay_lotus_tool; break;
+            case "done": case "responding": resId = R.drawable.overlay_lotus_done; break;
+            case "error": case "offline": resId = R.drawable.overlay_lotus_error; break;
+            case "ask": case "paused": resId = R.drawable.overlay_lotus_ask; break;
         }
-        iconView.setImageResource(resId);
+        if (sAvatarMode == AVATAR_MODE_CLASSIC) resId = R.drawable.overlay_look;
+        if (currentSprite != resId) {
+            iconView.setImageResource(resId);
+            currentSprite = resId;
+        }
+        // Leave space around the original sprite's headwear/tail, even at small sizes.
+        int inset = sAvatarMode == AVATAR_MODE_CLASSIC ? 0 : dp(4);
+        iconView.setPadding(inset, inset, inset, inset);
     }
 
     /**
@@ -2000,9 +2197,9 @@ public class OverlayService extends Service {
     }
 
     private void applyBubble(String text, boolean sticky, long ttlMs, int kind, String state, String tool) {
+        updateAvatarEmotion(state, kind, tool);
         if (statusBubble == null) return;
         if (text == null || text.isEmpty()) { hideBubble(); return; }
-        updateAvatarEmotion(state, kind, tool);
         // 面板里的"任务"行与气泡同源：气泡被点掉/超时收起后，展开面板仍能看到最近状态。
         if (agentText != null) agentText.setText(I18n.tr("任务：—").replace("—", I18n.tr(text)));
         // v1.21（ANR 修正）：文案与当前显示完全相同时**不重绘**。
@@ -2010,7 +2207,12 @@ public class OverlayService extends Service {
         // 模拟器软件渲染下高频重绘会把主线程卡在出帧（实测 ANR：nSyncAndDrawFrame）。
         boolean same = bubbleShowing && text.contentEquals(statusBubble.getText());
         lastAgentStatusAt = System.currentTimeMillis();
-        if (same) return;
+        if (same) {
+            handler.removeCallbacks(bubbleHide);
+            if (!sticky && kind != KIND_DONE && kind != KIND_IDLE)
+                handler.postDelayed(bubbleHide, ttlMs > 0 ? ttlMs : BUBBLE_TTL_MS);
+            return;
+        }
         statusBubble.setText(text);
         bubbleShowing = true;
         handler.removeCallbacks(bubbleHide);
@@ -2033,7 +2235,6 @@ public class OverlayService extends Service {
         // v1.21（重构）：气泡是独立窗口，直接把自己的窗口收起来 —— 不再需要"占位保留"这类技巧。
         bubbleShowing = false;
         layoutCompanions();
-        updateAvatarEmotion("idle", KIND_IDLE, null);
     }
 
     /**
@@ -2069,6 +2270,8 @@ public class OverlayService extends Service {
         lastText = shown;
         lastSticky = sticky;
         lastKind = kind;
+        lastState = state;
+        lastTool = tool;
         lastStatusAt = System.currentTimeMillis();
         final OverlayService s = instance;
         if (s == null) return;   // 悬浮窗没在跑：静默忽略（用户没开悬浮窗就不打扰）
@@ -2093,7 +2296,7 @@ public class OverlayService extends Service {
         final String[] out = { text };
         if (s.statusBubble == null) return text;
         final java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-        s.handler.post(new Runnable() {
+        Runnable measure = new Runnable() {
             @Override public void run() {
                 try {
                     android.widget.TextView tv = s.statusBubble;
@@ -2110,9 +2313,13 @@ public class OverlayService extends Service {
                 } catch (Throwable ignored) {}
                 latch.countDown();
             }
-        });
-        try { latch.await(Math.max(50L, timeoutMs), java.util.concurrent.TimeUnit.MILLISECONDS); }
-        catch (Throwable ignored) {}
+        };
+        if (Looper.myLooper() == Looper.getMainLooper()) measure.run();
+        else {
+            s.handler.post(measure);
+            try { latch.await(Math.max(50L, timeoutMs), java.util.concurrent.TimeUnit.MILLISECONDS); }
+            catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+        }
         return out[0];
     }
 
