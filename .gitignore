@@ -25,3 +25,13 @@ payload.zip
 # 构建产物 sidecar（每次构建重新生成）
 android-app/DeepSeekHarness-*.apk.sha256
 android-app/DeepSeekHarness-*.apk.build-info.txt
+
+# Пользовательские Live2D модели и ассеты (никогда не коммитить в git)
+*live2d*
+*DeepSeek-chan*
+*deepseek_chan*
+*.moc3
+*.model3.json
+*.cdi3.json
+*.physics3.json
+*.psd
