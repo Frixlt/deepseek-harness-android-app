@@ -809,7 +809,17 @@ public class OverlayService extends Service {
 
     private void buildOverlay() {
         // ===== 根布局（竖排：图标行 + 状态面板）=====
-        rootView = new LinearLayout(this);
+        rootView = new LinearLayout(this) {
+            @Override
+            public boolean onInterceptTouchEvent(MotionEvent ev) {
+                // 拦截头像区域所有触摸事件，由下面的 onTouchListener 统一处理拖动、边缘吸附与点击展开
+                return true;
+            }
+            @Override
+            public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+                // 禁止子视图（如 WebView）禁用拦截
+            }
+        };
         rootView.setOrientation(LinearLayout.VERTICAL);
         rootView.setPadding(dp(10), dp(8), dp(10), dp(8));
         // 收起态无背景（只留小鲸鱼图标）；背景移到展开面板 panelView 上
@@ -840,6 +850,11 @@ public class OverlayService extends Service {
             live2dWebView.setBackgroundColor(0);
             live2dWebView.setClickable(false);
             live2dWebView.setFocusable(false);
+            live2dWebView.setOnTouchListener(new View.OnTouchListener() {
+                @Override public boolean onTouch(View v, MotionEvent ev) {
+                    return false;
+                }
+            });
             live2dWebView.setWebChromeClient(new WebChromeClient() {
                 @Override public boolean onConsoleMessage(ConsoleMessage cm) {
                     Log.i("Live2D_JS", cm.message() + " [" + cm.sourceId() + ":" + cm.lineNumber() + "]");
@@ -1060,6 +1075,9 @@ public class OverlayService extends Service {
                             if (panelVisible) setPanelVisible(true, false);
                         } else if (System.currentTimeMillis() - downAt < 400) {
                             setPanelVisible(!panelVisible, true);
+                            if (sAvatarMode == AVATAR_MODE_LIVE2D && live2dWebView != null) {
+                                live2dWebView.evaluateJavascript("if (window.triggerLive2DTap) window.triggerLive2DTap();", null);
+                            }
                         }
                         setDismissHintInternal(false);
                         return true;

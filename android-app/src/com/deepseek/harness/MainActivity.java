@@ -12986,12 +12986,11 @@ public class MainActivity extends Activity {
             @Override public void onProgressChanged(SeekBar bar, int p, boolean fromUser) {
                 curSize[0] = p + 40;
                 sizeLab.setText(String.format(t("ovl.avatar.size", "头像尺寸：%d dp"), curSize[0]));
-                if (fromUser) {
-                    OverlayService.setAvatarSize(MainActivity.this, curSize[0]);
-                }
             }
             @Override public void onStartTrackingTouch(SeekBar bar) {}
-            @Override public void onStopTrackingTouch(SeekBar bar) {}
+            @Override public void onStopTrackingTouch(SeekBar bar) {
+                OverlayService.setAvatarSize(MainActivity.this, curSize[0]);
+            }
         });
         LinearLayout sActs = new LinearLayout(this);
         sActs.setOrientation(LinearLayout.HORIZONTAL);
