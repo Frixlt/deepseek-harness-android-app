@@ -389,6 +389,9 @@ if [ "$DO_VERIFY" = 1 ]; then
 @deepseek-ai/dsh-storage-json/lib/index.js:fsyncDirectory
 @deepseek-ai/dsh-bash-local/lib/index.js:sandboxMode
 @deepseek-ai/dsh-bash-local/lib/index.js:DSH_BASH_PATH
+@deepseek-ai/dsh-subprocess-local/lib/runner-launch-*.js:dsh-android-patch
+@deepseek-ai/dsh-util-ripgrep/lib/index.js:Android 适配
+@deepseek-ai/libreoffice-kit/lib/index.js:resolve(\"fontkit\")
 "
   # 校验对象必须是**真正进包的那棵树**（staging），不是构建用的 devhome 缓存 ——
   # 否则会出现"检查过了、包里没有"（本仓库踩过：overlay 只贴了 devhome，staging 是干净的）。

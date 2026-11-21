@@ -1,3 +1,72 @@
+## v1.24.0（2026-11-21）
+
+> **一句话**：内核升级到官方最新 **0.2.2-rc.5**；overlay 补丁按 rc5 全量重迁（含两处 Android 关键修复）；
+> 修好「只给 root 不给 Shizuku 时虚拟屏起不来」。versionCode **67**，
+> 内置 remote 插件 **0.6.0**。
+
+### 一、内核 0.2.2-rc.1 → 0.2.2-rc.5
+
+- `android-app/kernel/package.json` pin 到 `0.2.2-rc.5`；lock 重生成后再 `npm dedupe`，
+  `zod` 保持 **1** 份（去重成果未丢），依赖包 732 个。
+- rc5 有明显上游重构：`dsh-office-to-pdf` 改名 `dsh-office-kit`、
+  `resolveRgPath` 从 `dsh-tool-fs-search` 抽到新包 `dsh-util-ripgrep`、
+  `subprocess-local` 的 runner 文件哈希名变化、多个包新增导出。
+  **旧 overlay 是 rc1 全量快照，直接套用会让插件互相判定 incompatible** ——
+  本轮全部按 rc5 重新三方合并。
+
+### 二、overlay 补丁重迁（rc5 基座 + 我们的改动）
+
+| 包 | 我们的改动 | 处理 |
+|---|---|---|
+| `dsh-subprocess-local` | `platform === "android"` 复用 Linux 探针（否则一开终端就报 unsupported） | 迁到新哈希文件 `runner-launch-CKTiL8M8.js` |
+| `dsh-util-ripgrep`（rc5 新增） | Android 优先用 payload 自带的 `runtime/bin/rg` | **新补丁**（rg 解析已从 fs-search 移到这里） |
+| `libreoffice-kit` | `import "fontkit"` 副作用式静态导入 → 只做存在性检查（省 ~1.4 s 启动） | 按 rc5 重打 |
+| `node-addon-system` | flock 原生 addon 在 Android 缺失 → 退化为空锁（否则一开会话就失败） | 按 rc5 重打 |
+| `dsh-attachment-local` + `sharp-shim.js` | sharp 原生模块 → 纯 JS 图像头解析 | 保留 |
+| `dsh-bash-local` | `sandboxMode` / `DSH_BASH_PATH` | 保留 |
+| `dsh-fs-local` | 硬链接不支持 → 改名兜底 | 保留 |
+| `dsh-storage-json` | 目录 fsync 的 EINVAL 容错 | 保留 |
+| `dsh-app-boot` / `dsh-tool-web` / `dsh-tool-bash` / `dsh-session-persistence-jsonl` / `dsh-llm-deepseek` | 插件 warn 落盘、turndown 懒加载、Android 环境说明、link→rename、附件层 | 三方合并通过 |
+| `dsh-client-ui-layout` | （与上游一致，无改动） | 已从 overlay 移除 |
+
+- **删除全部 `overlay/**/package.json`**：这是本轮最隐蔽的坑 —— overlay 里残留的
+  `dsh-app-boot/package.json`（版本 rc.1）会被 `getDshRuntimeVersion()` 当成"内核版本"，
+  于是 rc5 的插件全部被判 *"incompatible with dsh 0.2.2-rc.1"*（实测 83 条，Web 界面直接起不来）。
+  内核树自带的 package.json 才是权威版本。
+- overlay 从 46 文件精简到 32 文件，构建闸门特征串同步为 11 条（11/11 命中）。
+
+### 三、虚拟屏：只给 root 也能用（1、2 两项）
+
+- **根因**：`VsreenBridgeService.ensureCoreServer()` 原来**只认 Shizuku**
+  （`waitShizuku()` 失败就 return），而 root 权限只影响"调用工具"这一环，
+  所以只给 root 的用户 **Core 永远起不来** → 桥转发 9028 被拒 → 创建虚拟屏失败。
+- **修法**：特权通道解析改为「Shizuku 授权优先 → 否则 su 可用则用 root → 都没有才等 Shizuku」；
+  root 分支用 `su -c <同一条启动命令>`（jar 校验 / 清旧进程 / token / 日志完全一致），
+  并把 `Process` 引用存入 `sRootProc` 防止被回收。日志会打印实际通道
+  （`特权通道：root` / `特权通道：Shizuku`）。
+- **权限页文案**改为「Shizuku 或 Root 特权（可选，二选一）」，
+  并说明 root 走 su、Shizuku 走官方 API，任一即可。
+- 删除 `MainActivity.ensureVscreenServer()` 死代码（唯一调用早已被注释，
+  只走 Shizuku，容易误导排查）。
+- ⚠️ 未验证：root 分支需要真机 Magisk；AOSP 模拟器的 `su` 只允许 shell/root，App uid 被拒，
+  无法在本环境实测（代码路径与日志已就绪）。
+
+### 四、冷启动（模拟器 community，x86_64 + ndk_translation）
+
+| 版本 | 引擎 spawn → 端口就绪 |
+|---|---|
+| 1.22.0（rc1，无优化） | 51 / 48 s |
+| 1.23.0（rc1 + 去重 + 懒加载） | 30 / 31 s |
+| **1.24.0（rc5 + 同套优化）** | **27 / 28 s** |
+
+### 五、验证
+
+- 干净安装：`incompatible` **0**、`failed to import` **0**、`did not activate` **0**，引擎 29 s 就绪。
+- 覆盖安装（不卸载、保留外部目录）：内核正确切到 rc5，同样 0 错误。
+- 13 个补丁文件逐个在设备上确认已落地（`noopBinding` / `existsSync(bundled)` /
+  `resolve("fontkit")` / `dsh-android-patch` / `sharpShim` + `sharp-shim.js`）。
+- ⚠️ 未验证：真机上由模型实际调用的 `web_fetch` / 终端 / 虚拟屏 root 通道。
+
 ## v1.23.0（2026-11-12）
 
 > **一句话**：冷启动优化落地 —— **锁文件去重**（zod 58 份 → 1 份）+ **两处重库懒加载**
