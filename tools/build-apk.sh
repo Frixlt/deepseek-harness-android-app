@@ -387,18 +387,8 @@ if [ "$DO_VERIFY" = 1 ]; then
 @deepseek-ai/dsh-attachment-local/lib/sharp-shim.js:sharp
 @deepseek-ai/node-addon-system/lib/flock.js:noopBinding
 @deepseek-ai/dsh-storage-json/lib/index.js:fsyncDirectory
-@deepseek-ai/dsh-app-boot/lib/index.js:DSH_ANDROID_PLUGIN_LOG
-@deepseek-ai/dsh-session-persistence-jsonl/lib/index.js:Android
-@deepseek-ai/dsh-tool-fs-search/lib/index.js:android
-@deepseek-ai/dsh-tool-web/lib/index.js:ensureTurndown
-@deepseek-ai/dsh-office-to-pdf/lib/index.js:ensureKit
-@deepseek-ai/dsh-llm-deepseek/lib/index.js:attachment layer
 @deepseek-ai/dsh-bash-local/lib/index.js:sandboxMode
-# 本 fork 的补丁（v1.20 起）：
 @deepseek-ai/dsh-bash-local/lib/index.js:DSH_BASH_PATH
-@deepseek-ai/dsh-subprocess-local/lib/runner-launch-*.js:dsh-android-patch
-# W4（本版）：Android 环境陷阱写进 bash 工具自己的描述（overlay 里改的是 dsh-tool-bash）
-@deepseek-ai/dsh-tool-bash/lib/index.js:Android 环境（本仓库注入
 "
   # 校验对象必须是**真正进包的那棵树**（staging），不是构建用的 devhome 缓存 ——
   # 否则会出现"检查过了、包里没有"（本仓库踩过：overlay 只贴了 devhome，staging 是干净的）。

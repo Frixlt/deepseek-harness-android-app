@@ -254,7 +254,7 @@ public class MainActivity extends Activity {
         "dshroot/lib/node_modules/@deepseek-ai/dsh-client-ui-cordis/",
         // v1.33：懒加载补丁的两个包（否则老设备升级后仍用旧文件 → 优化不生效）
         "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-web/",
-        "dshroot/lib/node_modules/@deepseek-ai/dsh-office-to-pdf/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-office-kit/",  // rc5 起由 office-to-pdf 改名
         "dshroot/lib/node_modules/@deepseek-ai/dsh/package.json"
     };
     // 外部 dshroot 解压完成标记（App 在 dshroot 补齐后写入；清空/重置时随目录删除）。
@@ -2515,8 +2515,8 @@ public class MainActivity extends Activity {
         guidePages.add(p10);
 
         GuidePage p11 = new GuidePage();
-        p11.title = "Shizuku / Root 特权（可选）"; p11.actionLabel = "去配置";
-        p11.desc = "授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击等。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。";
+        p11.title = "Shizuku 或 Root 特权（可选，二选一）"; p11.actionLabel = "去配置";
+        p11.desc = "Shizuku 或 root 任一即可（不必两个都给）：授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击、创建虚拟屏等。\n\nroot 走 su，用于命令行与虚拟屏核心；Shizuku 走官方 API，免 root 设备也能用。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。";
         p11.provider = new StatusProvider() { @Override public boolean granted() {
             // 只读缓存：root 探测在后台线程执行（probeShizuku），不在主线程跑 su
             return (shizukuOk != null && shizukuOk) || (rootOk != null && rootOk);
@@ -3367,10 +3367,10 @@ public class MainActivity extends Activity {
         if (installed) {
             msg = "Shizuku 服务未运行。\n\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。";
         } else {
-            msg = "未检测到 Shizuku 应用。请先安装 Shizuku（官方版），再回来授权。";
+            msg = "未检测到 Shizuku 应用，也未检测到 root。\n\n两者**任选其一**即可：\n· 已 root：直接选「重新检测」（App 会用 su 执行特权命令，虚拟屏核心也会用 su 拉起）；\n· 未 root：安装 Shizuku（官方版）并启动，然后回来授权。";
         }
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle("Shizuku 特权");
+        b.setTitle("Shizuku / Root 特权");
         b.setMessage(msg);
         if (installed) {
             b.setPositiveButton("去启动 Shizuku", new DialogInterface.OnClickListener() {
@@ -3407,46 +3407,9 @@ public class MainActivity extends Activity {
         }, "shizuku-probe").start();
     }
 
-    /**
-     * 用 Shizuku newProcess 启动 vscreen server：
-     * 之前用 rish -c 后台 & 启动，Shizuku 命令会话结束会杀子进程（用户 Android 15 实测 server 消失）——
-     * newProcess 创建的是独立进程（App 持有 IRemoteProcess），不被会话清理，这是 Operit 验证过的存活方案。
-     */
-    private void ensureVscreenServer() {
-        try {
-            long now = System.currentTimeMillis();
-            if (now - lastVscreenEnsureTs < 5000) return;  // 5 秒频率限制
-            lastVscreenEnsureTs = now;
-            if (vscreenAlive()) return;  // server 已在监听
-            File src = vscreenDex;
-            if (src == null || !src.exists()) return;
-            if (!shizukuAvailable()) return;
-            android.os.IBinder binder = Shizuku.getBinder();
-            if (binder == null) return;
-            IShizukuService svc = IShizukuService.Stub.asInterface(binder);
-            if (svc == null) return;
-            // 1) 特权拷贝 jar 到 /data/local/tmp（App uid 写不了该目录；等待完成）
-            IRemoteProcess cp = svc.newProcess(new String[]{ "/system/bin/cp", "-f", src.getAbsolutePath(), "/data/local/tmp/vscreen_shizuku.jar" }, null, null);
-            if (cp != null) { cp.waitFor(); }
-            // 2) chmod 644（保证可读）
-            IRemoteProcess ch = svc.newProcess(new String[]{ "/system/bin/chmod", "644", "/data/local/tmp/vscreen_shizuku.jar" }, null, null);
-            if (ch != null) { ch.waitFor(); }
-            // 3) 启动 server（长驻；保存引用防 GC）—— Operit 同款启动方式：
-            //    CLASSPATH=... app_process / <Main>（cmd-dir 用 /，不用 /system/bin；Operit 实测在这类设备可用）
-            // v1.18（B12）：主类与端口随变体（原为硬编码 "…vscreen.VirtualScreenServer"，与
-            // vscreen/Main.java 的真实类名 com.deepseek.harness.vscreen.Main 不符，是一条死路径）。
-            String[] env = new String[]{ "CLASSPATH=/data/local/tmp/vscreen_shizuku.jar" };
-            vscreenProc = svc.newProcess(new String[]{
-                    "/system/bin/app_process",
-                    "/",
-                    BuildVariant.APP_ID + ".vscreen.Main",
-                    "--port", String.valueOf(BuildVariant.VS_CORE_PORT)
-            }, env, null);
-            Log.i(TAG, "vscreen server start issued via Shizuku newProcess");
-        } catch (Throwable t) {
-            Log.w(TAG, "ensureVscreenServer failed", t);
-        }
-    }
+    // v1.35：删掉这里的 ensureVscreenServer() 死代码（唯一调用早已被注释）。
+    // 虚拟屏核心的真实启动逻辑在 VsreenBridgeService.ensureCoreServer()，
+    // 并且已支持「Shizuku 优先、root 兜底」，此处再留一份只会误导排查。
 
     private boolean vscreenAlive() {
         try {
