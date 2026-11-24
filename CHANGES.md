@@ -1,3 +1,10 @@
+## v1.24.1 (2026-11-24)
+
+- Исправлена заморозка точек загрузки в состоянии «думает» (Live2D): помимо `Param140` добавлена дискретная пошаговая анимация `Param11` и флага `key8`.
+- Подключена нативная физика модели через входы `AngleX/Y/Z`, `PositionX/Y/Z`, `LeanInput`, `LControl/RControl` без перезаписи выходов `physics3.json`.
+- Обогащены процедурные анимации всех 18 состояний и реакции на нажатие (моргание, подёргивание ушек, взгляд при поиске/чтении, речь и челюсть при ответе, каскад пота и дрожь при ошибке, засыпание/зевок, переливы хвоста и блёстки).
+- [Полный чейнджлог и установка](docs/releases/1.24.1.md).
+
 ## v1.24.0 (2026-11-21)
 
 - Merged upstream `1.24.0-community`: kernel upgraded to `@deepseek-ai/dsh@0.2.2-rc.5` (lock deduplication, lazy-loaded `turndown`/`domino` and `libreoffice-kit`, `NODE_COMPILE_CACHE`, `ds-harness-remote` 0.6.0, virtual screen `su`/root fallback, Rescue page reconnect, and `mobile.js` auto-reconnect).
