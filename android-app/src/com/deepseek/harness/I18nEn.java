@@ -2562,6 +2562,16 @@ final class I18nEn {
         m.put("；它有自己的 ref 体系，必要时重新 browser_snapshot", ";It has its own ref system, and browser_snapshot can be refreshed if necessary");
         m.put("；没有工作区文件", ";No workspace file");
         m.put("🐋 DeepSeek Harness 运行中", "🐋 DeepSeek Harness is running");
+        m.put("Shizuku 或 Root 特权（可选，二选一）", "Shizuku or Root Privilege (Optional, Either One)");
+        m.put("Shizuku 或 root 任一即可（不必两个都给）：授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击、创建虚拟屏等。\n\nroot 走 su，用于命令行与虚拟屏核心；Shizuku 走官方 API，免 root 设备也能用。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。",
+              "Either Shizuku or root is sufficient (you do not need both): once granted, the AI can perform system-level actions such as installing/uninstalling apps, changing settings, simulating taps, and creating virtual displays.\n\nRoot uses su for shell commands and the virtual display core; Shizuku uses the official API and works without root.\n\nCompletely optional: file read/write, preview, and editing only require \"All files access\" above.");
+        m.put("未检测到 Shizuku 应用，也未检测到 root。\n\n两者**任选其一**即可：\n· 已 root：直接选「重新检测」（App 会用 su 执行特权命令，虚拟屏核心也会用 su 拉起）；\n· 未 root：安装 Shizuku（官方版）并启动，然后回来授权。",
+              "Neither the Shizuku app nor root access was detected.\n\nEither one works:\n· Rooted device: tap \"Re-detect\" (the app will run privileged commands and start the virtual display core via su);\n· Non-rooted device: install and start Shizuku (official release), then return to grant permission.");
+        m.put("Shizuku / Root 特权", "Shizuku / Root Privilege");
+        m.put("重连页面", "Reconnect Page");
+        m.put("已重新加载页面", "Page reloaded");
+        m.put("已重新打开主界面", "Main interface reopened");
+        m.put("重连失败：", "Reconnect failed: ");
     }
 
 }

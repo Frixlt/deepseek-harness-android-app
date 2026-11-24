@@ -33,10 +33,6 @@
 # 会话日志导出按钮（右上角 session log，下载 ZIP）：移动端用不上，禁用留出空间
 - id: session-log-download
   disabled: true
-# 遥测（OTel）：Android 端不需要上报，且它是 0.1.5 树里最大的依赖块（@opentelemetry 全套）。
-# 禁用后可以整个删掉遥测包，显著减小 payload。
-- id: session-telemetry-otel
-  disabled: true
 # ⚠ 关于 0.1.5 新增包（dsh-webhook / dsh-webhook-github / dsh-http-proxy / dsh-acp-app /
 # dsh-sdk-app / dsh-sdk-minimal / dsh-hooks-claude-code / dsh-hooks-codex）：
 # 这些包虽然存在于内核树里，但 **未被 @deepseek-ai/dsh-base 或 dsh-web-app 的插件表注册**，
@@ -77,3 +73,23 @@
     # v1.19.0：AI 浏览器（结构化 DOM 快照 + 稳定 ref，不是截图 OCR）
     - id: tool-browser
       name: '@deepseek-ai/dsh-tool-browser'
+
+# ── v1.29（0.2.2 起）────────────────────────────────────────────────────────────
+# 0.2.2 的 agent preset 会启用 `tool-plugin-manager`（dsh-plugin-manager/tools），
+# 而它 inject 的 `pluginManager` 只在**有 profileContext 服务**时才启用
+# （dsh-base 里 `plugin-manager: disabled: !!js "!ctx.get('profileContext')"`）。
+# 我们这套是「APK 静态内置插件」的用法，没有 profileContext →
+#   pluginManager 永不启动 → tool-plugin-manager 永久 pending →
+#   新会话直接失败：`agent-preset/invalid: tool-plugin-manager … waiting for pluginManager`，
+#   同时「默认工作区不可用」。
+# 这里把它显式禁用（本文件是最后一层 patch，会覆盖 preset 的启用）。
+# 但"禁用工具"不够：agent preset 每次开会话都会把它重新启用 →
+# 正确做法是把**服务提供者** plugin-manager 打开（dsh-base 里它只在有 profileContext 时启用），
+# 这样 tool-plugin-manager 的注入有落点，会话不再报 agent-preset/invalid。
+- id: plugin-manager
+  disabled: false
+
+# ── v1.31（冷启动优化）────────────────────────────────────────────────────────
+# 维护者决定：**不禁用任何插件**（HMR 用于"手机上新装插件无需重启"；OTEL 上游默认
+# 只在用户显式反馈时上传会话日志前缀，FEEDBACK_ONLY）。启动时间的收益改由
+# 「锁文件去重 + 重库懒加载」承担，见 CHANGES v1.23.0。

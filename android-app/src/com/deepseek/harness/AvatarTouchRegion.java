@@ -23,7 +23,16 @@ final class AvatarTouchRegion {
         this.root = root;
         root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override public void onViewAttachedToWindow(View v) { install(); }
-            @Override public void onViewDetachedFromWindow(View v) { listener = null; }
+            @Override public void onViewDetachedFromWindow(View v) {
+                if (listener != null && listenerType != null) {
+                    try {
+                        root.getViewTreeObserver().getClass()
+                                .getMethod("removeOnComputeInternalInsetsListener", listenerType)
+                                .invoke(root.getViewTreeObserver(), listener);
+                    } catch (Throwable ignored) {}
+                }
+                listener = null;
+            }
         });
         if (root.isAttachedToWindow()) install();
     }
@@ -44,17 +53,25 @@ final class AvatarTouchRegion {
                     if ("equals".equals(method.getName())) return args != null && proxy == args[0];
                     if ("toString".equals(method.getName())) return "AvatarTouchRegion";
                     if ("onComputeInternalInsets".equals(method.getName()) && rectangles != null && !callbackFailed) {
-                        try {
-                        Object info = args[0];
-                        Region region = (Region) regionField.get(info);
-                        region.setEmpty();
                         int w = root.getWidth(), h = root.getHeight();
-                        for (int[] r : rectangles) {
-                            int left = r[0] * w / 1024, top = r[1] * h / 1024;
-                            int right = (r[2] * w + 1023) / 1024, bottom = (r[3] * h + 1023) / 1024;
-                            if (right > left && bottom > top) region.op(left, top, right, bottom, Region.Op.UNION);
-                        }
-                        setInsets.invoke(info, 3); // TOUCHABLE_INSETS_REGION, window-local coordinates.
+                        if (w <= 0 || h <= 0) return null;
+                        try {
+                            Object info = args[0];
+                            Region region = (Region) regionField.get(info);
+                            Region built = new Region();
+                            boolean nonEmpty = false;
+                            for (int[] r : rectangles) {
+                                int left = r[0] * w / 1024, top = r[1] * h / 1024;
+                                int right = (r[2] * w + 1023) / 1024, bottom = (r[3] * h + 1023) / 1024;
+                                if (right > left && bottom > top) {
+                                    built.op(left, top, right, bottom, Region.Op.UNION);
+                                    nonEmpty = true;
+                                }
+                            }
+                            if (nonEmpty) {
+                                region.set(built);
+                                setInsets.invoke(info, 3); // TOUCHABLE_INSETS_REGION, window-local coordinates.
+                            }
                         } catch (Throwable unavailable) {
                             callbackFailed = true;
                             Log.w("DSHOverlay", "Silhouette input callback unavailable", unavailable);

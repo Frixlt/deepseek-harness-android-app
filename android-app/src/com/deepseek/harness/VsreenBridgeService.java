@@ -722,10 +722,21 @@ public class VsreenBridgeService extends Service {
         if (sCoreStarting) return;
         sCoreStarting = true;
         try {
-            // Shizuku binder 是异步到达的（App 冷启动时通常晚几秒），必须等，否则会误判成无授权。
-            if (!waitShizuku(20000)) {
-                Log.w(TAG, "无 Shizuku 授权（binder 未就绪），稍后自动重试——请确认 Shizuku 服务在运行且已授权本应用");
-                return;
+            // 特权通道解析（v1.34）：
+            //   1) 已有 Shizuku 授权 → 用 Shizuku newProcess（原有路径，进程由 App 持有，最稳）；
+            //   2) 否则若有 root → 用 su 兜底（此前**只有** Shizuku 才能拉核心，
+            //      导致"只给 root 的用户"虚拟屏永远起不来：Core 不在 → 桥转发 9028 被拒 → 工具失败）；
+            //   3) 两者都没有 → 等 Shizuku binder（冷启动异步到达，最长 20 s）。
+            boolean viaShizuku = hasShizukuPermission();
+            if (!viaShizuku && rootAvailable()) {
+                Log.i(TAG, "特权通道：root（未授权 Shizuku）");
+            } else {
+                if (!viaShizuku) viaShizuku = waitShizuku(20000);
+                if (!viaShizuku) {
+                    Log.w(TAG, "无 Shizuku 授权且无 root（binder 未就绪）——请授权 Shizuku 或授予 root 后重试");
+                    return;
+                }
+                Log.i(TAG, "特权通道：Shizuku");
             }
             String dir = new File(Environment.getExternalStorageDirectory(), extRoot() + "/vscreen").getAbsolutePath();
             String rootDir = new File(Environment.getExternalStorageDirectory(), extRoot()).getAbsolutePath();
@@ -768,13 +779,21 @@ public class VsreenBridgeService extends Service {
                     + " --token " + LocalAuth.token(VsreenBridgeService.this)
                     + " >> /data/local/tmp/vscreen.log 2>&1";
             Log.i(TAG, "starting core server: " + cmd);
-            IShizukuService svc = IShizukuService.Stub.asInterface(Shizuku.getBinder());
-            IRemoteProcess p = svc.newProcess(
-                    new String[]{"/system/bin/sh", "-c", cmd},
-                    // env 必须传 null（继承 shell 环境）：传 {"PATH=..."} 会把 ANDROID_ROOT/BOOTCLASSPATH
-                    // 等一起覆盖掉，app_process 起不了 ART 虚拟机，表现为静默无输出。
-                    null, null);
-            sCoreProc = p;
+            if (viaShizuku) {
+                IShizukuService svc = IShizukuService.Stub.asInterface(Shizuku.getBinder());
+                IRemoteProcess p = svc.newProcess(
+                        new String[]{"/system/bin/sh", "-c", cmd},
+                        // env 必须传 null（继承 shell 环境）：传 {"PATH=..."} 会把 ANDROID_ROOT/BOOTCLASSPATH
+                        // 等一起覆盖掉，app_process 起不了 ART 虚拟机，表现为静默无输出。
+                        null, null);
+                sCoreProc = p;
+            } else {
+                // root 兜底：su -c 前台执行同一条 cmd。cmd 最后一条是前台的 app_process，
+                // 所以 su 进程会一直活着；把 Process 引用存住（sRootProc），核心就不会被回收。
+                Process p = Runtime.getRuntime().exec(new String[]{ "su", "-c", cmd });
+                sRootProc = p;
+                Log.i(TAG, "core server start issued via ROOT (su -c)");
+            }
             for (int i = 0; i < 40; i++) {
                 Thread.sleep(250);
                 if (coreAlive()) { Log.i(TAG, "core server ready after " + (i + 1) * 250 + "ms"); return; }
@@ -784,6 +803,33 @@ public class VsreenBridgeService extends Service {
             Log.w(TAG, "ensureCoreServer failed: " + t.getMessage());
         } finally {
             sCoreStarting = false;
+        }
+    }
+
+    /** root 通道拉起的 core 进程（持有引用防止被当作垃圾回收）。 */
+    private static Process sRootProc;
+
+    /** root 是否可用（su -c id 输出含 uid=0）。结果缓存，失败不缓存以便用户后授权。 */
+    private volatile Boolean sRootOk;
+
+    private boolean rootAvailable() {
+        Boolean cached = sRootOk;
+        if (cached != null) return cached;
+        Process p = null;
+        try {
+            p = Runtime.getRuntime().exec(new String[]{ "su", "-c", "id" });
+            java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()));
+            String line = r.readLine();
+            try {
+                if (!p.waitFor(3, java.util.concurrent.TimeUnit.SECONDS)) p.destroy();
+            } catch (Throwable ignored) {}
+            boolean ok = line != null && line.contains("uid=0");
+            if (ok) sRootOk = Boolean.TRUE;
+            return ok;
+        } catch (Throwable t) {
+            return false;
+        } finally {
+            try { if (p != null) p.destroy(); } catch (Throwable ignored) {}
         }
     }
 

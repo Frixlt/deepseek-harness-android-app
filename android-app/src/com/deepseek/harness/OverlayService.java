@@ -198,25 +198,29 @@ public class OverlayService extends Service {
         }
     }
 
+    private static boolean hasLive2DAssets(File dir) {
+        return dir != null && findLive2DModel(dir) != null
+                && new File(dir, "pixi.min.js").isFile()
+                && new File(dir, "cubism4.min.js").isFile()
+                && new File(dir, "live2dcubismcore.min.js").isFile();
+    }
+
     public static File getLive2DDir(Context ctx) {
         try {
             File f1 = new File(ctx.getExternalFilesDir(null), "live2d");
-            if (new File(f1, "index.html").exists()) return f1;
+            if (hasLive2DAssets(f1)) return f1;
         } catch (Throwable ignored) {}
         File f2 = new File("/sdcard/deepseek-harness/live2d");
-        if (new File(f2, "index.html").exists()) return f2;
+        if (hasLive2DAssets(f2)) return f2;
         try {
             File f3 = new File(ctx.getFilesDir(), "live2d");
-            if (new File(f3, "index.html").exists()) return f3;
+            if (hasLive2DAssets(f3)) return f3;
         } catch (Throwable ignored) {}
         return f2;
     }
 
     public static boolean isLive2DInstalled(Context ctx) {
-        File dir = getLive2DDir(ctx);
-        return findLive2DModel(dir) != null && new File(dir, "pixi.min.js").isFile()
-                && new File(dir, "cubism4.min.js").isFile()
-                && new File(dir, "live2dcubismcore.min.js").isFile();
+        return hasLive2DAssets(getLive2DDir(ctx));
     }
 
     private static File findLive2DModel(File dir) {
@@ -862,6 +866,12 @@ public class OverlayService extends Service {
             try { wm.removeView(rootView); } catch (Throwable ignored) {}
         }
         super.onDestroy();
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        applyAvatarSize();
     }
 
     @Override public IBinder onBind(Intent intent) { return null; }
@@ -2052,7 +2062,7 @@ public class OverlayService extends Service {
                 } else if ("AVATAR_READY".equals(cm.message())) {
                     live2dReady = true;
                     handler.removeCallbacks(modelTimeout);
-                    live2dWebView.setAlpha(1f);
+                    if (live2dWebView != null) live2dWebView.setAlpha(1f);
                     if (iconView != null) iconView.setVisibility(View.GONE);
                     sendLive2DState();
                     syncLive2DVisibility();

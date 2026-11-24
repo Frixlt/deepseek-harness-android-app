@@ -1,3 +1,9 @@
+## v1.24.0 (2026-11-21)
+
+- Merged upstream `1.24.0-community`: kernel upgraded to `@deepseek-ai/dsh@0.2.2-rc.5` (lock deduplication, lazy-loaded `turndown`/`domino` and `libreoffice-kit`, `NODE_COMPILE_CACHE`, `ds-harness-remote` 0.6.0, virtual screen `su`/root fallback, Rescue page reconnect, and `mobile.js` auto-reconnect).
+- Preserved fork Live2D/lotus 3-mode avatar, Russian/English localization, and CI auto-release workflow; fixed `getLive2DDir` asset detection, `AvatarTouchRegion` empty-bounds lockout, rotation re-clamping, `REQ_NOTIFICATION` request code collision, and mode-aware default size reset.
+- [Полный чейнджлог и установка](docs/releases/1.24.0.md).
+
 ## v1.21.3 (2026-11-02)
 
 - Исправлены размер, обрезание, позиционирование и прозрачная область касания Live2D.
@@ -5,6 +11,139 @@
 - Обе модели используют исходный стоячий риг; экспериментальное растягивание сидячей позы удалено.
 - Плеер включён в APK; добавлены регрессионные проверки и публикация с актуальным чейнджлогом.
 - [Полный чейнджлог и установка](docs/releases/1.21.3.md).
+
+## v1.24.0（2026-11-21）
+
+> **一句话**：内核升级到官方最新 **0.2.2-rc.5**；overlay 补丁按 rc5 全量重迁（含两处 Android 关键修复）；
+> 修好「只给 root 不给 Shizuku 时虚拟屏起不来」。versionCode **67**，
+> 内置 remote 插件 **0.6.0**。
+
+### 一、内核 0.2.2-rc.1 → 0.2.2-rc.5
+
+- `android-app/kernel/package.json` pin 到 `0.2.2-rc.5`；lock 重生成后再 `npm dedupe`，
+  `zod` 保持 **1** 份（去重成果未丢），依赖包 732 个。
+- rc5 有明显上游重构：`dsh-office-to-pdf` 改名 `dsh-office-kit`、
+  `resolveRgPath` 从 `dsh-tool-fs-search` 抽到新包 `dsh-util-ripgrep`、
+  `subprocess-local` 的 runner 文件哈希名变化、多个包新增导出。
+  **旧 overlay 是 rc1 全量快照，直接套用会让插件互相判定 incompatible** ——
+  本轮全部按 rc5 重新三方合并。
+
+### 二、overlay 补丁重迁（rc5 基座 + 我们的改动）
+
+| 包 | 我们的改动 | 处理 |
+|---|---|---|
+| `dsh-subprocess-local` | `platform === "android"` 复用 Linux 探针（否则一开终端就报 unsupported） | 迁到新哈希文件 `runner-launch-CKTiL8M8.js` |
+| `dsh-util-ripgrep`（rc5 新增） | Android 优先用 payload 自带的 `runtime/bin/rg` | **新补丁**（rg 解析已从 fs-search 移到这里） |
+| `libreoffice-kit` | `import "fontkit"` 副作用式静态导入 → 只做存在性检查（省 ~1.4 s 启动） | 按 rc5 重打 |
+| `node-addon-system` | flock 原生 addon 在 Android 缺失 → 退化为空锁（否则一开会话就失败） | 按 rc5 重打 |
+| `dsh-attachment-local` + `sharp-shim.js` | sharp 原生模块 → 纯 JS 图像头解析 | 保留 |
+| `dsh-bash-local` | `sandboxMode` / `DSH_BASH_PATH` | 保留 |
+| `dsh-fs-local` | 硬链接不支持 → 改名兜底 | 保留 |
+| `dsh-storage-json` | 目录 fsync 的 EINVAL 容错 | 保留 |
+| `dsh-app-boot` / `dsh-tool-web` / `dsh-tool-bash` / `dsh-session-persistence-jsonl` / `dsh-llm-deepseek` | 插件 warn 落盘、turndown 懒加载、Android 环境说明、link→rename、附件层 | 三方合并通过 |
+| `dsh-client-ui-layout` | （与上游一致，无改动） | 已从 overlay 移除 |
+
+- **删除全部 `overlay/**/package.json`**：这是本轮最隐蔽的坑 —— overlay 里残留的
+  `dsh-app-boot/package.json`（版本 rc.1）会被 `getDshRuntimeVersion()` 当成"内核版本"，
+  于是 rc5 的插件全部被判 *"incompatible with dsh 0.2.2-rc.1"*（实测 83 条，Web 界面直接起不来）。
+  内核树自带的 package.json 才是权威版本。
+- overlay 从 46 文件精简到 32 文件，构建闸门特征串同步为 11 条（11/11 命中）。
+
+### 三、虚拟屏：只给 root 也能用（1、2 两项）
+
+- **根因**：`VsreenBridgeService.ensureCoreServer()` 原来**只认 Shizuku**
+  （`waitShizuku()` 失败就 return），而 root 权限只影响"调用工具"这一环，
+  所以只给 root 的用户 **Core 永远起不来** → 桥转发 9028 被拒 → 创建虚拟屏失败。
+- **修法**：特权通道解析改为「Shizuku 授权优先 → 否则 su 可用则用 root → 都没有才等 Shizuku」；
+  root 分支用 `su -c <同一条启动命令>`（jar 校验 / 清旧进程 / token / 日志完全一致），
+  并把 `Process` 引用存入 `sRootProc` 防止被回收。日志会打印实际通道
+  （`特权通道：root` / `特权通道：Shizuku`）。
+- **权限页文案**改为「Shizuku 或 Root 特权（可选，二选一）」，
+  并说明 root 走 su、Shizuku 走官方 API，任一即可。
+- 删除 `MainActivity.ensureVscreenServer()` 死代码（唯一调用早已被注释，
+  只走 Shizuku，容易误导排查）。
+- ⚠️ 未验证：root 分支需要真机 Magisk；AOSP 模拟器的 `su` 只允许 shell/root，App uid 被拒，
+  无法在本环境实测（代码路径与日志已就绪）。
+
+### 四、冷启动（模拟器 community，x86_64 + ndk_translation）
+
+| 版本 | 引擎 spawn → 端口就绪 |
+|---|---|
+| 1.22.0（rc1，无优化） | 51 / 48 s |
+| 1.23.0（rc1 + 去重 + 懒加载） | 30 / 31 s |
+| **1.24.0（rc5 + 同套优化）** | **27 / 28 s** |
+
+### 五、验证
+
+- 干净安装：`incompatible` **0**、`failed to import` **0**、`did not activate` **0**，引擎 29 s 就绪。
+- 覆盖安装（不卸载、保留外部目录）：内核正确切到 rc5，同样 0 错误。
+- 13 个补丁文件逐个在设备上确认已落地（`noopBinding` / `existsSync(bundled)` /
+  `resolve("fontkit")` / `dsh-android-patch` / `sharpShim` + `sharp-shim.js`）。
+- ⚠️ 未验证：真机上由模型实际调用的 `web_fetch` / 终端 / 虚拟屏 root 通道。
+
+## v1.23.0（2026-11-12）
+
+> **一句话**：冷启动优化落地 —— **锁文件去重**（zod 58 份 → 1 份）+ **两处重库懒加载**
+> （turndown/domino、libreoffice-kit）。干净安装实测：**冷启动 56 s → 32 s（−43%）**，
+> **APK 217 MB → 113 MB（−48%）**。versionCode **66**，内核 DSH **0.2.2-rc.1**，
+> 内置 remote 插件升到 **0.6.0**。
+
+### 一、冷启动（模拟器 community，干净安装，同场 A/B 各 2 次）
+
+| 指标 | 优化前 | 优化后 |
+|---|---|---|
+| App 冷启动（点图标 → 引擎就绪） | 56 s | **32 s** |
+| 引擎 spawn → 端口就绪 | 51 / 48 s | **31 / 30 s** |
+| 启动期模块加载次数 | 5078 | （禁用项恢复后重测，见 release 说明）|
+| 设备树 `.js` 文件数 | 12,363 | **6,357**（−49%）|
+| APK 体积 | 217 MB | **113 MB**（−48%）|
+
+### 二、做了什么
+
+- **锁文件去重（最大单项收益）**：几乎所有 `@deepseek-ai/dsh-*` 都写死 `zod: "4.4.3"`（精确版本），
+  而顶层是另一个包要的 `4.6.7` → npm 判定"不满足" → **给 57 个包各塞一份 3 MB 副本**（合计 96 MB、
+  约 3600 次模块加载）。`npm dedupe --package-lock-only` 后 zod 条目 **58 → 1**，所有需求范围
+  （`4.4.3` / `^4.4.3` / `^4.2.0`）都由 4.6.7 满足，语义不变。
+- **懒加载 turndown / domino**：`dsh-tool-web` 原来在**模块级**静态 import 并立刻构造转换器，
+  启动即付 ~1.2 s（53 个文件），而它只在 `web_fetch` 真要把 HTML 转 Markdown 时才用。
+  改为 `ensureTurndown()`（幂等 memo）→ `web_fetch.execute` 里与网络抓取**并行预热** →
+  同步 `renderBody` 未就绪时**沿用原有兜底文案**，绝不抛错。
+- **懒加载 libreoffice-kit**：`dsh-office-to-pdf` 静态 import 其入口（83 KB，实测 ~1.2 s），
+  改为 `ensureKit()` 惰性 memo；创建转换器本就在首次转换时进行，语义不变。
+- **配套**：两个包进 overlay（48 文件）+ 强制覆盖白名单（hoisted 路径）+ 构建闸门特征串（16 条）；
+  overlay 与 mobile 文件统一 LF。
+- **不禁用任何插件（维护者决定）**：`hmr` 必须保留 —— 手机端可以新装插件（插件管理器 / AI 自己写插件），
+  HMR 让改动无需重启引擎即可生效，是真实使用场景；`otel` 同样保留（上游默认 `FEEDBACK_ONLY`：
+  只有用户显式反馈时才上传会话日志前缀）。启动时间的收益完全由「锁文件去重 + 重库懒加载」承担。
+  > 说明：本轮开发过程中曾一度把 `hmr`/`otel` 禁用，经维护者指出后已全部恢复，发布物与本文档一致。
+- **`NODE_COMPILE_CACHE`（保留但收益≈0）**：引擎环境注入（缓存目录 `files/node-compile-cache`）。
+  微基准：`import zod` 2.68→2.39 s、`dsh-app-boot` 1.93→1.65 s、`cordis` 162→71 ms；
+  但整体墙钟无可见改善（77/78 s vs 82 s，噪声内）—— **字节码缓存覆盖不到顶层求值**，如实记录。
+
+### 三、工具与维护机制（新增）
+
+- `tools/boot-timing/`：从 `perf/startup-timing` 分支搬回并适配 0.2.2 —— `boot-run.sh`（plain/prof/hooks/
+  profhooks/sync 五种模式）、`preload.mjs`（同线程 `module.registerHooks` 打点）、`analyze.py`（按包聚合 +
+  空档归因）、`bench-import.mjs`、`bench-cache.mjs`（缓存收益微基准）。
+- `tools/boot-timing/lazy-candidates.yml`：**"偶然使用"白名单**（不是重包黑名单）。
+- `tools/boot-timing/lazy-scan.py`：扫 hooks 日志 → 打"启动期最重的包 + 判定（候选/已懒加载/必需）"，
+  并列出"本版未加载 → 可从清单删除"的条目。**每版 5 分钟复核**，补丁失效由构建闸门 + stale 检查提示。
+- `tools/diag/bench-boot.sh`、`.cache/ab-coldstart.sh`（冷启动 A/B 脚本）。
+
+### 四、验证
+
+- 端到端（不经模型）驱动修补后的 `dsh-tool-web`：`execute 2650 ms, status=200, kind=html`，
+  `formatFetchOutput` 产出正确 Markdown（标题/粗体/GFM 表格），**未走兜底**。
+- 冒烟：两个补丁文件 `import` 正常（导出项完整）。
+- 引擎健康：`failed to import` **0**，`incompatible` **0**。
+- ⚠️ 未验证：真实会话里由模型调用 `web_fetch`；Excel→PDF（`libreoffice-kit` 需要 LibreOffice 二进制，
+  Android 上本来就没有，改动前后一致为"工具不可用"）。
+
+### 五、已知问题
+
+- 控制流断开（`session-controller: control stream failed`）后前端不自动重连 —— 已在 1.22.0 加入
+  "断流自动重载（仅断开触发、60 s 冷却）+ 救援页「重连页面」"作为兜底，根治仍需上游能力。
+- 模拟器测量噪声大（同一配置不同时段 51–86 s），所有结论以**同场 A/B** 与**加载次数**为准。
 
 ## v1.19.3（未发布 · 2026-10-14）
 

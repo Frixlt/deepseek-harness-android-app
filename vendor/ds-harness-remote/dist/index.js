@@ -4,17 +4,10 @@ var __export = (target2, all) => {
     __defProp(target2, name2, { get: all[name2], enumerable: true });
 };
 
-// ../webrtc/dist/websocket-backpressure.js
-async function waitForRelayCapacity(socket) {
-  const started = Date.now();
-  while ((socket.bufferedAmount ?? 0) > 512 * 1024) {
-    if (socket.readyState !== 1 || Date.now() - started > 1e4)
-      throw new Error("Relay consumer is too slow or disconnected");
-    await new Promise((resolve4) => setTimeout(resolve4, 10));
-  }
-  if (socket.readyState !== 1)
-    throw new Error("Relay transport closed");
-}
+// src/client-runtime.ts
+import { mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
+import { homedir as homedir2 } from "node:os";
+import { join as join6 } from "node:path";
 
 // ../../node_modules/zod/v3/external.js
 var external_exports = {};
@@ -177,8 +170,8 @@ var util;
     return void 0;
   };
   util2.isInteger = typeof Number.isInteger === "function" ? (val) => Number.isInteger(val) : (val) => typeof val === "number" && Number.isFinite(val) && Math.floor(val) === val;
-  function joinValues(array3, separator = " | ") {
-    return array3.map((val) => typeof val === "string" ? `'${val}'` : val).join(separator);
+  function joinValues(array2, separator = " | ") {
+    return array2.map((val) => typeof val === "string" ? `'${val}'` : val).join(separator);
   }
   util2.joinValues = joinValues;
   util2.jsonStringifyReplacer = (_, value) => {
@@ -4594,6 +4587,32 @@ function cryptoRandomId() {
   return `msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
 }
 
+// src/history-policy.ts
+var HISTORY_PAGE_SIZES = [50, 30, 20, 12, 6, 3, 1];
+var RESPONSE_ENVELOPE_BYTES = 8 * 1024;
+var HISTORY_BUDGET_BYTES = MAX_SECURE_MESSAGE_BYTES - RESPONSE_ENVELOPE_BYTES;
+function historyPageSizes(start = HISTORY_PAGE_SIZES[0]) {
+  const sizes = [start];
+  for (const size of HISTORY_PAGE_SIZES) if (size < start) sizes.push(size);
+  return sizes;
+}
+function codexHistoryStatsFileEnabled(env = process.env) {
+  const value = env.DSH_CODEX_HISTORY_STATS?.trim().toLowerCase();
+  return value === "1" || value === "true" || value === "on" || value === "yes";
+}
+
+// ../webrtc/dist/websocket-backpressure.js
+async function waitForRelayCapacity(socket) {
+  const started = Date.now();
+  while ((socket.bufferedAmount ?? 0) > 512 * 1024) {
+    if (socket.readyState !== 1 || Date.now() - started > 1e4)
+      throw new Error("Relay consumer is too slow or disconnected");
+    await new Promise((resolve5) => setTimeout(resolve5, 10));
+  }
+  if (socket.readyState !== 1)
+    throw new Error("Relay transport closed");
+}
+
 // ../webrtc/dist/transport.js
 var BaseTransport = class {
   handlers = /* @__PURE__ */ new Set();
@@ -5066,8 +5085,8 @@ var RtcDataChannelTransport = class {
     if (this.connectPromise !== void 0)
       return this.connectPromise;
     this.armAbort(signal);
-    this.connectPromise = new Promise((resolve4, reject) => {
-      this.openResolve = resolve4;
+    this.connectPromise = new Promise((resolve5, reject) => {
+      this.openResolve = resolve5;
       this.openReject = reject;
       this.negotiateTimer = setTimeout(() => {
         void this.failOpenAfterStats(new RtcConnectError("RTC_CONNECT_TIMEOUT", `WebRTC negotiation timed out after ${this.negotiateTimeoutMs}ms.`));
@@ -5282,9 +5301,9 @@ var RtcDataChannelTransport = class {
       if (this.closed || this.opened)
         return;
       this.opened = true;
-      const resolve4 = this.openResolve;
+      const resolve5 = this.openResolve;
       this.clearNegotiation();
-      void this.resolveSelectedTransport().then(() => resolve4?.());
+      void this.resolveSelectedTransport().then(() => resolve5?.());
     };
     channel.onmessage = (event) => {
       if (this.closed || !this.opened)
@@ -5678,7 +5697,7 @@ function asError(error) {
   return error instanceof Error ? error : new RtcConnectError("RTC_FAILED", "WebRTC negotiation failed.");
 }
 function sleep(ms) {
-  return new Promise((resolve4) => setTimeout(resolve4, ms));
+  return new Promise((resolve5) => setTimeout(resolve5, ms));
 }
 
 // ../webrtc/dist/adaptive-transport.js
@@ -5719,8 +5738,8 @@ var AdaptiveTransport = class extends BaseTransport {
     this.socket = new WebSocket(this.url);
     this.controlFrameLimits = {};
     this.socket.binaryType = "arraybuffer";
-    await new Promise((resolve4, reject) => {
-      this.readyResolve = resolve4;
+    await new Promise((resolve5, reject) => {
+      this.readyResolve = resolve5;
       this.readyReject = reject;
       this.handshakeTimer = setTimeout(() => this.failConnection(new Error("Adaptive control handshake timed out")), this.options.handshakeTimeoutMs ?? 15e3);
       const socket = this.socket;
@@ -6242,7 +6261,7 @@ function hexToBytes(hex) {
   const al = hl / 2;
   if (hl % 2)
     throw new Error("hex string expected, got unpadded hex of length " + hl);
-  const array3 = new Uint8Array(al);
+  const array2 = new Uint8Array(al);
   for (let ai = 0, hi = 0; ai < al; ai++, hi += 2) {
     const n1 = asciiToBase16(hex.charCodeAt(hi));
     const n2 = asciiToBase16(hex.charCodeAt(hi + 1));
@@ -6250,9 +6269,9 @@ function hexToBytes(hex) {
       const char = hex[hi] + hex[hi + 1];
       throw new Error('hex string expected, got non-hex character "' + char + '" at index ' + hi);
     }
-    array3[ai] = n1 * 16 + n2;
+    array2[ai] = n1 * 16 + n2;
   }
-  return array3;
+  return array2;
 }
 function utf8ToBytes(str) {
   if (typeof str !== "string")
@@ -8959,7 +8978,7 @@ function hexToBytes2(hex) {
   const al = hl / 2;
   if (hl % 2)
     throw new RangeError("hex string expected, got unpadded hex of length " + hl);
-  const array3 = new Uint8Array(al);
+  const array2 = new Uint8Array(al);
   for (let ai = 0, hi = 0; ai < al; ai++, hi += 2) {
     const n1 = asciiToBase162(hex.charCodeAt(hi));
     const n2 = asciiToBase162(hex.charCodeAt(hi + 1));
@@ -8967,9 +8986,9 @@ function hexToBytes2(hex) {
       const char = hex[hi] + hex[hi + 1];
       throw new RangeError('hex string expected, got non-hex character "' + char + '" at index ' + hi);
     }
-    array3[ai] = n1 * 16 + n2;
+    array2[ai] = n1 * 16 + n2;
   }
-  return array3;
+  return array2;
 }
 function concatBytes2(...arrays) {
   let sum = 0;
@@ -13213,8 +13232,8 @@ function errorCode(error) {
   return typeof code === "string" ? code : void 0;
 }
 function sleep2(ms) {
-  return new Promise((resolve4) => {
-    setTimeout(resolve4, ms);
+  return new Promise((resolve5) => {
+    setTimeout(resolve5, ms);
   });
 }
 
@@ -13279,7 +13298,7 @@ var ServerCredentialStore = class {
         if (!(error instanceof Error) || !("code" in error) || error.code !== "EEXIST") throw error;
         if (await reclaimAbandonedRefreshLock(lock)) continue;
         if (Date.now() >= deadline) throw new ServerCredentialsBusyError();
-        await new Promise((resolve4) => setTimeout(resolve4, 50));
+        await new Promise((resolve5) => setTimeout(resolve5, 50));
       }
     }
     try {
@@ -13418,7 +13437,8 @@ var entryConfigSchema = s.object({
   ]),
   codex: s.object({
     enabled: s.boolean(),
-    binary: s.string()
+    binary: s.string(),
+    showUnprojectedSessions: s.boolean()
   }),
   acp: s.object({ enabled: s.boolean(), backends: s.array(s.object({ id: s.string(), enabled: s.boolean(), command: s.string(), args: s.array(s.string()), cwd: s.string() })) })
 });
@@ -13451,7 +13471,8 @@ var configSchema = external_exports.object({
   reconnect: reconnectSchema.optional(),
   codex: external_exports.object({
     enabled: external_exports.boolean().optional(),
-    binary: external_exports.string().trim().min(1).max(4096).optional()
+    binary: external_exports.string().trim().min(1).max(4096).optional(),
+    showUnprojectedSessions: external_exports.boolean().optional()
   }).strict().optional(),
   acp: external_exports.object({ enabled: external_exports.boolean().optional(), backends: external_exports.array(external_exports.object({ id: external_exports.string().trim().regex(/^[a-z0-9][a-z0-9._-]{0,31}$/i), enabled: external_exports.boolean().optional(), command: external_exports.string().trim().min(1).max(4096).optional(), args: external_exports.array(external_exports.string().max(4096)).max(32).optional(), cwd: external_exports.string().max(4096).optional() }).strict()).max(12).optional(), backend: external_exports.string().trim().regex(/^[a-z0-9][a-z0-9._-]{0,31}$/i).optional(), command: external_exports.string().trim().min(1).max(4096).optional(), args: external_exports.array(external_exports.string().max(4096)).max(32).optional(), cwd: external_exports.string().max(4096).optional() }).strict().optional()
 }).strict();
@@ -13493,7 +13514,8 @@ function resolveConfig(input2 = {}, env = process.env) {
       // an account and, while unavailable, retries every minute. The bundled profile patch says the same thing, so
       // an install that never touches the switch has it off.
       enabled: parsed.codex?.enabled ?? false,
-      binary: parsed.codex?.binary ?? "codex"
+      binary: parsed.codex?.binary ?? "codex",
+      showUnprojectedSessions: parsed.codex?.showUnprojectedSessions ?? true
     },
     acp: { enabled: parsed.acp?.enabled ?? true, backends: [.../* @__PURE__ */ new Set(["codex", "cursor", "kimi", ...parsed.acp?.backends?.map((item) => item.id) ?? []])].map((id4) => {
       const d = parsed.acp?.backends?.find((x) => x.id === id4);
@@ -13521,7 +13543,7 @@ function normalizeServerUrl(value) {
 }
 
 // src/version.ts
-var PLUGIN_VERSION = "0.5.6";
+var PLUGIN_VERSION = "0.6.0";
 
 // src/server-api.ts
 var ENABLED_QR_PROVIDERS = ["github"];
@@ -13998,6 +14020,7 @@ function requireRecord(value, name2) {
 
 // src/server-connection.ts
 var DEFAULT_WEBRTC_NEGOTIATE_TIMEOUT_MS = 12e3;
+var CLOSE_DRAIN_TIMEOUT_MS = 5e3;
 var HostServerConnection = class {
   constructor(config, identity, identities, api, connections, logger, createWebSocket = (url) => new WebSocket(url), rtcFactoryProvider, hostCapabilities = () => ["harness.api.v1"], harnessVersion) {
     this.config = config;
@@ -14041,7 +14064,7 @@ var HostServerConnection = class {
     }
     if (this.resumeQueued) return;
     this.resumeQueued = true;
-    void this.running.finally(() => {
+    void this.running.catch(() => void 0).finally(() => {
       this.resumeQueued = false;
       if (!this.stopped) this.start();
     });
@@ -14077,7 +14100,7 @@ var HostServerConnection = class {
     this.reconnectRequested = true;
     this.retryWake?.();
     this.socket?.close(4e3, "manual reconnect");
-    void this.running.finally(() => {
+    void this.running.catch(() => void 0).finally(() => {
       if (!this.reconnectRequested || this.stopped) return;
       this.reconnectRequested = false;
       this.start();
@@ -14107,7 +14130,7 @@ var HostServerConnection = class {
           ...connectionFailureDetail(error)
         });
         if (TERMINAL_AUTH_ERRORS.has(code)) {
-          this.logger.warn(code === "CONNECTION_REPLACED" ? "Another instance is using this Host identity. Standing by: retrying in five minutes, and taking over as soon as it leaves." : code === "SERVER_CREDENTIALS_BUSY" ? "Credential refresh is locked. Stop other instances; after a crash, stop all instances before removing server-credentials.json.refresh-lock and authorizing again." : "Host authorization failed. Run /remote login or authorize this Host again in Remote settings.");
+          this.logger.warn(code === "CONNECTION_REPLACED" ? "Another instance is using this Host identity. Standing by: retrying in five minutes, and taking over as soon as it leaves." : code === "SERVER_CREDENTIALS_BUSY" ? "Credential refresh is locked. Stop other instances; after a crash, stop all instances before removing server-credentials.json.refresh-lock and authorizing again." : code === "CONTROL_DISABLED" ? 'This device is not accepting control. Turn on "Allow control of this device" to reconnect.' : "Host authorization failed. Run /remote login or authorize this Host again in Remote settings.");
         }
         if (code === "DEVICE_REVOKED" || code === "AUTH_INVALID") {
           try {
@@ -14143,7 +14166,7 @@ var HostServerConnection = class {
     this.controlFrameLimits = {};
     let acknowledged = false;
     let messageQueue = Promise.resolve();
-    await new Promise((resolve4, reject) => {
+    await new Promise((resolve5, reject) => {
       let settled = false;
       const helloTimer = setTimeout(() => socket.close(4001, "hello timeout"), 1e4);
       const finish = (error) => {
@@ -14152,7 +14175,7 @@ var HostServerConnection = class {
         clearTimeout(helloTimer);
         this.online = false;
         if (this.socket === socket) this.socket = void 0;
-        void this.dropTunnels().finally(() => error === void 0 ? resolve4() : reject(error));
+        void this.dropTunnels().finally(() => error === void 0 ? resolve5() : reject(error));
       };
       socket.onopen = () => {
         this.sendControl("hello", {
@@ -14166,9 +14189,25 @@ var HostServerConnection = class {
         });
       };
       socket.onmessage = (event) => {
+        let frame;
+        try {
+          frame = decodeControl(event.data, this.controlFrameLimits);
+        } catch (error) {
+          this.controlFrameFailed(socket, error);
+          return;
+        }
+        this.lastActiveAt = Date.now();
+        if (acknowledged && (frame.type === "ping" || frame.type === "pong")) {
+          if (frame.type === "pong") return;
+          const nonce = objectValue(frame.payload, "nonce");
+          if (typeof nonce !== "string") {
+            this.controlFrameFailed(socket, new ControlConnectionError("INVALID_MESSAGE", "Control ping has no nonce."));
+            return;
+          }
+          this.sendControl("pong", { nonce });
+          return;
+        }
         messageQueue = messageQueue.then(async () => {
-          const frame = decodeControl(event.data, this.controlFrameLimits);
-          this.lastActiveAt = Date.now();
           if (frame.type === "hello.ack") {
             const payload = requireHelloAck(frame.payload);
             this.authRecoveryAttempted = false;
@@ -14193,13 +14232,7 @@ var HostServerConnection = class {
           if (!acknowledged) throw new ControlConnectionError("INVALID_MESSAGE", "Server sent a frame before hello.ack.");
           await this.handleFrame(frame);
         }).catch((error) => {
-          const code = errorCode2(error);
-          this.terminalError = code;
-          this.logger.error("server control frame failed", {
-            code,
-            reason: diagnosticReason(error)
-          });
-          socket.close(4008, "invalid control frame");
+          this.controlFrameFailed(socket, error);
         });
       };
       socket.onerror = (event) => {
@@ -14209,7 +14242,7 @@ var HostServerConnection = class {
       };
       socket.onclose = (event) => {
         const close = async () => {
-          await messageQueue.catch(() => void 0);
+          await drainWithin(messageQueue, CLOSE_DRAIN_TIMEOUT_MS);
           if (this.stopped) {
             finish();
             return;
@@ -14237,12 +14270,22 @@ var HostServerConnection = class {
             finish(new ControlConnectionError("DEVICE_REVOKED", "The Server revoked this Host device."));
             return;
           }
-          if (acknowledged) this.terminalError = closeCode(event.code);
-          finish(acknowledged ? void 0 : new ControlConnectionError(closeCode(event.code), event.reason || "Server control connection closed."));
+          if (acknowledged) this.terminalError = closeCode(event.code, event.reason);
+          finish(acknowledged ? void 0 : new ControlConnectionError(closeCode(event.code, event.reason), event.reason || "Server control connection closed."));
         };
         void close();
       };
     });
+  }
+  /** Record a frame failure and close the socket, so the run retries from a clean state. */
+  controlFrameFailed(socket, error) {
+    const code = errorCode2(error);
+    this.terminalError = code;
+    this.logger.error("server control frame failed", {
+      code,
+      reason: diagnosticReason(error)
+    });
+    socket.close(4008, "invalid control frame");
   }
   async handleFrame(frame) {
     if (frame.type === "ping") {
@@ -14692,23 +14735,38 @@ var HostServerConnection = class {
   waitBeforeRetry(baseDelay, exact = false) {
     const spread = exact ? 0 : baseDelay * this.config.reconnect.jitter;
     const delay = Math.max(0, Math.round(baseDelay - spread + Math.random() * spread * 2));
-    return new Promise((resolve4) => {
+    return new Promise((resolve5) => {
       const timer = setTimeout(() => {
         this.retryWake = void 0;
-        resolve4();
+        resolve5();
       }, delay);
       this.retryWake = () => {
         clearTimeout(timer);
-        resolve4();
+        resolve5();
       };
     });
   }
 };
 var REPLACED_FIRST_RETRY_MS = 65e3;
+async function drainWithin(promise, ms) {
+  let timer;
+  try {
+    await Promise.race([
+      promise.catch(() => void 0),
+      new Promise((resolve5) => {
+        timer = setTimeout(resolve5, ms);
+        timer.unref?.();
+      })
+    ]);
+  } finally {
+    if (timer !== void 0) clearTimeout(timer);
+  }
+}
 var TERMINAL_AUTH_ERRORS = /* @__PURE__ */ new Set([
   "SERVER_CREDENTIALS_BUSY",
   "ACCOUNT_AUTH_REQUIRED",
   "AUTH_INVALID",
+  "CONTROL_DISABLED",
   "DEVICE_OWNERSHIP_REQUIRED",
   "DEVICE_REVOKED",
   "TOKEN_EXPIRED"
@@ -14926,14 +14984,25 @@ function errorCode2(error) {
 function isRetryable(error) {
   return !TERMINAL_AUTH_ERRORS.has(errorCode2(error)) && (!(error instanceof ServerApiError) || error.retryable);
 }
-function closeCode(code) {
+function closeCode(code, reason) {
   if (code === 4002) return "AUTH_INVALID";
   if (code === 4003) return "CONNECTION_REPLACED";
   if (code === 4004) return "DEVICE_REVOKED";
   if (code === 4007) return "RATE_LIMITED";
   if (code === 4011) return "UNSUPPORTED_VERSION";
+  if (code === 4001 && reason !== void 0 && REJECTED_HELLO_CODES.has(reason)) return reason;
   return "CONNECTION_FAILED";
 }
+var REJECTED_HELLO_CODES = /* @__PURE__ */ new Set([
+  "AUTH_REQUIRED",
+  "AUTH_INVALID",
+  "TOKEN_EXPIRED",
+  "DEVICE_REVOKED",
+  "CONTROL_DISABLED",
+  "MEMBERSHIP_REQUIRED",
+  "UNSUPPORTED_VERSION",
+  "RATE_LIMITED"
+]);
 
 // src/loopback-preview.ts
 import { randomBytes as randomBytes7, randomUUID } from "node:crypto";
@@ -15039,7 +15108,7 @@ var LoopbackHost = class {
         const response = handle.response;
         let chunk = response.read(Math.min(response.readableLength || LOOPBACK_CHUNK_BYTES, LOOPBACK_CHUNK_BYTES));
         if (chunk === null && !response.readableEnded && !response.destroyed) {
-          await new Promise((resolve4, reject) => {
+          await new Promise((resolve5, reject) => {
             const timer = setTimeout(() => finish(new Error("timeout")), 2e4);
             const ready = () => finish();
             const fail4 = () => finish(new Error("closed"));
@@ -15049,7 +15118,7 @@ var LoopbackHost = class {
               response.off("end", ready);
               response.off("close", ready);
               response.off("error", fail4);
-              error === void 0 ? resolve4() : reject(error);
+              error === void 0 ? resolve5() : reject(error);
             };
             response.once("readable", ready);
             response.once("end", ready);
@@ -15080,22 +15149,22 @@ var LoopbackHost = class {
           this.close(value.id);
           throw new RpcError("RATE_LIMITED", "Preview WebSocket buffer exceeded its limit.");
         }
-        await new Promise((resolve4, reject) => handle.socket.send(data2, { binary: value.binary }, (error) => error ? reject(new RpcError("LOOPBACK_CLOSED", "Preview socket closed.")) : resolve4()));
+        await new Promise((resolve5, reject) => handle.socket.send(data2, { binary: value.binary }, (error) => error ? reject(new RpcError("LOOPBACK_CLOSED", "Preview socket closed.")) : resolve5()));
         return { sent: true };
       }
       if (value.op === "ws.read") {
         if (handle.reading) throw new RpcError("REQUEST_CONFLICT", "Only one preview read may be pending.");
         handle.reading = true;
         try {
-          if (handle.messages.length === 0 && !handle.closed) await new Promise((resolve4) => {
+          if (handle.messages.length === 0 && !handle.closed) await new Promise((resolve5) => {
             const timer = setTimeout(() => {
               handle.wake = void 0;
-              resolve4();
+              resolve5();
             }, 2e4);
             handle.wake = () => {
               clearTimeout(timer);
               handle.wake = void 0;
-              resolve4();
+              resolve5();
             };
           });
           let bytes = 0;
@@ -15142,7 +15211,7 @@ var LoopbackHost = class {
   openHttp(value) {
     const body = value.body === void 0 ? void 0 : Buffer.from(value.body, "base64");
     if ((body?.length ?? 0) > LOOPBACK_MAX_BODY_BYTES) throw new Error("body limit");
-    return new Promise((resolve4, reject) => {
+    return new Promise((resolve5, reject) => {
       const headers = Object.fromEntries(cleanHeaders(value.headers));
       let handle;
       const request = httpRequest({
@@ -15161,7 +15230,7 @@ var LoopbackHost = class {
         handle.response = response;
         response.on("error", () => void 0);
         clearTimeout(timer);
-        resolve4({ status: response.statusCode ?? 502, headers: cleanHeaders(headerPairs(response.headers)) });
+        resolve5({ status: response.statusCode ?? 502, headers: cleanHeaders(headerPairs(response.headers)) });
       });
       const timer = setTimeout(() => {
         request.destroy();
@@ -15177,7 +15246,7 @@ var LoopbackHost = class {
     });
   }
   openWs(value) {
-    return new Promise((resolve4, reject) => {
+    return new Promise((resolve5, reject) => {
       const socket = new WebSocket2(`ws://127.0.0.1:${value.port}${value.path}`, value.protocols, {
         headers: Object.fromEntries(cleanHeaders(value.headers)),
         followRedirects: false,
@@ -15187,7 +15256,7 @@ var LoopbackHost = class {
       });
       const handle = { kind: "ws", port: value.port, socket, messages: [], bytes: 0, reading: false, closed: false, touched: Date.now() };
       this.handles.set(value.id, handle);
-      socket.once("open", () => resolve4({ protocol: socket.protocol }));
+      socket.once("open", () => resolve5({ protocol: socket.protocol }));
       socket.on("message", (data2, binary) => {
         if (handle.closed) return;
         const message = { data: Buffer.from(data2).toString("base64"), binary };
@@ -15246,7 +15315,7 @@ var LoopbackPreview = class {
       for (const client of running.ws.clients) client.terminate();
       running.ws.close();
       running.server.closeAllConnections();
-      await new Promise((resolve4) => running.server.close(() => resolve4()));
+      await new Promise((resolve5) => running.server.close(() => resolve5()));
     }
     this.servers.clear();
   }
@@ -15301,11 +15370,11 @@ var LoopbackPreview = class {
         void this.release(id4);
       });
     });
-    await new Promise((resolve4, reject) => {
+    await new Promise((resolve5, reject) => {
       server.once("error", reject);
       server.listen(0, "127.0.0.1", () => {
         server.off("error", reject);
-        resolve4();
+        resolve5();
       });
     });
     const address = server.address();
@@ -15371,10 +15440,10 @@ var LoopbackPreview = class {
       while (!signal.aborted) {
         const chunk = await this.client.rpc("loopback.call", { op: "http.read", id: id4 }, signal);
         if (chunk.data !== "" && !res.write(Buffer.from(chunk.data, "base64"))) {
-          await new Promise((resolve4, reject) => {
+          await new Promise((resolve5, reject) => {
             const ready = () => {
               cleanup();
-              resolve4();
+              resolve5();
             };
             const closed = () => {
               cleanup();
@@ -15434,7 +15503,7 @@ var LoopbackPreview = class {
           const result = await this.client.rpc("loopback.call", { op: "ws.read", id: id4 }, signal);
           for (const message of result.messages) {
             if (socket.bufferedAmount > 1024 * 1024) throw new Error("slow preview");
-            await new Promise((resolve4, reject) => socket.send(Buffer.from(message.data, "base64"), { binary: message.binary }, (error) => error ? reject(error) : resolve4()));
+            await new Promise((resolve5, reject) => socket.send(Buffer.from(message.data, "base64"), { binary: message.binary }, (error) => error ? reject(error) : resolve5()));
           }
           if (result.closed) break;
         }
@@ -16122,13 +16191,13 @@ var RemoteClientCore = class {
       throw rpcAbortedError(method, signal.reason);
     const timeoutMs = callTimeoutMs(this.timeoutMs, options);
     const request = createRpcRequest(method, params);
-    const result = new Promise((resolve4, reject) => {
+    const result = new Promise((resolve5, reject) => {
       const timer = setTimeout(() => {
         this.rejectPending(request.id, new RemoteClientError("RPC_TIMEOUT", `RPC ${method} timed out after ${timeoutMs}ms`));
       }, timeoutMs);
       const pending = {
         method,
-        resolve: resolve4,
+        resolve: resolve5,
         reject,
         timer
       };
@@ -16437,7 +16506,7 @@ var ClientSecureTransport = class {
   }
 };
 async function waitForResponder(inner, noise) {
-  await new Promise((resolve4, reject) => {
+  await new Promise((resolve5, reject) => {
     let settled = false;
     const timer = setTimeout(() => finish(new Error("Noise IK handshake timed out.")), 1e4);
     const unsubscribe = inner.onHandshake((step, data2) => {
@@ -16456,7 +16525,7 @@ async function waitForResponder(inner, noise) {
       settled = true;
       clearTimeout(timer);
       unsubscribe();
-      if (error === void 0) resolve4();
+      if (error === void 0) resolve5();
       else reject(error);
     };
     void inner.sendHandshake(1, noise.writeHandshake()).catch((error) => {
@@ -16893,7 +16962,7 @@ var RemoteHarnessApiProxy = class {
       if (committed.transferId !== transferId || committed.totalBytes <= 0 || committed.totalBytes > MAX_HARNESS_API_TRANSFER_BYTES || committed.totalChunks !== Math.ceil(committed.totalBytes / HARNESS_API_TRANSFER_CHUNK_BYTES)) {
         throw new Error("The remote Host returned an invalid Harness API transfer descriptor.");
       }
-      const responseBytes = new Uint8Array(committed.totalBytes);
+      const responseBytes2 = new Uint8Array(committed.totalBytes);
       let offset = 0;
       for (let index = 0; index < committed.totalChunks; index += 1) {
         const result = await this.client.rpc(
@@ -16909,10 +16978,10 @@ var RemoteHarnessApiProxy = class {
         if (chunk.byteLength !== expectedBytes) {
           throw new Error("The remote Host returned an invalid Harness API transfer chunk.");
         }
-        responseBytes.set(chunk, offset);
+        responseBytes2.set(chunk, offset);
         offset += chunk.byteLength;
       }
-      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(responseBytes));
+      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(responseBytes2));
     } finally {
       if (opened) {
         await this.client.rpc("harness.api.transfer.close", { transferId }).catch(() => void 0);
@@ -17052,7 +17121,7 @@ var AsyncFrameQueue = class {
         continue;
       }
       if (this.closed) return;
-      const next = await new Promise((resolve4) => this.waiters.push(resolve4));
+      const next = await new Promise((resolve5) => this.waiters.push(resolve5));
       if (next.done) return;
       yield next.value;
     }
@@ -17387,7 +17456,7 @@ var RemoteTypertGateway2 = class {
       if (committed.transferId !== transferId || committed.totalBytes <= 0 || committed.totalBytes > MAX_HARNESS_API_TRANSFER_BYTES || committed.totalChunks !== Math.ceil(committed.totalBytes / HARNESS_API_TRANSFER_CHUNK_BYTES)) {
         throw new Error("The remote Host returned an invalid Harness Remote transfer descriptor.");
       }
-      const responseBytes = new Uint8Array(committed.totalBytes);
+      const responseBytes2 = new Uint8Array(committed.totalBytes);
       let offset = 0;
       for (let index = 0; index < committed.totalChunks; index += 1) {
         const result = await this.client.rpc(
@@ -17403,10 +17472,10 @@ var RemoteTypertGateway2 = class {
         if (chunk.byteLength !== expectedBytes) {
           throw new Error("The remote Host returned an invalid Harness Remote transfer chunk.");
         }
-        responseBytes.set(chunk, offset);
+        responseBytes2.set(chunk, offset);
         offset += chunk.byteLength;
       }
-      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(responseBytes));
+      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(responseBytes2));
     } finally {
       if (opened) await this.client.rpc("harness.remote.transfer.close", { transferId }).catch(() => void 0);
     }
@@ -17457,7 +17526,7 @@ var AsyncValueQueue = class {
         if (this.error !== void 0) throw this.error;
         return;
       }
-      const next = await new Promise((resolve4) => this.waiters.push(resolve4));
+      const next = await new Promise((resolve5) => this.waiters.push(resolve5));
       if (next.done) {
         if (this.error !== void 0) throw this.error;
         return;
@@ -17548,6 +17617,11 @@ function patchWelcomeDescribe2(value) {
   return { ...value, namespaces };
 }
 
+// src/codex/virtual-harness.ts
+import { mkdirSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join as join4 } from "node:path";
+
 // src/codex/permissions.ts
 function codexPermissionPresetFromResponse(value) {
   const root = record(value);
@@ -17576,135 +17650,6 @@ function parseCodexSessionId(value) {
 }
 function resolveCodexThreadKey(key) {
   return codexThreadIdFromKey(key) ?? key;
-}
-
-// src/codex/method-policy.ts
-var id2 = external_exports.string().min(1).max(256);
-var cursor = external_exports.string().min(1).max(4096).nullable().optional();
-var textInput = external_exports.object({
-  type: external_exports.literal("text"),
-  text: external_exports.string().min(1).max(256 * 1024)
-}).strict();
-var imageMediaType = external_exports.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]);
-var canonicalBase64 = external_exports.string().min(4).max(288 * 1024 * 1024).refine((value) => value.length % 4 === 0 && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value), {
-  message: "Image data must use canonical base64."
-});
-var imageInput = external_exports.object({
-  type: external_exports.literal("image"),
-  mediaType: imageMediaType,
-  data: canonicalBase64
-}).strict();
-var input = external_exports.array(external_exports.union([textInput, imageInput])).min(1).max(16);
-var permissionPreset = external_exports.enum(["workspace-write", "danger-full-access"]);
-var projectRoot = external_exports.object({
-  path: external_exports.string().min(1).max(4096)
-}).strict();
-var CODEX_HISTORY_MAX_MESSAGES = 200;
-var schemas = {
-  "account/read": external_exports.object({ refreshToken: external_exports.literal(false).optional() }).strict(),
-  "model/list": external_exports.object({
-    cursor,
-    limit: external_exports.number().int().min(1).max(100).optional(),
-    includeHidden: external_exports.boolean().optional()
-  }).strict(),
-  "project/list": external_exports.object({
-    cursor,
-    limit: external_exports.number().int().min(1).max(100).optional()
-  }).strict(),
-  "project/create": external_exports.object({
-    name: external_exports.string().trim().min(1).max(256),
-    roots: external_exports.array(projectRoot).length(1),
-    idempotencyKey: external_exports.string().min(16).max(256)
-  }).strict(),
-  "thread/list": external_exports.object({
-    cursor,
-    limit: external_exports.number().int().min(1).max(100).optional(),
-    sortKey: external_exports.enum(["created_at", "updated_at", "recency_at"]).optional(),
-    sortDirection: external_exports.enum(["asc", "desc"]).optional(),
-    modelProviders: external_exports.array(external_exports.string().min(1).max(128)).max(32).nullable().optional(),
-    sourceKinds: external_exports.array(external_exports.enum(["cli", "vscode", "exec", "appServer", "unknown"])).max(8).optional(),
-    archived: external_exports.boolean().optional(),
-    isPinned: external_exports.boolean().optional(),
-    cwd: external_exports.union([external_exports.string().min(1).max(4096), external_exports.array(external_exports.string().min(1).max(4096)).min(1).max(32)]).optional(),
-    useStateDbOnly: external_exports.boolean().optional(),
-    searchTerm: external_exports.string().max(1024).optional(),
-    // Upstream `ThreadListParams` declares these two as well. Refusing them turned a
-    // legitimate client query into "The CodeX call parameters are invalid.".
-    originators: external_exports.array(external_exports.string().min(1).max(256)).max(32).nullable().optional(),
-    sectionId: external_exports.string().max(256).nullable().optional()
-  }).strict(),
-  "thread/read": external_exports.object({ threadId: id2, includeTurns: external_exports.boolean().optional() }).strict(),
-  "dsh/sessionHistory": external_exports.object({
-    threadId: id2,
-    beforeSeq: external_exports.number().int().nonnegative().optional(),
-    throughSeq: external_exports.number().int().min(-1).optional(),
-    maxMessages: external_exports.number().int().min(1).max(CODEX_HISTORY_MAX_MESSAGES).optional()
-  }).strict(),
-  "dsh/directoryList": external_exports.object({
-    path: external_exports.string().min(1).max(4096)
-  }).strict(),
-  "thread/start": external_exports.object({
-    cwd: external_exports.string().min(1).max(4096),
-    model: external_exports.string().min(1).max(128).optional(),
-    personality: external_exports.string().min(1).max(64).optional(),
-    permissionPreset: permissionPreset.optional()
-  }).strict(),
-  "thread/resume": external_exports.object({
-    threadId: id2,
-    model: external_exports.string().min(1).max(128).optional(),
-    permissionPreset: permissionPreset.optional()
-  }).strict(),
-  "thread/fork": external_exports.object({
-    threadId: id2,
-    lastTurnId: id2.optional(),
-    permissionPreset: permissionPreset.optional()
-  }).strict(),
-  // Upstream declares a plain string and uses the empty value to clear a name, so the
-  // trim-based minimum rejected a legitimate rename.
-  "thread/name/set": external_exports.object({ threadId: id2, name: external_exports.string().max(256) }).strict(),
-  "thread/archive": external_exports.object({ threadId: id2 }).strict(),
-  "thread/unarchive": external_exports.object({ threadId: id2 }).strict(),
-  "thread/unsubscribe": external_exports.object({ threadId: id2 }).strict(),
-  "turn/start": external_exports.object({
-    threadId: id2,
-    input,
-    model: external_exports.string().min(1).max(128).optional(),
-    effort: external_exports.enum(["none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"]).optional(),
-    summary: external_exports.enum(["auto", "concise", "detailed", "none"]).optional(),
-    personality: external_exports.string().min(1).max(64).optional(),
-    permissionPreset: permissionPreset.optional()
-  }).strict(),
-  "turn/steer": external_exports.object({
-    threadId: id2,
-    input,
-    expectedTurnId: id2,
-    // Declared by upstream `TurnSteerParams`; see the thread/list note above.
-    clientUserMessageId: external_exports.string().max(256).nullable().optional()
-  }).strict(),
-  "turn/interrupt": external_exports.object({ threadId: id2, turnId: id2 }).strict()
-};
-var CODEX_APP_ALLOWLIST = Object.freeze(Object.keys(schemas));
-function parseCodexCall(method, params) {
-  if (!Object.prototype.hasOwnProperty.call(schemas, method)) {
-    throw new RpcError("METHOD_NOT_ALLOWED", "The requested Codex method is not available over Remote.");
-  }
-  const schema = schemas[method];
-  const parsed = schema.safeParse(params);
-  if (!parsed.success) {
-    const detail = parsed.error.issues.slice(0, 4).map((issue) => {
-      const path = issue.path.length === 0 ? "(root)" : issue.path.join(".");
-      const keys = "keys" in issue && Array.isArray(issue.keys) ? ` [${issue.keys.join(", ")}]` : "";
-      return `${path}${keys}: ${issue.code}`;
-    }).join(", ");
-    throw new RpcError("INVALID_MESSAGE", `The CodeX call parameters are invalid. (${method} \u2192 ${detail})`);
-  }
-  return { method, params: parsed.data };
-}
-function isThreadMutation(method) {
-  return method === "turn/start" || method === "turn/steer" || method === "turn/interrupt";
-}
-function threadIdFromParams(params) {
-  return typeof params.threadId === "string" ? params.threadId : void 0;
 }
 
 // src/codex/codex-image-codec.ts
@@ -17941,9 +17886,10 @@ var CODEX_MODEL = "codex";
 var CODEX_PAGE_LIMIT = 100;
 var MAX_CODEX_PAGES = 32;
 var MAX_LIVE_TOOL_OUTPUT = 128 * 1024;
-var DEFAULT_HISTORY_MESSAGES = 50;
 var SESSION_SEARCH_RESULT_LIMIT = 20;
 var SESSION_SEARCH_SNIPPET_CODE_POINTS = 240;
+var HISTORY_PAGE_CACHE_TTL_MS = 6e4;
+var HISTORY_PAGE_CACHE_LIMIT = 24;
 var CODEX_DEFAULT_PERMISSION = "workspace-write";
 var MAX_CODEX_PROMPT_PARTS = 16;
 var MAX_CODEX_PROMPT_TEXT = 256 * 1024;
@@ -17990,6 +17936,7 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
     this.sessionGeneration = sessionGeneration;
     this.hostCarrier = hostCarrier;
     this.api = this.createApiProxy();
+    this.installHistoryCacheInspector();
     this.stopCapabilityWatch = this.client.watchCapability?.((available) => {
       if (!available) this.onSessionLost?.("domain-notice");
     });
@@ -18009,6 +17956,10 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
   selectedModels = /* @__PURE__ */ new Map();
   selectedPermissions = /* @__PURE__ */ new Map();
   imageAttachments = /* @__PURE__ */ new Map();
+  historyPageCache = /* @__PURE__ */ new Map();
+  historyPageHits = 0;
+  historyPageMisses = 0;
+  historyCacheInspector;
   modelDirectory;
   modelDirectoryPromise;
   lastProjectionSeq = 0;
@@ -18124,6 +18075,10 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
           return business(await this.archiveSession(requestArg(args), signal));
         case "session/list":
           return business(success({ items: await this.sessionSummaries(signal) }));
+        case "thread/list": {
+          const catalog = await this.refreshCatalog(signal);
+          return business(success({ data: catalog.threads, nextCursor: null }));
+        }
         case "session/search":
           return business(await this.searchSessions(requestArg(args), signal));
         case "session/create":
@@ -18237,6 +18192,17 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
     this.selectedModels.clear();
     this.selectedPermissions.clear();
     this.imageAttachments.clear();
+    this.historyPageCache.clear();
+    const globalScope = globalThis;
+    if (this.historyCacheInspector !== void 0 && globalScope.__dshCodexHistoryCacheStats === this.historyCacheInspector) {
+      delete globalScope.__dshCodexHistoryCacheStats;
+    }
+    const scope = globalThis;
+    if (scope.window !== void 0 && this.historyCacheInspector !== void 0 && scope.window.__dshCodexHistoryCacheStats === this.historyCacheInspector) {
+      delete scope.window.__dshCodexHistoryCacheStats;
+    }
+    scope.document?.documentElement?.removeAttribute?.("data-dsh-codex-history-cache-stats");
+    this.historyCacheInspector = void 0;
   }
   async refreshCatalog(signal) {
     const catalog = await loadCatalog(this.client, signal, this.pendingThreads);
@@ -18510,6 +18476,7 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
     });
   }
   acceptCodexFrame(follow, frame) {
+    this.invalidateHistoryPages(follow.threadId);
     const params = record3(frame.params);
     if (frame.method === "thread/name/updated") {
       const name2 = string2(params.threadName);
@@ -19162,29 +19129,27 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
     return thread;
   }
   async readHistoryPage(threadId, page, signal) {
-    const maxMessages = page.maxMessages === void 0 ? void 0 : Math.min(CODEX_HISTORY_MAX_MESSAGES, Math.max(1, page.maxMessages));
-    let value;
-    try {
-      value = record3(await this.client.request("dsh/sessionHistory", {
-        threadId,
-        ...page.beforeSeq === void 0 ? {} : { beforeSeq: page.beforeSeq },
-        ...page.throughSeq === void 0 ? {} : { throughSeq: page.throughSeq },
-        ...maxMessages === void 0 ? {} : { maxMessages }
-      }, signal));
-    } catch (error) {
-      if (!isLegacySessionHistoryUnsupported(error)) throw error;
-      const result = record3(await this.client.request("thread/read", { threadId, includeTurns: true }, signal));
-      const thread = record3(result.thread);
-      if (string2(thread.id) !== threadId) throw new Error("CodeX returned an invalid Thread history.");
-      value = paginateCodexNativeHistory(
-        projectCodexNativeHistory(thread, `codex:${threadId}`, this.sessionGeneration),
-        {
-          beforeSeq: page.beforeSeq,
-          throughSeq: page.throughSeq,
-          maxMessages
-        }
-      );
+    const maxMessages = Math.min(
+      HISTORY_PAGE_SIZES[0],
+      Math.max(1, page.maxMessages ?? HISTORY_PAGE_SIZES[0])
+    );
+    const cacheKey = `${this.host.deviceId}|${threadId}|${page.beforeSeq ?? ""}|${page.throughSeq ?? ""}|${maxMessages}`;
+    const cached = this.historyPageCache.get(cacheKey);
+    if (cached !== void 0 && Date.now() - cached.at < HISTORY_PAGE_CACHE_TTL_MS) {
+      const ageMs = Date.now() - cached.at;
+      this.historyPageHits += 1;
+      this.cacheHistoryImages(cached.page);
+      this.publishHistoryCacheStats();
+      this.logHistoryCache("hit", threadId, { ...page, maxMessages }, cached.page.records.length, ageMs);
+      return cached.page;
     }
+    this.historyPageMisses += 1;
+    let value = record3(await this.client.request("dsh/sessionHistory", {
+      threadId,
+      ...page.beforeSeq === void 0 ? {} : { beforeSeq: page.beforeSeq },
+      ...page.throughSeq === void 0 ? {} : { throughSeq: page.throughSeq },
+      maxMessages
+    }, signal));
     value = adaptCodexHistoryPage(value, this.sessionGeneration);
     if (!isCodexNativeHistoryPage(value, `codex:${threadId}`)) {
       throw new Error("CodeX Remote returned an invalid paginated History.");
@@ -19194,7 +19159,114 @@ var CodexVirtualHarness = class _CodexVirtualHarness {
       this.setPermissionSelection(`codex:${threadId}`, preset === "workspace-write" || preset === "danger-full-access" ? preset : void 0);
     }
     this.cacheHistoryImages(value);
+    this.historyPageCache.set(cacheKey, { page: value, at: Date.now() });
+    if (this.historyPageCache.size > HISTORY_PAGE_CACHE_LIMIT) {
+      const oldest = this.historyPageCache.keys().next().value;
+      if (oldest !== void 0) this.historyPageCache.delete(oldest);
+    }
+    this.publishHistoryCacheStats();
+    this.logHistoryCache("miss", threadId, { ...page, maxMessages }, value.records.length);
     return value;
+  }
+  /** A live change or a new turn makes the cached page stale. */
+  invalidateHistoryPages(threadId) {
+    const marker = `|${threadId}|`;
+    let removed = false;
+    for (const key of [...this.historyPageCache.keys()]) {
+      if (key.includes(marker)) {
+        this.historyPageCache.delete(key);
+        removed = true;
+      }
+    }
+    if (removed) this.publishHistoryCacheStats();
+  }
+  /**
+   * Expose cache metadata to the current page's DevTools as
+   * `__dshCodexHistoryCacheStats()`. The function is metadata only: it never
+   * returns message text or event data, so the Session content stays private.
+   * It is installed on both the realm global and `window`, and mirrored into a
+   * DOM data attribute so a console in another realm can read it too.
+   */
+  installHistoryCacheInspector() {
+    const globalScope = globalThis;
+    const scope = globalThis;
+    const inspector = () => this.historyCacheStats();
+    globalScope.__dshCodexHistoryCacheStats = inspector;
+    if (scope.window !== void 0) scope.window.__dshCodexHistoryCacheStats = inspector;
+    this.historyCacheInspector = inspector;
+    this.publishHistoryCacheStats();
+  }
+  publishHistoryCacheStats() {
+    const stats = this.historyCacheStats();
+    this.writeHistoryCacheStatsFile(stats);
+    const scope = globalThis;
+    const root = scope.document?.documentElement;
+    if (root?.setAttribute === void 0) return;
+    try {
+      root.setAttribute("data-dsh-codex-history-cache-stats", JSON.stringify(stats));
+    } catch {
+    }
+  }
+  /**
+   * The Codex virtual harness runs in the DSH client's Node process, not in the
+   * browser page, so DevTools cannot see its globals. Mirror the same metadata to
+   * the client home for inspection without any message content.
+   */
+  writeHistoryCacheStatsFile(stats) {
+    if (!codexHistoryStatsFileEnabled() || process.env.VITEST !== void 0) return;
+    try {
+      const home = process.env.DSH_HOME ?? join4(homedir(), ".dsh");
+      mkdirSync(home, { recursive: true });
+      writeFileSync(
+        join4(home, "codex-history-cache-stats.json"),
+        JSON.stringify({
+          ...stats,
+          pid: process.pid,
+          source: "codex-harness",
+          writtenAt: (/* @__PURE__ */ new Date()).toISOString()
+        }, null, 2)
+      );
+    } catch {
+    }
+  }
+  logHistoryCache(event, threadId, page, records, ageMs) {
+    if (!codexHistoryStatsFileEnabled()) return;
+    const scope = globalThis;
+    scope.console?.info?.("[dsh-remote] codex history page cache " + event, {
+      threadId,
+      beforeSeq: page.beforeSeq ?? null,
+      ...page.maxMessages === void 0 ? {} : { maxMessages: page.maxMessages },
+      ...records === void 0 ? {} : { records },
+      ...ageMs === void 0 ? {} : { ageMs },
+      hits: this.historyPageHits,
+      misses: this.historyPageMisses
+    });
+  }
+  historyCacheStats() {
+    const now = Date.now();
+    return {
+      ttlMs: HISTORY_PAGE_CACHE_TTL_MS,
+      hits: this.historyPageHits,
+      misses: this.historyPageMisses,
+      active: true,
+      entries: [...this.historyPageCache.entries()].map(([key, { page, at }]) => {
+        const records = page.records;
+        const firstSeq = records[0]?.event.seq;
+        const lastSeq = records.at(-1)?.event.seq;
+        return {
+          key,
+          ageMs: now - at,
+          expired: now - at >= HISTORY_PAGE_CACHE_TTL_MS,
+          sessionId: page.header.id,
+          records: records.length,
+          cursor: page.cursor,
+          nextTurn: page.nextTurn,
+          hasMore: page.hasMore,
+          ...firstSeq === void 0 ? {} : { firstSeq },
+          ...lastSeq === void 0 ? {} : { lastSeq }
+        };
+      })
+    };
   }
   cacheHistoryImages(history) {
     const sessionId = history.header.id;
@@ -19457,10 +19529,24 @@ async function loadCatalog(client, signal, pendingThreads) {
   const workspaceByProjectId = new Map(projects.map((project, index) => [project.id, projectWorkspaces[index]]));
   const visibleSessionIds = /* @__PURE__ */ new Set();
   const visibleThreads = [];
+  const unmatched = [];
   for (const { thread, session } of projected) {
     const projectWorkspaceForSession = findProjectWorkspace(thread, session, projects, workspaceByProjectId);
     if (projectWorkspaceForSession !== void 0) {
+      rebaseSessionCwdOnProjectRoot(session, projectWorkspaceForSession.path);
+      rebaseThreadCwdOnProjectRoot(thread, projectWorkspaceForSession.path);
       addSessionToWorkspace(projectWorkspaceForSession, session);
+      visibleSessionIds.add(session.id);
+      visibleThreads.push(thread);
+    } else {
+      unmatched.push({ thread, session });
+    }
+  }
+  if (unmatched.length > 0) {
+    const workspace = defaultCodexWorkspace(unmatched.map((value) => value.session));
+    projectWorkspaces.push(workspace);
+    for (const { thread, session } of unmatched) {
+      addSessionToWorkspace(workspace, session);
       visibleSessionIds.add(session.id);
       visibleThreads.push(thread);
     }
@@ -19553,13 +19639,17 @@ async function loadModelDirectory(client, signal) {
     models
   };
 }
-function projectCodexNativeHistory(thread, sessionId, sessionGeneration = "legacy") {
+function projectCodexNativeHistory(thread, sessionId, sessionGeneration = "legacy", start = {}) {
   const entries = [];
-  let seq = 0;
-  let turnNumber = 0;
+  let seq = start.seq ?? 0;
+  let turnNumber = start.turn ?? 0;
+  let turnSeqBase = 0;
+  let turnEventIndex = 0;
+  let lastSeq = start.stable === true ? -1 : (start.seq ?? 0) - 1;
   const active = activeTurnId(thread.turns);
   const append = (type, data2, time = Date.now(), view, sourceEventSeqs) => {
-    const eventSeq = seq++;
+    const eventSeq = start.stable === true ? turnSeqBase + turnEventIndex++ : seq++;
+    lastSeq = eventSeq;
     entries.push({
       type: "event",
       event: {
@@ -19576,13 +19666,16 @@ function projectCodexNativeHistory(thread, sessionId, sessionGeneration = "legac
   };
   for (const rawTurn of array(thread.turns)) {
     const turn = record3(rawTurn);
+    const turnId = string2(turn.id);
     const turnItems = array(turn.items).map(record3);
     const toolImages = turnItems.flatMap(toolOutputImageBlocks);
     let imageOwner = -1;
     for (let index = 0; index < turnItems.length; index += 1) {
       if (turnItems[index].type === "agentMessage") imageOwner = index;
     }
-    turnNumber += 1;
+    turnNumber = (turnId === void 0 ? void 0 : start.turnNumbers?.get(turnId)) ?? turnNumber + 1;
+    turnSeqBase = turnNumber * 4096;
+    turnEventIndex = 0;
     const turnActive = isActiveCodexTurn(turn);
     const time = normalizeTime(turn.createdAt) || normalizeTime(turn.startedAt) || normalizeTime(thread.createdAt) || Date.now();
     append("turn/start", { turn: turnNumber }, time);
@@ -19626,7 +19719,7 @@ function projectCodexNativeHistory(thread, sessionId, sessionGeneration = "legac
       ...sessionGeneration === "v3" ? { isSeeded: false } : {}
     },
     entries,
-    lastSeq: seq - 1,
+    lastSeq,
     nextTurn: turnNumber,
     ...active === void 0 ? {} : { activeTurnId: active }
   };
@@ -19635,7 +19728,7 @@ function paginateCodexNativeHistory(history, request) {
   const throughSeq = Math.min(request.throughSeq ?? history.lastSeq, history.lastSeq);
   const endSeq = Math.min(throughSeq, request.beforeSeq === void 0 ? throughSeq : request.beforeSeq - 1);
   const window = endSeq < 0 ? [] : history.entries.filter((entry) => entry.event.seq <= endSeq);
-  const maxMessages = request.maxMessages ?? DEFAULT_HISTORY_MESSAGES;
+  const maxMessages = request.maxMessages ?? HISTORY_PAGE_SIZES[0];
   let messages = 0;
   let cut = 0;
   for (let index = window.length - 1; index >= 0; index -= 1) {
@@ -19910,6 +20003,20 @@ function nativeWorkspace(view) {
 function nativeVisibleWorkspaces(catalog, selectedWorkspaceId) {
   return catalog.workspaces.filter((workspace) => workspace.sessionIds.length > 0 || workspace.workspaceId === selectedWorkspaceId);
 }
+var DEFAULT_CODEX_WORKSPACE_ID = "codex-workspace:default";
+var DEFAULT_CODEX_WORKSPACE_TITLE = "\u9ED8\u8BA4\u5DE5\u4F5C\u533A";
+function defaultCodexWorkspace(sessions) {
+  const first = sessions[0];
+  return {
+    workspaceId: DEFAULT_CODEX_WORKSPACE_ID,
+    path: sessions.find((session) => session.cwd !== void 0)?.cwd ?? "/",
+    title: DEFAULT_CODEX_WORKSPACE_TITLE,
+    sessionIds: [],
+    sessionCount: 0,
+    createdAt: isoTime(first.createdAt),
+    updatedAt: isoTime(first.updatedAt || first.createdAt)
+  };
+}
 function projectWorkspace(project) {
   const root = project.roots[0];
   return {
@@ -19951,6 +20058,28 @@ function findProjectWorkspace(thread, session, projects, workspaceByProjectId) {
   })[0];
   return match === void 0 ? void 0 : workspaceByProjectId.get(match.project.id);
 }
+function rebasedCwdOnProjectRoot(cwd, projectRoot2) {
+  if (process.platform !== "win32") return void 0;
+  const root = projectRoot2.replace(/[\\/]+$/u, "");
+  if (root.length === 0) return void 0;
+  const normalizedRoot = root.toLowerCase();
+  const normalizedCwd = cwd.toLowerCase();
+  if (normalizedCwd === normalizedRoot) return root;
+  if (normalizedCwd.startsWith(`${normalizedRoot}\\`) || normalizedCwd.startsWith(`${normalizedRoot}/`)) {
+    return `${root}${cwd.slice(root.length)}`;
+  }
+  return void 0;
+}
+function rebaseSessionCwdOnProjectRoot(session, projectRoot2) {
+  if (session.cwd === void 0) return;
+  const next = rebasedCwdOnProjectRoot(session.cwd, projectRoot2);
+  if (next !== void 0) session.cwd = next;
+}
+function rebaseThreadCwdOnProjectRoot(thread, projectRoot2) {
+  if (typeof thread.cwd !== "string") return;
+  const next = rebasedCwdOnProjectRoot(thread.cwd, projectRoot2);
+  if (next !== void 0) thread.cwd = next;
+}
 function addSessionToWorkspace(workspace, session) {
   if (!workspace.sessionIds.includes(session.id)) {
     workspace.sessionIds.push(session.id);
@@ -19967,7 +20096,8 @@ function containsPath(root, candidate) {
   return normalizedCandidate === normalizedRoot || normalizedCandidate.startsWith(`${normalizedRoot}/`) || normalizedCandidate.startsWith(`${normalizedRoot}\\`);
 }
 function normalizePathForCompare(path) {
-  return path.replace(/[\\/]+$/u, "") || path;
+  const trimmed = path.replace(/[\\/]+$/u, "") || path;
+  return process.platform === "win32" ? trimmed.toLowerCase() : trimmed;
 }
 function modelSelection() {
   return { provider: CODEX_PROVIDER, model: CODEX_MODEL };
@@ -20217,10 +20347,6 @@ function failFrom(error) {
   const source = error instanceof Error ? error : new Error(String(error));
   return fail(errorCode3(source) ?? "internal", source.message, errorDetails(source));
 }
-function isLegacySessionHistoryUnsupported(error) {
-  if (!(error instanceof Error)) return false;
-  return errorCode3(error) === "METHOD_NOT_ALLOWED" || errorCode3(error) === "METHOD_NOT_FOUND" || error.message.includes("The requested Codex method is not available over Remote.");
-}
 function errorCode3(error) {
   return "code" in error && typeof error.code === "string" ? error.code : void 0;
 }
@@ -20341,7 +20467,7 @@ var AsyncValueQueue2 = class {
         continue;
       }
       if (this.closed) return;
-      const next = await new Promise((resolve4) => this.waiters.push(resolve4));
+      const next = await new Promise((resolve5) => this.waiters.push(resolve5));
       if (next.done) return;
       yield next.value;
     }
@@ -20363,7 +20489,13 @@ function normalizeByteResult2(endpoint, result) {
 
 // src/typert-gateway-switch.ts
 var REMOTE_COMMAND_METHODS = ["execute", "list"];
-var LOCAL_ONLY_NAMESPACES = /* @__PURE__ */ new Set(["dynamicCordisRunner"]);
+var LOCAL_ONLY_NAMESPACES = /* @__PURE__ */ new Set([
+  "account",
+  "dynamicCordisRunner",
+  "remoteAccess",
+  "schedule",
+  "web"
+]);
 var LOCAL_FALLBACK_NAMESPACES = /* @__PURE__ */ new Set(["$events", "settings", "credentials", "dynamicCordisRunner"]);
 var PEER_GONE_CODES = /* @__PURE__ */ new Set([
   "TRANSPORT_CLOSED",
@@ -20442,7 +20574,7 @@ var TypertGatewaySwitch = class {
       signal,
       ...rest.length === 0 ? this.peerArguments() : rest
     ));
-    const open = this.localOpen ?? (async (endpoint, payload, signal) => {
+    const open2 = this.localOpen ?? (async (endpoint, payload, signal) => {
       if (this.localStream === void 0) throw new Error("The local Harness Gateway does not support Remote streams.");
       return this.localStream(requestFromCarrier(endpoint, payload, signal));
     });
@@ -20450,7 +20582,7 @@ var TypertGatewaySwitch = class {
       invoke: this.localInvoke,
       ...this.localStream === void 0 ? {} : { stream: this.localStream },
       dispatch,
-      open,
+      open: open2,
       failure: (error) => this.failure(error),
       supportsCarrier: this.localDispatch !== void 0 && this.localOpen !== void 0
     };
@@ -20490,15 +20622,15 @@ var TypertGatewaySwitch = class {
       ).then((result) => normalizeByteResult3(endpoint, result));
     }
     if (previousOpen !== void 0) {
-      const open = previousOpen;
-      const rc1 = usesRc1Arity(open);
+      const open2 = previousOpen;
+      const rc1 = usesRc1Arity(open2);
       this.runtime.openWireStream = (...callArgs) => {
         const endpoint = callArgs[0];
         if (forwards(endpoint)) {
-          return rc1 ? Reflect.apply(open, this.runtime, callArgs) : open.call(this.runtime, endpoint, callArgs[1], callArgs[2]);
+          return rc1 ? Reflect.apply(open2, this.runtime, callArgs) : open2.call(this.runtime, endpoint, callArgs[1], callArgs[2]);
         }
         if (!this.routesToRemote(endpoint)) {
-          return rc1 ? Reflect.apply(open, this.runtime, callArgs) : open.call(this.runtime, endpoint, callArgs[1], callArgs[2]);
+          return rc1 ? Reflect.apply(open2, this.runtime, callArgs) : open2.call(this.runtime, endpoint, callArgs[1], callArgs[2]);
         }
         const signal = rc1 ? callArgs[4] : callArgs[2];
         if (!rc1) {
@@ -20507,7 +20639,7 @@ var TypertGatewaySwitch = class {
         return this.withLocalFallback(
           endpoint,
           () => this.remoteTarget.open(endpoint, callArgs[1], signal ?? new AbortController().signal),
-          () => Reflect.apply(open, this.runtime, callArgs)
+          () => Reflect.apply(open2, this.runtime, callArgs)
         );
       };
     }
@@ -20609,8 +20741,8 @@ var TypertGatewaySwitch = class {
     return { code, message: source.message, details };
   }
 };
-function usesRc1Arity(open) {
-  return open.length >= 5;
+function usesRc1Arity(open2) {
+  return open2.length >= 5;
 }
 function endedUplink() {
   return {
@@ -20626,9 +20758,9 @@ function linkControl(signal) {
   return control;
 }
 function createLocalOpen(gateway, runtime, peer = () => void 0) {
-  const open = runtime.openWireStream;
-  if (open !== void 0) {
-    return usesRc1Arity(open) ? (endpoint, payload, signal) => open.call(runtime, endpoint, payload, endedUplink(), peer(), signal, linkControl(signal)) : (endpoint, payload, signal) => open.call(runtime, endpoint, payload, signal);
+  const open2 = runtime.openWireStream;
+  if (open2 !== void 0) {
+    return usesRc1Arity(open2) ? (endpoint, payload, signal) => open2.call(runtime, endpoint, payload, endedUplink(), peer(), signal, linkControl(signal)) : (endpoint, payload, signal) => open2.call(runtime, endpoint, payload, signal);
   }
   const wire = gateway.wireStream;
   if (wire === void 0) return void 0;
@@ -20720,7 +20852,7 @@ import { networkInterfaces } from "node:os";
 // src/native-rtc-helper.ts
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, realpathSync, statSync } from "node:fs";
-import { delimiter, dirname as dirname3, join as join4 } from "node:path";
+import { delimiter, dirname as dirname3, join as join5 } from "node:path";
 import { fileURLToPath } from "node:url";
 var cachedExternalFactory;
 var cachedExternalFactoryResolved = false;
@@ -20771,21 +20903,21 @@ function nodeBinaryCandidates() {
   add3(process.env.DSH_REMOTE_NODE);
   add3(process.env.NODE);
   if (process.versions.electron === void 0) add3(process.execPath);
-  for (const part of (process.env.PATH ?? "").split(delimiter)) add3(join4(part, process.platform === "win32" ? "node.exe" : "node"));
+  for (const part of (process.env.PATH ?? "").split(delimiter)) add3(join5(part, process.platform === "win32" ? "node.exe" : "node"));
   add3("/opt/homebrew/bin/node");
   add3("/usr/local/bin/node");
   add3("/usr/bin/node");
-  add3(join4(process.env.HOME ?? "", ".volta", "bin", process.platform === "win32" ? "node.exe" : "node"));
-  add3(join4(process.env.HOME ?? "", ".asdf", "shims", process.platform === "win32" ? "node.exe" : "node"));
-  add3(join4(process.env.HOME ?? "", ".local", "bin", process.platform === "win32" ? "node.exe" : "node"));
+  add3(join5(process.env.HOME ?? "", ".volta", "bin", process.platform === "win32" ? "node.exe" : "node"));
+  add3(join5(process.env.HOME ?? "", ".asdf", "shims", process.platform === "win32" ? "node.exe" : "node"));
+  add3(join5(process.env.HOME ?? "", ".local", "bin", process.platform === "win32" ? "node.exe" : "node"));
   for (const nvmNode of nvmNodeCandidates()) add3(nvmNode);
   return candidates;
 }
 function nvmNodeCandidates() {
-  const root = join4(process.env.HOME ?? "", ".nvm", "versions", "node");
+  const root = join5(process.env.HOME ?? "", ".nvm", "versions", "node");
   if (root === "" || !existsSync(root)) return [];
   try {
-    return readdirSync(root).map((version) => join4(root, version, "bin", process.platform === "win32" ? "node.exe" : "node")).sort((left, right) => right.localeCompare(left, "en", { numeric: true }));
+    return readdirSync(root).map((version) => join5(root, version, "bin", process.platform === "win32" ? "node.exe" : "node")).sort((left, right) => right.localeCompare(left, "en", { numeric: true }));
   } catch {
     return [];
   }
@@ -20816,10 +20948,10 @@ function isUsableExternalNode(candidate, requireFrom) {
 }
 function isExecutableFile(candidate) {
   try {
-    const stat8 = statSync(candidate);
-    if (!stat8.isFile()) return false;
+    const stat9 = statSync(candidate);
+    if (!stat9.isFile()) return false;
     if (process.platform === "win32") return true;
-    return (stat8.mode & 73) !== 0;
+    return (stat9.mode & 73) !== 0;
   } catch {
     return false;
   }
@@ -20908,8 +21040,8 @@ var ExternalNativePeerConnection = class {
   request(method, payload) {
     if (this.closed) return Promise.reject(new Error("native rtc helper is closed"));
     const id4 = this.nextRequestId++;
-    const promise = new Promise((resolve4, reject) => {
-      this.pending.set(id4, { resolve: resolve4, reject });
+    const promise = new Promise((resolve5, reject) => {
+      this.pending.set(id4, { resolve: resolve5, reject });
     });
     this.write({ id: id4, method, payload });
     return promise;
@@ -21703,10 +21835,10 @@ function parseRouteTarget(value) {
 async function detectRouteHostIpv4(target2, timeoutMs) {
   const socket = createSocket("udp4");
   try {
-    return await new Promise((resolve4, reject) => {
+    return await new Promise((resolve5, reject) => {
       const timer = setTimeout(() => {
         cleanup();
-        resolve4(void 0);
+        resolve5(void 0);
       }, timeoutMs);
       const cleanup = () => {
         clearTimeout(timer);
@@ -21720,7 +21852,7 @@ async function detectRouteHostIpv4(target2, timeoutMs) {
       socket.connect(target2.port, target2.host, () => {
         cleanup();
         const address = socket.address();
-        resolve4(typeof address === "string" ? void 0 : address.address);
+        resolve5(typeof address === "string" ? void 0 : address.address);
       });
     });
   } finally {
@@ -21815,6 +21947,7 @@ var ClientModeRuntime = class {
     this.proxySwitch = apiProxy === void 0 ? void 0 : new ApiProxySwitch(apiProxy);
     this.gatewaySwitch = new TypertGatewaySwitch(typertGateway, { peer: this.peer });
     this.gatewaySwitch.setRemoteAvailability(() => this.connected !== void 0);
+    this.installCodexHistoryCacheInspector();
   }
   preview;
   identity;
@@ -22056,6 +22189,8 @@ var ClientModeRuntime = class {
       this.server.bindIdentity(identity);
       authorization = await this.server.authorizeWithAccount(identity, email, password);
     }
+    this.server.reloadCredentials();
+    this.host?.reloadCredentials?.();
     this.logger.info("Client account authorized");
     return authorization;
   }
@@ -22133,6 +22268,10 @@ var ClientModeRuntime = class {
   async hasServerAuthorization() {
     if (this.server.hasStoredAuthorization === void 0) return false;
     return await this.server.hasStoredAuthorization().catch(() => false);
+  }
+  /** How this device was authorized, so a DSH sign-out only clears a DeepSeek grant. */
+  async authorizationMethod() {
+    return (await this.server.currentAuthorization())?.method;
   }
   async setHostAuthorization(enabled) {
     if (this.host === void 0) throw new ClientModeError("METHOD_NOT_ALLOWED", "This plugin is not running as a Host.");
@@ -23269,6 +23408,43 @@ var ClientModeRuntime = class {
     const virtual = this.codexVirtual;
     this.codexVirtual = void 0;
     await virtual?.close();
+    this.installCodexHistoryCacheInspector();
+  }
+  /**
+   * Keep `__dshCodexHistoryCacheStats()` defined for the whole client lifetime.
+   * The Codex virtual harness has its own inspector while a workspace is open;
+   * this runtime-level one fills the gap before the first open and after close.
+   */
+  installCodexHistoryCacheInspector() {
+    const globalScope = globalThis;
+    const scope = globalThis;
+    const inspect = () => this.codexVirtual?.historyCacheStats() ?? {
+      ttlMs: 6e4,
+      hits: 0,
+      misses: 0,
+      active: false,
+      entries: []
+    };
+    globalScope.__dshCodexHistoryCacheStats = inspect;
+    if (scope.window !== void 0) scope.window.__dshCodexHistoryCacheStats = inspect;
+    this.writeCodexHistoryCacheStats(inspect());
+  }
+  writeCodexHistoryCacheStats(stats) {
+    if (!codexHistoryStatsFileEnabled() || process.env.VITEST !== void 0) return;
+    try {
+      const home = process.env.DSH_HOME ?? join6(homedir2(), ".dsh");
+      mkdirSync2(home, { recursive: true });
+      writeFileSync2(
+        join6(home, "codex-history-cache-stats.json"),
+        JSON.stringify({
+          ...stats,
+          pid: process.pid,
+          source: "client-runtime",
+          writtenAt: (/* @__PURE__ */ new Date()).toISOString()
+        }, null, 2)
+      );
+    } catch {
+    }
   }
   assertRemoteCompatible(remote) {
     this.selectHarnessRemoteTransport(remote);
@@ -23865,8 +24041,8 @@ function failureCode(error) {
   return own ?? safeErrorCode(error);
 }
 function sleep3(ms) {
-  return new Promise((resolve4) => {
-    setTimeout(resolve4, ms);
+  return new Promise((resolve5) => {
+    setTimeout(resolve5, ms);
   });
 }
 function remoteHostFeatures(clientVersion) {
@@ -23917,7 +24093,7 @@ async function probeRemoteHostFeatures(client, clientVersion) {
 }
 async function waitForCodexFrames(stream, signal) {
   if (signal?.aborted) throw new ClientModeError("RPC_ABORTED", "The Codex event poll was cancelled.");
-  await new Promise((resolve4, reject) => {
+  await new Promise((resolve5, reject) => {
     const previousWake = stream.wake;
     const timer = setTimeout(done, 25e3);
     const onAbort = () => {
@@ -23931,7 +24107,7 @@ async function waitForCodexFrames(stream, signal) {
     }
     function done() {
       cleanup();
-      resolve4();
+      resolve5();
     }
     stream.wake = () => {
       previousWake();
@@ -23976,14 +24152,14 @@ function iceServersForAttempt(attempt, iceServers) {
 // src/client-target-store.ts
 import { randomUUID as randomUUID2 } from "node:crypto";
 import { chmod as chmod2, mkdir as mkdir2, readFile as readFile3, writeFile as writeFile2 } from "node:fs/promises";
-import { join as join5 } from "node:path";
+import { join as join7 } from "node:path";
 var FILE_NAME = "client-target.json";
 var ClientTargetStore = class {
   constructor(directory) {
     this.directory = directory;
   }
   get file() {
-    return join5(this.directory, FILE_NAME);
+    return join7(this.directory, FILE_NAME);
   }
   /** Read the record. A missing, unreadable or malformed file reads as "no record". */
   async load() {
@@ -24058,9 +24234,9 @@ import { execFileSync } from "node:child_process";
 // src/identity-store.ts
 import { existsSync as existsSync2 } from "node:fs";
 import { createHash } from "node:crypto";
-import { chmod as chmod3, cp, mkdir as mkdir3, readFile as readFile4, rm as rm3, stat as stat3, writeFile as writeFile3 } from "node:fs/promises";
-import { homedir } from "node:os";
-import { dirname as dirname4, join as join6 } from "node:path";
+import { chmod as chmod3, cp, mkdir as mkdir3, open, readFile as readFile4, rm as rm3, stat as stat3, writeFile as writeFile3 } from "node:fs/promises";
+import { homedir as homedir3 } from "node:os";
+import { dirname as dirname4, join as join8 } from "node:path";
 var identitySchema = external_exports.object({
   schemaVersion: external_exports.literal(1),
   deviceId: external_exports.string().uuid(),
@@ -24089,14 +24265,22 @@ var IdentityStore = class {
   peers = /* @__PURE__ */ new Map();
   constructor(options = {}) {
     const env = options.env ?? process.env;
-    const dshHome = env.DSH_HOME || join6(options.homeDirectory ?? homedir(), ".dsh");
-    this.directory = options.directory ?? join6(dshHome, "remote");
+    const dshHome = env.DSH_HOME || join8(options.homeDirectory ?? homedir3(), ".dsh");
+    this.directory = options.directory ?? join8(dshHome, "remote");
   }
   async loadOrCreate(deviceName) {
     await mkdir3(this.directory, { recursive: true, mode: 448 });
     await chmod3(this.directory, 448);
-    const devicePath = join6(this.directory, "device.json");
-    const keyPath = join6(this.directory, "device.key");
+    const release = await this.acquireCreationLock();
+    try {
+      return await this.loadOrCreateLocked(deviceName);
+    } finally {
+      await release();
+    }
+  }
+  async loadOrCreateLocked(deviceName) {
+    const devicePath = join8(this.directory, "device.json");
+    const keyPath = join8(this.directory, "device.key");
     const [hasDevice, hasKey] = await Promise.all([exists2(devicePath), exists2(keyPath)]);
     if (hasDevice !== hasKey) {
       throw new IdentityInvalidError("device identity is incomplete; repair it explicitly before reconnecting");
@@ -24126,6 +24310,40 @@ var IdentityStore = class {
     } catch (error) {
       if (error instanceof IdentityInvalidError) throw error;
       throw new IdentityInvalidError(`device identity is invalid: ${safeErrorMessage(error)}`);
+    }
+  }
+  async acquireCreationLock() {
+    const lockPath = join8(this.directory, ".identity.lock");
+    const deadline = Date.now() + 3e4;
+    for (; ; ) {
+      try {
+        const handle = await open(lockPath, "wx", 384);
+        try {
+          await handle.writeFile(`${process.pid}
+`);
+        } finally {
+          await handle.close();
+        }
+        return async () => {
+          await rm3(lockPath, { force: true });
+        };
+      } catch (error) {
+        if (!isNodeError(error) || error.code !== "EEXIST") throw error;
+        try {
+          const info = await stat3(lockPath);
+          if (Date.now() - info.mtimeMs > 6e4) {
+            await rm3(lockPath, { force: true });
+            continue;
+          }
+        } catch (statError) {
+          if (isNodeError(statError) && statError.code === "ENOENT") continue;
+          throw statError;
+        }
+        if (Date.now() >= deadline) {
+          throw new IdentityInvalidError("device identity creation is locked by another DSH process");
+        }
+        await new Promise((resolve5) => setTimeout(resolve5, 20));
+      }
     }
   }
   current() {
@@ -24165,7 +24383,7 @@ var IdentityStore = class {
     return removed;
   }
   async loadPeers() {
-    const path = join6(this.directory, "trusted-peers.json");
+    const path = join8(this.directory, "trusted-peers.json");
     if (!await exists2(path)) {
       await atomicJsonWrite(path, { schemaVersion: 1, peers: [] }, 384);
     }
@@ -24181,7 +24399,7 @@ var IdentityStore = class {
     this.peers = peers;
   }
   async savePeers() {
-    await atomicJsonWrite(join6(this.directory, "trusted-peers.json"), {
+    await atomicJsonWrite(join8(this.directory, "trusted-peers.json"), {
       schemaVersion: 1,
       peers: [...this.peers.values()]
     }, 384);
@@ -24190,7 +24408,7 @@ var IdentityStore = class {
 function serverStorageDirectory(root, serverUrl, role) {
   const origin = new URL(serverUrl).origin;
   const scope = createHash("sha256").update(origin).digest("hex").slice(0, 24);
-  return join6(root, "servers", scope, role);
+  return join8(root, "servers", scope, role);
 }
 async function ensureDeviceDirectory(root, serverUrl) {
   const directory = serverStorageDirectory(root, serverUrl, "device");
@@ -24391,10 +24609,11 @@ var ControlStatusStream = class {
 
 // src/codex/domain.ts
 import { randomUUID as randomUUID3 } from "node:crypto";
+import { Buffer as Buffer4 } from "node:buffer";
 import { accessSync, constants, existsSync as existsSync3, readFileSync, readdirSync as readdirSync2, statSync as statSync2 } from "node:fs";
 import { readdir as readdir2, realpath, stat as stat4 } from "node:fs/promises";
-import { homedir as homedir2 } from "node:os";
-import { basename as basename2, isAbsolute as isAbsolute2, join as join7, posix, relative, resolve } from "node:path";
+import { homedir as homedir4 } from "node:os";
+import { basename as basename2, isAbsolute as isAbsolute2, join as join9, posix, relative, resolve } from "node:path";
 
 // src/codex/app-server.ts
 import { spawn as spawn2 } from "node:child_process";
@@ -24467,15 +24686,15 @@ var CodexAppServerClient = class {
     const child = this.process;
     this.process = void 0;
     if (child === void 0 || child.exitCode !== null || child.killed) return;
-    await new Promise((resolve4) => {
+    await new Promise((resolve5) => {
       const timer = setTimeout(() => {
         child.kill("SIGKILL");
-        resolve4();
+        resolve5();
       }, 2e3);
       timer.unref?.();
       child.once("exit", () => {
         clearTimeout(timer);
-        resolve4();
+        resolve5();
       });
       child.kill("SIGTERM");
     });
@@ -24531,13 +24750,13 @@ var CodexAppServerClient = class {
   }
   request(method, params, timeoutMs) {
     const id4 = this.nextId++;
-    const result = new Promise((resolve4, reject) => {
+    const result = new Promise((resolve5, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id4);
         reject(new CodexAppServerError("CODEX_REQUEST_TIMEOUT", "Codex App Server request timed out."));
       }, timeoutMs);
       timer.unref?.();
-      this.pending.set(id4, { resolve: resolve4, reject, timer });
+      this.pending.set(id4, { resolve: resolve5, reject, timer });
     });
     try {
       this.write({ id: id4, method, params });
@@ -24649,6 +24868,135 @@ function safeUpstreamCode(value) {
 }
 function isRecord10(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// src/codex/method-policy.ts
+var id2 = external_exports.string().min(1).max(256);
+var cursor = external_exports.string().min(1).max(4096).nullable().optional();
+var textInput = external_exports.object({
+  type: external_exports.literal("text"),
+  text: external_exports.string().min(1).max(256 * 1024)
+}).strict();
+var imageMediaType = external_exports.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+var canonicalBase64 = external_exports.string().min(4).max(288 * 1024 * 1024).refine((value) => value.length % 4 === 0 && /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(value), {
+  message: "Image data must use canonical base64."
+});
+var imageInput = external_exports.object({
+  type: external_exports.literal("image"),
+  mediaType: imageMediaType,
+  data: canonicalBase64
+}).strict();
+var input = external_exports.array(external_exports.union([textInput, imageInput])).min(1).max(16);
+var permissionPreset = external_exports.enum(["workspace-write", "danger-full-access"]);
+var projectRoot = external_exports.object({
+  path: external_exports.string().min(1).max(4096)
+}).strict();
+var CODEX_HISTORY_MAX_MESSAGES = 200;
+var schemas = {
+  "account/read": external_exports.object({ refreshToken: external_exports.literal(false).optional() }).strict(),
+  "model/list": external_exports.object({
+    cursor,
+    limit: external_exports.number().int().min(1).max(100).optional(),
+    includeHidden: external_exports.boolean().optional()
+  }).strict(),
+  "project/list": external_exports.object({
+    cursor,
+    limit: external_exports.number().int().min(1).max(100).optional()
+  }).strict(),
+  "project/create": external_exports.object({
+    name: external_exports.string().trim().min(1).max(256),
+    roots: external_exports.array(projectRoot).length(1),
+    idempotencyKey: external_exports.string().min(16).max(256)
+  }).strict(),
+  "thread/list": external_exports.object({
+    cursor,
+    limit: external_exports.number().int().min(1).max(100).optional(),
+    sortKey: external_exports.enum(["created_at", "updated_at", "recency_at"]).optional(),
+    sortDirection: external_exports.enum(["asc", "desc"]).optional(),
+    modelProviders: external_exports.array(external_exports.string().min(1).max(128)).max(32).nullable().optional(),
+    sourceKinds: external_exports.array(external_exports.enum(["cli", "vscode", "exec", "appServer", "unknown"])).max(8).optional(),
+    archived: external_exports.boolean().optional(),
+    isPinned: external_exports.boolean().optional(),
+    cwd: external_exports.union([external_exports.string().min(1).max(4096), external_exports.array(external_exports.string().min(1).max(4096)).min(1).max(32)]).optional(),
+    useStateDbOnly: external_exports.boolean().optional(),
+    searchTerm: external_exports.string().max(1024).optional(),
+    // Upstream `ThreadListParams` declares these two as well. Refusing them turned a
+    // legitimate client query into "The CodeX call parameters are invalid.".
+    originators: external_exports.array(external_exports.string().min(1).max(256)).max(32).nullable().optional(),
+    sectionId: external_exports.string().max(256).nullable().optional()
+  }).strict(),
+  "thread/read": external_exports.object({ threadId: id2, includeTurns: external_exports.boolean().optional() }).strict(),
+  "dsh/sessionHistory": external_exports.object({
+    threadId: id2,
+    beforeSeq: external_exports.number().int().nonnegative().optional(),
+    throughSeq: external_exports.number().int().min(-1).optional(),
+    maxMessages: external_exports.number().int().min(1).max(CODEX_HISTORY_MAX_MESSAGES).optional()
+  }).strict(),
+  "dsh/directoryList": external_exports.object({
+    path: external_exports.string().min(1).max(4096)
+  }).strict(),
+  "thread/start": external_exports.object({
+    cwd: external_exports.string().min(1).max(4096),
+    model: external_exports.string().min(1).max(128).optional(),
+    personality: external_exports.string().min(1).max(64).optional(),
+    permissionPreset: permissionPreset.optional()
+  }).strict(),
+  "thread/resume": external_exports.object({
+    threadId: id2,
+    model: external_exports.string().min(1).max(128).optional(),
+    permissionPreset: permissionPreset.optional()
+  }).strict(),
+  "thread/fork": external_exports.object({
+    threadId: id2,
+    lastTurnId: id2.optional(),
+    permissionPreset: permissionPreset.optional()
+  }).strict(),
+  // Upstream declares a plain string and uses the empty value to clear a name, so the
+  // trim-based minimum rejected a legitimate rename.
+  "thread/name/set": external_exports.object({ threadId: id2, name: external_exports.string().max(256) }).strict(),
+  "thread/archive": external_exports.object({ threadId: id2 }).strict(),
+  "thread/unarchive": external_exports.object({ threadId: id2 }).strict(),
+  "thread/unsubscribe": external_exports.object({ threadId: id2 }).strict(),
+  "turn/start": external_exports.object({
+    threadId: id2,
+    input,
+    model: external_exports.string().min(1).max(128).optional(),
+    effort: external_exports.enum(["none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"]).optional(),
+    summary: external_exports.enum(["auto", "concise", "detailed", "none"]).optional(),
+    personality: external_exports.string().min(1).max(64).optional(),
+    permissionPreset: permissionPreset.optional()
+  }).strict(),
+  "turn/steer": external_exports.object({
+    threadId: id2,
+    input,
+    expectedTurnId: id2,
+    // Declared by upstream `TurnSteerParams`; see the thread/list note above.
+    clientUserMessageId: external_exports.string().max(256).nullable().optional()
+  }).strict(),
+  "turn/interrupt": external_exports.object({ threadId: id2, turnId: id2 }).strict()
+};
+var CODEX_APP_ALLOWLIST = Object.freeze(Object.keys(schemas));
+function parseCodexCall(method, params) {
+  if (!Object.prototype.hasOwnProperty.call(schemas, method)) {
+    throw new RpcError("METHOD_NOT_ALLOWED", "The requested Codex method is not available over Remote.");
+  }
+  const schema = schemas[method];
+  const parsed = schema.safeParse(params);
+  if (!parsed.success) {
+    const detail = parsed.error.issues.slice(0, 4).map((issue) => {
+      const path = issue.path.length === 0 ? "(root)" : issue.path.join(".");
+      const keys = "keys" in issue && Array.isArray(issue.keys) ? ` [${issue.keys.join(", ")}]` : "";
+      return `${path}${keys}: ${issue.code}`;
+    }).join(", ");
+    throw new RpcError("INVALID_MESSAGE", `The CodeX call parameters are invalid. (${method} \u2192 ${detail})`);
+  }
+  return { method, params: parsed.data };
+}
+function isThreadMutation(method) {
+  return method === "turn/start" || method === "turn/steer" || method === "turn/interrupt";
+}
+function threadIdFromParams(params) {
+  return typeof params.threadId === "string" ? params.threadId : void 0;
 }
 
 // src/codex/peer-bridge.ts
@@ -24797,22 +25145,22 @@ var CodexPeerBridge = class {
       });
       throw error;
     }
-    const responseBytes = new TextEncoder().encode(JSON.stringify(response));
-    if (responseBytes.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES) return { kind: "inline", response };
-    if (responseBytes.byteLength > MAX_CODEX_APP_TRANSFER_BYTES) {
+    const responseBytes2 = new TextEncoder().encode(JSON.stringify(response));
+    if (responseBytes2.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES) return { kind: "inline", response };
+    if (responseBytes2.byteLength > MAX_CODEX_APP_TRANSFER_BYTES) {
       throw new RpcError("RESPONSE_TOO_LARGE", "The Codex response exceeds the bounded transfer limit.");
     }
     if (this.outgoingTransfers.size >= MAX_ACTIVE_TRANSFERS) {
       throw new RpcError("RATE_LIMITED", "Too many Codex response transfers are active.", void 0, true);
     }
-    const totalChunks = Math.ceil(responseBytes.byteLength / CODEX_APP_TRANSFER_CHUNK_BYTES);
+    const totalChunks = Math.ceil(responseBytes2.byteLength / CODEX_APP_TRANSFER_CHUNK_BYTES);
     this.outgoingTransfers.set(params.transferId, {
-      bytes: responseBytes,
+      bytes: responseBytes2,
       totalChunks,
       nextIndex: 0,
       touchedAt: Date.now()
     });
-    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes.byteLength, totalChunks };
+    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes2.byteLength, totalChunks };
   }
   readTransfer(input2) {
     this.requireOpen();
@@ -24941,6 +25289,219 @@ function concatChunks(chunks, totalBytes) {
   return output;
 }
 
+// src/codex/history-window.ts
+var PAGE_LIMIT = 25;
+var MAX_PAGES = 64;
+var CACHE_TTL_MS = 5 * 6e4;
+var CACHE_LIMIT = 16;
+var CodexHistoryWindows = class {
+  constructor(call, logger) {
+    this.call = call;
+    this.logger = logger;
+  }
+  windows = /* @__PURE__ */ new Map();
+  async window(threadId, metadata, beforeSeq, maxMessages) {
+    const updatedAt = typeof metadata.updatedAt === "number" ? metadata.updatedAt : void 0;
+    const cached = this.windows.get(threadId);
+    const fresh = cached !== void 0 && (updatedAt === void 0 || cached.updatedAt === void 0 || cached.updatedAt === updatedAt) && Date.now() - cached.at < CACHE_TTL_MS;
+    if (fresh && cached !== void 0) {
+      cached.at = Date.now();
+      await this.ensureOlder(threadId, cached, beforeSeq, maxMessages);
+      this.logger?.debug("codex history cache hit", {
+        threadId,
+        turns: cached.loaded.size,
+        records: cached.history.entries.length
+      });
+      return cached;
+    }
+    if (cached !== void 0) {
+      const appended = await this.appendNewTurns(threadId, cached, updatedAt);
+      if (appended !== void 0) {
+        await this.ensureOlder(threadId, appended, beforeSeq, maxMessages);
+        this.remember(threadId, appended);
+        this.logger?.debug("codex history cache appended", {
+          threadId,
+          turns: appended.loaded.size,
+          records: appended.history.entries.length
+        });
+        return appended;
+      }
+    }
+    const built = await this.rebuild(threadId, metadata, cached?.acceptedPageSize);
+    await this.ensureOlder(threadId, built, beforeSeq, maxMessages);
+    this.remember(threadId, built);
+    return built;
+  }
+  async rebuild(threadId, metadata, acceptedPageSize) {
+    const startedAt = performance.now();
+    const index = await this.readTurnIndex(threadId);
+    const window = {
+      metadata,
+      turnNumbers: index.numbers,
+      turnStartSeq: index.turnStartSeq,
+      totalTurns: index.total,
+      totalEvents: index.totalEvents,
+      loaded: /* @__PURE__ */ new Map(),
+      history: projectCodexNativeHistory({ ...metadata, turns: [] }, `codex:${threadId}`, "legacy", {
+        turnNumbers: index.numbers
+      }),
+      ...typeof metadata.updatedAt === "number" ? { updatedAt: metadata.updatedAt } : {},
+      ...acceptedPageSize === void 0 ? {} : { acceptedPageSize },
+      at: Date.now()
+    };
+    this.logger?.debug("codex history index", {
+      threadId,
+      turns: index.total,
+      pages: index.pages,
+      durationMs: Math.round(performance.now() - startedAt)
+    });
+    await this.loadTail(threadId, window);
+    return window;
+  }
+  async readTurnIndex(threadId) {
+    const numbers = /* @__PURE__ */ new Map();
+    const turnStartSeq = /* @__PURE__ */ new Map();
+    let total = 0;
+    let totalEvents = 0;
+    let pages = 0;
+    let cursor2;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const result = await this.turnPage(threadId, cursor2, "asc", "summary");
+      pages += 1;
+      for (const rawTurn of result.turns) {
+        const turnId = typeof rawTurn.id === "string" ? rawTurn.id : void 0;
+        if (turnId === void 0 || numbers.has(turnId)) continue;
+        total += 1;
+        numbers.set(turnId, total);
+        turnStartSeq.set(turnId, totalEvents);
+        totalEvents += projectCodexNativeHistory({ turns: [rawTurn] }, `codex:${threadId}`).entries.length;
+      }
+      cursor2 = result.nextCursor;
+      if (cursor2 === void 0) break;
+    }
+    return { numbers, turnStartSeq, total, totalEvents, pages };
+  }
+  async loadTail(threadId, window) {
+    let cursor2;
+    let fetched = 0;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const result = await this.turnPage(threadId, cursor2, "desc", "full");
+      fetched += result.turns.length;
+      this.addTurns(window, result.turns);
+      cursor2 = result.nextCursor;
+      this.project(threadId, window);
+      if (surfaceRecords(window.history) >= HISTORY_PAGE_SIZES[0] || cursor2 === void 0) break;
+    }
+    window.olderCursor = cursor2;
+    this.logger?.debug("codex history tail", {
+      threadId,
+      turnsFetched: fetched,
+      loadedTurns: window.loaded.size,
+      records: window.history.entries.length,
+      older: window.olderCursor !== void 0
+    });
+  }
+  async ensureOlder(threadId, window, beforeSeq, maxMessages) {
+    if (beforeSeq === void 0) return;
+    const needed = Math.min(maxMessages ?? HISTORY_PAGE_SIZES[0], HISTORY_PAGE_SIZES[0]);
+    const available = () => window.history.entries.filter((entry) => entry.event.seq < beforeSeq && isSurfaceEvent(entry.event.type) && entry.event.surfaceOp === "append").length;
+    let fetched = 0;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      if (available() >= needed) break;
+      if (window.olderCursor === void 0) break;
+      const result = await this.turnPage(threadId, window.olderCursor, "desc", "full");
+      fetched += result.turns.length;
+      this.addTurns(window, result.turns);
+      window.olderCursor = result.nextCursor;
+      this.project(threadId, window);
+    }
+    if (fetched > 0) {
+      this.logger?.debug("codex history older", {
+        threadId,
+        beforeSeq,
+        needed,
+        turnsFetched: fetched,
+        loadedTurns: window.loaded.size
+      });
+    }
+  }
+  async appendNewTurns(threadId, cached, updatedAt) {
+    if (cached.newestTurnId === void 0) return void 0;
+    const newer = [];
+    let cursor2;
+    for (let page = 0; page < MAX_PAGES; page += 1) {
+      const result = await this.turnPage(threadId, cursor2, "desc", "full");
+      for (const rawTurn of result.turns) {
+        if (typeof rawTurn.id === "string" && rawTurn.id === cached.newestTurnId) {
+          if (newer.length === 0) {
+            cached.updatedAt = updatedAt;
+            cached.at = Date.now();
+            return cached;
+          }
+          this.addTurns(cached, [...newer].reverse());
+          this.project(threadId, cached);
+          cached.updatedAt = updatedAt;
+          cached.at = Date.now();
+          return cached;
+        }
+        newer.push(rawTurn);
+      }
+      cursor2 = result.nextCursor;
+      if (cursor2 === void 0) return void 0;
+    }
+    return void 0;
+  }
+  addTurns(window, turns) {
+    for (const turn of turns) {
+      const turnId = typeof turn.id === "string" ? turn.id : void 0;
+      if (turnId === void 0) continue;
+      if (!window.turnNumbers.has(turnId)) {
+        window.totalTurns += 1;
+        window.turnNumbers.set(turnId, window.totalTurns);
+        window.turnStartSeq.set(turnId, window.totalEvents);
+        window.totalEvents += projectCodexNativeHistory({ turns: [turn] }, window.history.header.id).entries.length;
+      }
+      window.loaded.set(turnId, turn);
+    }
+  }
+  project(threadId, window) {
+    const turns = [...window.loaded.entries()].sort((left, right) => (window.turnNumbers.get(left[0]) ?? 0) - (window.turnNumbers.get(right[0]) ?? 0)).map(([, turn]) => turn);
+    const first = [...window.loaded.keys()].sort((left, right) => (window.turnNumbers.get(left) ?? 0) - (window.turnNumbers.get(right) ?? 0))[0];
+    const startSeq = first === void 0 ? 0 : window.turnStartSeq.get(first) ?? 0;
+    const history = projectCodexNativeHistory({ ...window.metadata, turns }, `codex:${threadId}`, "legacy", {
+      seq: startSeq,
+      turnNumbers: window.turnNumbers
+    });
+    history.nextTurn = window.totalTurns + 1;
+    window.history = history;
+    const newest = [...window.turnNumbers.entries()].sort((left, right) => right[1] - left[1])[0]?.[0];
+    if (newest !== void 0) window.newestTurnId = newest;
+  }
+  async turnPage(threadId, cursor2, direction, itemsView) {
+    const result = await this.call("thread/turns/list", {
+      threadId,
+      limit: PAGE_LIMIT,
+      sortDirection: direction,
+      itemsView,
+      ...cursor2 === void 0 ? {} : { cursor: cursor2 }
+    });
+    const page = typeof result === "object" && result !== null ? result : {};
+    const turns = Array.isArray(page.data) ? page.data.filter((turn) => typeof turn === "object" && turn !== null && !Array.isArray(turn)) : [];
+    const nextCursor = typeof page.nextCursor === "string" && page.nextCursor.length > 0 ? page.nextCursor : void 0;
+    return { turns, nextCursor };
+  }
+  remember(threadId, window) {
+    if (this.windows.size >= CACHE_LIMIT && !this.windows.has(threadId)) {
+      const oldest = this.windows.keys().next().value;
+      if (oldest !== void 0) this.windows.delete(oldest);
+    }
+    this.windows.set(threadId, window);
+  }
+};
+function surfaceRecords(history) {
+  return history.entries.filter((entry) => isSurfaceEvent(entry.event.type) && entry.event.surfaceOp === "append").length;
+}
+
 // src/codex/domain.ts
 var APPROVAL_TTL_MS = 5 * 6e4;
 var DEFAULT_RESTART_DELAYS_MS = [1e3, 2e3, 4e3, 8e3, 15e3];
@@ -24949,8 +25510,6 @@ var ACCOUNT_PROBE_TIMEOUT_MS = 6e4;
 var CODEX_START_BUDGET_MS = 9e4;
 var CODEX_PAGE_LIMIT2 = 100;
 var MAX_CODEX_PAGES2 = 32;
-var CODEX_HISTORY_PAGE_LIMIT = 25;
-var MAX_CODEX_HISTORY_PAGES = 64;
 var CODEX_DIRECTORY_ENTRY_LIMIT = 500;
 var CodexRemoteDomain = class {
   constructor(config, logger, createAppServer = (binary, targetLogger) => new CodexAppServerClient(binary, targetLogger), restartDelaysMs = DEFAULT_RESTART_DELAYS_MS) {
@@ -24958,6 +25517,7 @@ var CodexRemoteDomain = class {
     this.createAppServer = createAppServer;
     this.restartDelaysMs = restartDelaysMs;
     this.config = config;
+    this.historyWindows = new CodexHistoryWindows((method, params) => this.callUpstream(method, params), logger);
   }
   appServer;
   unsubscribeInbound;
@@ -24967,6 +25527,8 @@ var CodexRemoteDomain = class {
   turnOwners = /* @__PURE__ */ new Map();
   approvals = /* @__PURE__ */ new Map();
   permissionPresets = /* @__PURE__ */ new Map();
+  /** Per-Thread turn index plus the tail-first full-item window. */
+  historyWindows;
   approvalExpiryTimer;
   restartTimer;
   restartAttempt = 0;
@@ -25068,14 +25630,16 @@ var CodexRemoteDomain = class {
     }
     if (call.method === "thread/list") {
       const result = sanitizeThreadList(await this.callUpstream(call.method, call.params));
+      const authority = await this.readWorkspaceAuthority(result.data);
       const authorized = filterThreadListByWorkspaceAuthority(
         result,
-        await this.readWorkspaceAuthority(result.data)
+        authority,
+        this.config.showUnprojectedSessions !== false
       );
-      return {
+      return rebaseThreadListCwds({
         ...authorized,
         data: uniqueCodexThreadRows(authorized.data)
-      };
+      }, authority.roots);
     }
     if (call.method === "thread/start") {
       const cwd = await this.requireCodexWorkspacePath(call.params.cwd);
@@ -25094,21 +25658,15 @@ var CodexRemoteDomain = class {
     }
     const threadId = threadIdFromParams(call.params);
     if (call.method === "dsh/sessionHistory") {
-      const thread = await this.readThreadForHistory(connectionId, threadId);
-      const page = paginateCodexNativeHistory(
-        projectCodexNativeHistory(thread, `codex:${threadId}`),
-        {
-          beforeSeq: optionalInteger2(call.params.beforeSeq),
-          throughSeq: optionalInteger2(call.params.throughSeq),
-          maxMessages: optionalInteger2(call.params.maxMessages)
-        }
-      );
-      const activeTurnId2 = typeof page.activeTurnId === "string" ? page.activeTurnId : this.turnOwners.get(threadId)?.turnId;
-      return {
-        ...page,
-        ...activeTurnId2 === void 0 ? {} : { activeTurnId: activeTurnId2 },
-        permissionPreset: this.permissionPresets.get(threadId) ?? null
-      };
+      const { thread: metadata } = await this.readKnownThread(threadId);
+      const beforeSeq = optionalInteger2(call.params.beforeSeq);
+      const maxMessages = optionalInteger2(call.params.maxMessages);
+      const window = await this.historyWindows.window(threadId, metadata, beforeSeq, maxMessages);
+      return this.historyPage(window, threadId, {
+        beforeSeq,
+        throughSeq: optionalInteger2(call.params.throughSeq),
+        maxMessages
+      });
     }
     if (call.method === "dsh/directoryList") {
       return this.listCodexDirectory(call.params.path);
@@ -25512,6 +26070,15 @@ var CodexRemoteDomain = class {
     }
     if (message.method === "thread/closed" && threadId !== void 0) this.permissionPresets.delete(threadId);
     if (message.method === "turn/completed" && threadId !== void 0) this.turnOwners.delete(threadId);
+    if (message.method === "thread/status/changed" && threadId !== void 0 && isTerminalThreadStatus(message.params)) {
+      this.turnOwners.delete(threadId);
+      for (const [handle, approval] of this.approvals) {
+        if (approval.threadId !== threadId) continue;
+        this.approvals.delete(handle);
+        void this.appServer?.respond(approval.upstreamId, { decision: "decline" }).catch(() => void 0);
+      }
+      this.scheduleApprovalExpiry();
+    }
     if (message.method === "turn/started" && threadId !== void 0) {
       const owner = this.turnOwners.get(threadId);
       const turnId = extractTurnId(message.params);
@@ -25611,102 +26178,59 @@ var CodexRemoteDomain = class {
       return { thread: listed, ...typeof listed.cwd === "string" && listed.cwd.length > 0 ? { cwd: listed.cwd } : {} };
     }
     const thread = extractThread(result);
-    if (thread === void 0 || thread.id !== threadId || !isThreadAllowedByWorkspaceAuthority(thread, authority)) {
+    if (thread === void 0 || thread.id !== threadId || !this.threadAllowed(thread, authority)) {
       throw new RpcError("CODEX_THREAD_NOT_ALLOWED", "The Codex thread is not available through this Remote Host.");
     }
     return { thread, ...typeof thread.cwd === "string" && thread.cwd.length > 0 ? { cwd: thread.cwd } : {} };
   }
-  async readThreadForHistory(connectionId, threadId) {
-    const { thread: metadata } = await this.readKnownThread(threadId);
-    try {
-      return { ...metadata, turns: await this.readThreadTurns(connectionId, threadId, "full") };
-    } catch (fullError) {
-      if (!isHistoryReadRecoverable(fullError)) throw fullError;
-      this.logHistoryFallback(connectionId, "turns-full", fullError);
-    }
-    try {
-      return { ...metadata, turns: await this.readThreadTurns(connectionId, threadId, "summary") };
-    } catch (summaryError) {
-      if (!isHistoryReadRecoverable(summaryError)) throw summaryError;
-      this.logHistoryFallback(connectionId, "turns-summary", summaryError);
-    }
-    try {
-      const legacyResult = await this.callUpstream("thread/read", { threadId, includeTurns: true });
-      const legacyThread = extractThread(legacyResult);
-      if (legacyThread === void 0 || legacyThread.id !== threadId) {
-        throw new RpcError("CODEX_INVALID_RESPONSE", "Codex App Server returned an invalid Thread history.");
-      }
-      return legacyThread;
-    } catch (legacyError) {
-      if (!isHistoryReadRecoverable(legacyError)) throw legacyError;
-      this.logHistoryFallback(connectionId, "thread-read-full", legacyError);
-      return { ...metadata, turns: [] };
-    }
-  }
-  async readThreadTurns(connectionId, threadId, itemsView) {
-    const turns = [];
-    let cursor2;
-    for (let page = 0; page < MAX_CODEX_HISTORY_PAGES; page += 1) {
-      const result = await this.callUpstream("thread/turns/list", {
-        threadId,
-        limit: CODEX_HISTORY_PAGE_LIMIT,
-        sortDirection: "asc",
-        itemsView,
-        ...cursor2 === void 0 ? {} : { cursor: cursor2 }
+  historyPage(window, threadId, request) {
+    const requested = request.maxMessages ?? HISTORY_PAGE_SIZES[0];
+    const start = Math.max(1, Math.min(requested, HISTORY_PAGE_SIZES[0], window.acceptedPageSize ?? requested));
+    const activeTurnId2 = this.turnOwners.get(threadId)?.turnId;
+    for (const size of historyPageSizes(start)) {
+      const page = paginateCodexNativeHistory(window.history, {
+        beforeSeq: request.beforeSeq,
+        throughSeq: request.throughSeq,
+        maxMessages: size
       });
-      const pageResult = isRecord12(result) ? result : {};
-      for (const rawTurn of array2(pageResult.data)) {
-        if (!isRecord12(rawTurn)) continue;
-        const turnId = typeof rawTurn.id === "string" ? rawTurn.id : void 0;
-        const items = rawTurn.itemsView === "full" || turnId === void 0 ? array2(rawTurn.items) : await this.readThreadItems(connectionId, threadId, turnId, array2(rawTurn.items));
-        turns.push({ ...rawTurn, items });
+      const resolvedActiveTurnId = page.activeTurnId ?? activeTurnId2;
+      const response = {
+        ...page,
+        cursor: window.history.lastSeq,
+        nextTurn: window.totalTurns + 1,
+        hasMore: page.hasMore || window.olderCursor !== void 0,
+        ...resolvedActiveTurnId === void 0 ? {} : { activeTurnId: resolvedActiveTurnId },
+        permissionPreset: this.permissionPresets.get(threadId) ?? null
+      };
+      const bytes = Buffer4.byteLength(JSON.stringify(response), "utf8");
+      this.logger.debug("codex history page", {
+        threadId,
+        requested,
+        size,
+        bytes,
+        budget: HISTORY_BUDGET_BYTES,
+        loadedTurns: window.loaded.size,
+        totalTurns: window.totalTurns
+      });
+      if (bytes <= HISTORY_BUDGET_BYTES) {
+        window.acceptedPageSize = size;
+        return response;
       }
-      cursor2 = typeof pageResult.nextCursor === "string" && pageResult.nextCursor.length > 0 ? pageResult.nextCursor : void 0;
-      if (cursor2 === void 0) break;
     }
-    return turns;
-  }
-  async readThreadItems(connectionId, threadId, turnId, fallbackItems) {
-    const items = [];
-    let cursor2;
-    try {
-      for (let page = 0; page < MAX_CODEX_HISTORY_PAGES; page += 1) {
-        const result = await this.callUpstream("thread/items/list", {
-          threadId,
-          turnId,
-          limit: CODEX_HISTORY_PAGE_LIMIT,
-          sortDirection: "asc",
-          ...cursor2 === void 0 ? {} : { cursor: cursor2 }
-        });
-        const pageResult = isRecord12(result) ? result : {};
-        for (const entry of array2(pageResult.data)) {
-          if (isRecord12(entry) && entry.item !== void 0) items.push(entry.item);
-        }
-        cursor2 = typeof pageResult.nextCursor === "string" && pageResult.nextCursor.length > 0 ? pageResult.nextCursor : void 0;
-        if (cursor2 === void 0) break;
-      }
-    } catch (error) {
-      if (!isHistoryReadRecoverable(error)) throw error;
-      this.logHistoryFallback(connectionId, "items", error);
-      return fallbackItems;
-    }
-    return items;
-  }
-  logHistoryFallback(connectionId, stage, error) {
-    this.logger.warn("Codex history read fallback", {
-      connectionId: maskId(connectionId),
-      stage,
-      code: errorCode4(error)
-    });
+    throw new RpcError("RESPONSE_TOO_LARGE", "The Codex history page is too large for the secure Remote channel.");
   }
   async assertResultThreadAllowed(result) {
     const thread = extractThread(result);
     if (thread === void 0 || typeof thread.id !== "string") {
       throw new RpcError("CODEX_INVALID_RESPONSE", "Codex App Server returned an invalid thread.");
     }
-    if (!isThreadAllowedByWorkspaceAuthority(thread, await this.readWorkspaceAuthority())) {
+    if (!this.threadAllowed(thread, await this.readWorkspaceAuthority())) {
       throw new RpcError("CODEX_THREAD_NOT_ALLOWED", "The Codex thread is not available through this Remote Host.");
     }
+  }
+  /** The authority check, widened when unprojected Sessions are exposed. */
+  threadAllowed(thread, authority) {
+    return this.config.showUnprojectedSessions !== false || isThreadAllowedByWorkspaceAuthority(thread, authority);
   }
   claimTurn(threadId, connectionId, method, turnId) {
     const owner = this.turnOwners.get(threadId);
@@ -25848,7 +26372,7 @@ var CodexRemoteDomain = class {
       }));
       const thread = result.data.find((item) => item.id === threadId);
       if (thread !== void 0) {
-        return isThreadAllowedByWorkspaceAuthority(thread, authority) ? thread : void 0;
+        return this.threadAllowed(thread, authority) ? thread : void 0;
       }
       cursor2 = typeof result.nextCursor === "string" && result.nextCursor.length > 0 ? result.nextCursor : void 0;
       if (cursor2 === void 0) break;
@@ -25857,6 +26381,14 @@ var CodexRemoteDomain = class {
   }
   async requireCodexWorkspacePath(path) {
     if (!isAbsolute2(path)) {
+      throw new RpcError("CODEX_PATH_NOT_ALLOWED", "The CodeX working directory is not available as a Workspace.");
+    }
+    if (this.config.showUnprojectedSessions !== false) {
+      try {
+        const candidate2 = await realpath(path);
+        if ((await stat4(candidate2)).isDirectory()) return candidate2;
+      } catch {
+      }
       throw new RpcError("CODEX_PATH_NOT_ALLOWED", "The CodeX working directory is not available as a Workspace.");
     }
     const paths = await this.listCodexWorkspacePaths();
@@ -25959,7 +26491,7 @@ var CodexRemoteDomain = class {
     return paths;
   }
 };
-function codexBinaryCandidates(configured, hostPlatform = process.platform, userHome = homedir2(), localAppData = process.env.LOCALAPPDATA) {
+function codexBinaryCandidates(configured, hostPlatform = process.platform, userHome = homedir4(), localAppData = process.env.LOCALAPPDATA) {
   if (configured !== "codex") return [configured];
   if (hostPlatform === "win32") {
     return [.../* @__PURE__ */ new Set([
@@ -25995,14 +26527,13 @@ function codexBinaryCandidates(configured, hostPlatform = process.platform, user
   ])];
 }
 function bundledWindowsCodex(userHome) {
-  return bundledWindowsCodexAt(join7(userHome, "AppData", "Local"));
+  return bundledWindowsCodexAt(join9(userHome, "AppData", "Local"));
 }
 function bundledWindowsCodexAt(localAppData) {
-  const bin = join7(localAppData, "OpenAI", "Codex", "bin");
+  const bin = join9(localAppData, "OpenAI", "Codex", "bin");
   try {
-    const newest = readdirSync2(bin, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => join7(bin, entry.name, "codex.exe")).filter((candidate2) => existsSync3(candidate2)).map((candidate2) => ({ candidate: candidate2, modified: statSync2(candidate2).mtimeMs })).sort((left, right) => right.modified - left.modified);
-    const candidate = newest[0]?.candidate;
-    return candidate === void 0 ? [] : [candidate];
+    const newest = readdirSync2(bin, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => join9(bin, entry.name, "codex.exe")).filter((candidate) => existsSync3(candidate)).map((candidate) => ({ candidate, modified: statSync2(candidate).mtimeMs })).sort((left, right) => right.modified - left.modified);
+    return newest.map((entry) => entry.candidate);
   } catch {
     return [];
   }
@@ -26073,13 +26604,30 @@ function sanitizeThreadList(result) {
     ...typeof result.backwardsCursor === "string" && result.backwardsCursor.length > 0 ? { backwardsCursor: result.backwardsCursor } : {}
   };
 }
-function filterThreadListByWorkspaceAuthority(result, authority) {
+function filterThreadListByWorkspaceAuthority(result, authority, includeUnprojected = false) {
   if (!isRecord12(result) || !Array.isArray(result.data)) {
     throw new RpcError("CODEX_INVALID_RESPONSE", "Codex App Server returned an invalid thread list.");
   }
   return {
     ...result,
-    data: result.data.map((record7) => isRecord12(record7) ? record7 : void 0).filter((thread) => thread !== void 0 && isThreadAllowedByWorkspaceAuthority(thread, authority))
+    data: result.data.map((record7) => isRecord12(record7) ? record7 : void 0).filter((thread) => thread !== void 0 && (includeUnprojected || isThreadAllowedByWorkspaceAuthority(thread, authority)))
+  };
+}
+function rebaseThreadListCwds(result, roots) {
+  if (process.platform !== "win32" || roots.length === 0) return result;
+  const ordered = [...roots].sort((left, right) => right.length - left.length);
+  return {
+    ...result,
+    data: result.data.map((thread) => {
+      const cwd = typeof thread.cwd === "string" ? thread.cwd : void 0;
+      if (cwd === void 0) return thread;
+      const root = ordered.find((candidate) => containsCodexPath(candidate, cwd));
+      if (root === void 0) return thread;
+      const normalizedRoot = normalizeCodexPathForCompare(root);
+      const normalizedCwd = normalizeCodexPathForCompare(cwd);
+      const rebased = normalizedCwd === normalizedRoot ? root : normalizedCwd.startsWith(`${normalizedRoot}/`) || normalizedCwd.startsWith(`${normalizedRoot}\\`) ? `${root}${cwd.slice(root.length)}` : cwd;
+      return rebased === cwd ? thread : { ...thread, cwd: rebased };
+    })
   };
 }
 function sanitizeProject(value) {
@@ -26236,14 +26784,12 @@ function canTryNextBinary(error) {
 function isRecord12(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
-function array2(value) {
-  return Array.isArray(value) ? value : [];
-}
-function maskId(value) {
-  return value.length <= 12 ? value : `${value.slice(0, 8)}\u2026${value.slice(-4)}`;
-}
 function isActiveWriterMessage(message) {
   return message.toLowerCase().includes("active writer");
+}
+function isTerminalThreadStatus(params) {
+  if (!isRecord12(params) || !isRecord12(params.status) || typeof params.status.type !== "string") return false;
+  return params.status.type !== "active";
 }
 
 // src/control-runtime.ts
@@ -26579,12 +27125,14 @@ var PluginControlRuntime = class {
   /** Consecutive reconciliations without a DSH session: DSH refreshes its grant, so one empty read is not a sign-out. */
   /** Guards against re-entry through configure(), which reads the settings view back. */
   reconcilingWithDeepSeek = false;
+  /** The authorization exchange in flight; a settings poll must not start a second one. */
+  deepseekAuthorization;
   /**
    * Keep this device's Server credentials in step with DSH's DeepSeek session - that session is the credential, and
    * the Server verifies it before issuing this device its own tokens.
    *
    * Three cases: DSH signed in and this device not authorized -> authorize; DSH signed out and this device authorized
-   * -> sign out; otherwise nothing. At most once per ten seconds, from the settings poll the panel already makes.
+   * -> sign out; otherwise nothing. At most one exchange at a time, from the settings poll the panel already makes.
    */
   async reconcileWithDeepSeek() {
     if (this.deepseekSession === void 0 || this.reconcilingWithDeepSeek) return;
@@ -26593,19 +27141,21 @@ var PluginControlRuntime = class {
       const session = await this.deepseekSession.read();
       if (this.client !== void 0) this.client.hasDeepSeekSession = session !== void 0;
       const authorized = this.client === void 0 ? false : await this.client.hasServerAuthorization();
-      console.error(`[dsh-remote] reconcile ${JSON.stringify({ hasSession: session !== void 0, authorized })}`);
-      if (session === void 0 && authorized) {
+      const authorizationMethod = this.client === void 0 ? void 0 : await this.client.authorizationMethod?.();
+      if (session === void 0 && authorized && authorizationMethod === "deepseek") {
         await this.logout({ releaseDeepSeek: false });
         return;
       }
       if (session === void 0 || authorized) return;
+      if (this.deepseekAuthorization !== void 0) return;
       if (this.client !== void 0) this.client.authorizingWithDeepSeek = true;
-      void (async () => {
+      this.deepseekAuthorization = (async () => {
         try {
           await this.configure({ provider: "deepseek", serverUrl: this.config.serverUrl });
         } catch (error) {
           console.error(`[dsh-remote] reconcile failed ${JSON.stringify({ code: String(error?.code ?? "") })}`);
         } finally {
+          this.deepseekAuthorization = void 0;
           if (this.client !== void 0) this.client.authorizingWithDeepSeek = false;
         }
       })();
@@ -27352,12 +27902,12 @@ function isOversizedListing(value) {
 
 // src/remote-directory-browser.ts
 import { readdir as readdir3, stat as stat5 } from "node:fs/promises";
-import { homedir as homedir3, platform as platform2 } from "node:os";
+import { homedir as homedir5, platform as platform2 } from "node:os";
 import { basename as basename3, dirname as dirname5, isAbsolute as isAbsolute3, parse, resolve as resolve2 } from "node:path";
 var MAX_ENTRIES = 500;
 async function listRemoteDirectory(path, signal) {
   signal?.throwIfAborted();
-  const home = resolve2(homedir3());
+  const home = resolve2(homedir5());
   const target2 = path === void 0 || path.trim() === "" ? home : resolve2(path);
   if (!isAbsolute3(target2)) throw new Error("The remote directory path must be absolute.");
   const rows = await readdir3(target2, { withFileTypes: true });
@@ -27418,8 +27968,8 @@ async function callHistoryWithRetry(callWithTimeout, payload, rpcId2, pageSizes)
   }
   throw new RpcError("INTERNAL_ERROR", "Failed to load session history with a fallback page size.");
 }
-function sessionHistoryFallbackPageSizes(requestedMaxMessages) {
-  const requested = normalizeSessionHistoryPageSize(requestedMaxMessages);
+function sessionHistoryFallbackPageSizes(requestedMaxMessages2) {
+  const requested = normalizeSessionHistoryPageSize(requestedMaxMessages2);
   const sizes = [];
   if (requested === void 0) {
     sizes.push(...SESSION_HISTORY_PAGE_SIZES);
@@ -27782,25 +28332,25 @@ var HarnessApiBridge = class {
     }
     const nativeRequest = callSchema2.parse(request);
     const response = await this.call(nativeRequest);
-    const responseBytes = new TextEncoder().encode(JSON.stringify(response));
-    if (responseBytes.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES2) {
+    const responseBytes2 = new TextEncoder().encode(JSON.stringify(response));
+    if (responseBytes2.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES2) {
       return { kind: "inline", response };
     }
-    if (responseBytes.byteLength > MAX_HARNESS_API_TRANSFER_BYTES) {
+    if (responseBytes2.byteLength > MAX_HARNESS_API_TRANSFER_BYTES) {
       throw new RpcError("RESPONSE_TOO_LARGE", "The Harness API response exceeds the bounded transfer limit.");
     }
     this.pruneTransfers();
     if (this.outgoingTransfers.size >= MAX_ACTIVE_API_TRANSFERS) {
       throw new RpcError("RATE_LIMITED", "Too many Harness API response transfers are active.", void 0, true);
     }
-    const totalChunks = Math.ceil(responseBytes.byteLength / HARNESS_API_TRANSFER_CHUNK_BYTES);
+    const totalChunks = Math.ceil(responseBytes2.byteLength / HARNESS_API_TRANSFER_CHUNK_BYTES);
     this.outgoingTransfers.set(params.transferId, {
-      bytes: responseBytes,
+      bytes: responseBytes2,
       totalChunks,
       nextIndex: 0,
       touchedAt: Date.now()
     });
-    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes.byteLength, totalChunks };
+    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes2.byteLength, totalChunks };
   }
   readTransfer(input2) {
     this.pruneTransfers();
@@ -28183,7 +28733,7 @@ function frameSessionId(frame) {
   return typeof payload.sessionId === "string" && payload.sessionId.length > 0 ? payload.sessionId : void 0;
 }
 function withTimeout(promise, ms, message) {
-  return new Promise((resolve4, reject) => {
+  return new Promise((resolve5, reject) => {
     const timer = setTimeout(() => {
       reject(new RpcError("TIMEOUT", message, void 0, true));
     }, ms);
@@ -28191,7 +28741,7 @@ function withTimeout(promise, ms, message) {
     promise.then(
       (value) => {
         clearTimeout(timer);
-        resolve4(value);
+        resolve5(value);
       },
       (error) => {
         clearTimeout(timer);
@@ -28221,6 +28771,9 @@ function concatChunks2(chunks, totalBytes) {
 }
 
 // src/harness-remote-bridge.ts
+import { Buffer as Buffer5 } from "node:buffer";
+import { lstat, realpath as realpath2, stat as stat6 } from "node:fs/promises";
+import { dirname as dirname6, isAbsolute as isAbsolute4, join as join10, parse as parse2, relative as relative2, resolve as resolve3, sep } from "node:path";
 var endpointSchema = external_exports.string().min(1).max(128).regex(/^(?:\$events(?:\/result)?|[A-Za-z0-9_$.-]+\/[A-Za-z0-9_$.-]+)$/);
 var callSchema3 = external_exports.object({ endpoint: endpointSchema, payload: external_exports.unknown() }).strict();
 var streamOpenSchema3 = external_exports.object({
@@ -28268,6 +28821,14 @@ var directoryListSchema2 = external_exports.object({
 var MAX_ACTIVE_STREAMS2 = MAX_ALPHA_STREAMS_PER_CONNECTION;
 var MAX_ACTIVE_TRANSFERS2 = MAX_ACTIVE_TRANSFERS_PER_DIRECTION;
 var INLINE_TRANSFER_RESPONSE_BYTES3 = 2 * 1024 * 1024;
+var STREAM_FRAME_ENVELOPE_BYTES = 4 * 1024;
+var RESPONSE_ENVELOPE_BYTES2 = 8 * 1024;
+var WORKSPACE_FILE_ENDPOINTS = /* @__PURE__ */ new Set(["workspaceFiles/stat", "workspaceFiles/read", "workspaceFiles/readBytes", "workspaceFiles/list"]);
+var WORKSPACE_FILE_READ_ENDPOINTS = /* @__PURE__ */ new Set(["workspaceFiles/stat", "workspaceFiles/read", "workspaceFiles/readBytes", "workspaceFiles/readAll", "workspaceFiles/list"]);
+var MAX_WORKSPACE_READ_BYTES = 4 * 1024 * 1024;
+var REMOTE_HISTORY_CALL_ENDPOINTS = /* @__PURE__ */ new Set(["session/page", "session/history"]);
+var REMOTE_HISTORY_STREAM_ENDPOINTS = /* @__PURE__ */ new Set(["session/follow"]);
+var MAX_CACHED_HISTORY_PAGES = 64;
 var HARNESS_REMOTE_ALLOWLIST = [
   "$events",
   "$events/result",
@@ -28287,6 +28848,9 @@ var HARNESS_REMOTE_ALLOWLIST = [
   "goals/edit",
   "goals/pause",
   "goals/resume",
+  "job/follow",
+  "job/kill",
+  "job/list",
   "llm/discoverModels",
   "llm/listConfigurableProviders",
   "llm/listProviders",
@@ -28345,17 +28909,22 @@ var HARNESS_REMOTE_ALLOWLIST = [
 ];
 var allowedEndpoints = new Set(HARNESS_REMOTE_ALLOWLIST);
 var HarnessRemoteBridge = class {
-  constructor(gateway, publish, logger, harnessVersion, terminal = new TerminalPolicy(() => false, "", /* @__PURE__ */ new Map()), codexWorkspace) {
+  constructor(gateway, publish, logger, harnessVersion, terminal = new TerminalPolicy(() => false, "", /* @__PURE__ */ new Map()), codexWorkspace, sessionHeaderCwd) {
     this.gateway = gateway;
     this.publish = publish;
     this.logger = logger;
     this.harnessVersion = harnessVersion;
     this.terminal = terminal;
     this.codexWorkspace = codexWorkspace;
+    this.sessionHeaderCwd = sessionHeaderCwd;
   }
   streams = /* @__PURE__ */ new Map();
   incomingTransfers = /* @__PURE__ */ new Map();
   outgoingTransfers = /* @__PURE__ */ new Map();
+  /** Last page size that fit one secure message, per session, so probing is paid once. */
+  historyPageSizes = /* @__PURE__ */ new Map();
+  /** Last working directory read per Session, so a file open does not re-project on every chunk. */
+  sessionWorkingDirectories = /* @__PURE__ */ new Map();
   /**
    * Answer one remote Gateway call.
    *
@@ -28396,8 +28965,13 @@ var HarnessRemoteBridge = class {
     const signal = AbortSignal.timeout(6e4);
     try {
       const nativePayload = normalizeWorkspaceRequestPayload(params.endpoint, params.payload, this.harnessVersion);
-      const nativeResult = params.endpoint === "commands/execute" ? await dispatchCommandForHost(this.gateway, params.payload, signal, this.harnessVersion) : await this.gateway.dispatch(params.endpoint, nativePayload, signal);
+      const guardedPayload = this.sessionHeaderCwd !== void 0 && WORKSPACE_FILE_READ_ENDPOINTS.has(params.endpoint) ? await this.assertNativeWorkspaceFileCall(params.endpoint, nativePayload, signal) : nativePayload;
+      const nativeResult = REMOTE_HISTORY_CALL_ENDPOINTS.has(params.endpoint) ? await this.dispatchHistoryPage(params.endpoint, guardedPayload, signal) : params.endpoint === "commands/execute" ? await dispatchCommandForHost(this.gateway, params.payload, signal, this.harnessVersion) : await this.dispatchWorkspaceFile(params.endpoint, guardedPayload, signal);
       const result = params.endpoint === "directoryPicker/list" && needsDirectoryFallback(nativeResult) ? await this.directoryList(params.payload, signal) : nativeResult;
+      if (params.endpoint === "workspace/create" && isInvalidWorkspacePath(result)) {
+        const recovered = await this.recoverWorkspaceCreate(params.payload, signal);
+        if (recovered !== void 0) return recovered;
+      }
       this.logger?.debug("harness remote call ok", {
         endpoint: params.endpoint,
         durationMs: Math.round(performance.now() - startedAt)
@@ -28405,6 +28979,10 @@ var HarnessRemoteBridge = class {
       return reservation === void 0 ? result : this.terminal.result(params.endpoint, params.payload, result, reservation);
     } catch (error) {
       if (reservation !== void 0) this.terminal.result(params.endpoint, params.payload, { ok: false, error: { code: "FAILED", message: "", details: {} } }, reservation);
+      if (params.endpoint === "workspace/create" && isInvalidWorkspacePath(error)) {
+        const recovered = await this.recoverWorkspaceCreate(params.payload, signal);
+        if (recovered !== void 0) return recovered;
+      }
       if (params.endpoint === "directoryPicker/list") {
         const result = await this.directoryList(params.payload, signal);
         this.logger?.debug("harness remote call ok", {
@@ -28417,7 +28995,10 @@ var HarnessRemoteBridge = class {
       this.logger?.warn("harness remote call failed", {
         endpoint: params.endpoint,
         durationMs: Math.round(performance.now() - startedAt),
-        code: this.gateway.failure(error).code
+        code: this.gateway.failure(error).code,
+        // The code alone is what the client sees; the message is the only thing that says WHY the
+        // Host threw (a strict-schema rejection, an oversized page, a session the gateway lost).
+        message: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
@@ -28426,6 +29007,137 @@ var HarnessRemoteBridge = class {
     const args = requestArgs(payload);
     const params = directoryListSchema2.parse(args);
     return { ok: true, value: await listRemoteDirectory(params.path, signal) };
+  }
+  /**
+   * Prove a native workspace read stays inside the Session's workspace.
+   *
+   * DSH's workspace-file endpoints are also reachable from the local UI, but
+   * this bridge is the trust boundary for a remote peer: a client-controlled
+   * absolute path, `..`, or symlink must never leave the Session cwd.
+   * @param endpoint - allowlisted native workspace read endpoint.
+   * @param payload - original endpoint payload.
+   * @param signal - call lifetime.
+   * @returns the payload with a canonical, workspace-relative locator.
+   */
+  async assertNativeWorkspaceFileCall(endpoint, payload, signal) {
+    const rootPayload = isRecord14(payload) ? payload : {};
+    const args = requestArgs(payload);
+    const sessionId = typeof args.workspaceFileScopeId === "string" ? args.workspaceFileScopeId : typeof args.sessionId === "string" ? args.sessionId : typeof args.agentId === "string" ? args.agentId : void 0;
+    if (sessionId === void 0) {
+      throw new RpcError("WORKSPACE_UNAVAILABLE", "The workspace identifier is missing.");
+    }
+    const cwd = this.sessionHeaderCwd?.(sessionId);
+    if (cwd === void 0) throw new RpcError("WORKSPACE_UNAVAILABLE", "The workspace is unavailable.");
+    let root;
+    try {
+      root = await realpath2(cwd);
+      if (!(await stat6(root)).isDirectory()) throw new Error("not a directory");
+    } catch {
+      return payload;
+    }
+    signal.throwIfAborted();
+    const options = isRecord14(args.options) ? args.options : void 0;
+    const rawBaseFile = options !== void 0 && "baseFile" in options ? options.baseFile : args.baseFile;
+    if (rawBaseFile !== void 0 && typeof rawBaseFile !== "string") {
+      throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is outside the workspace.");
+    }
+    const path = typeof args.path === "string" ? args.path : ".";
+    if (rawBaseFile !== void 0) {
+      const baseCandidate = isAbsolute4(rawBaseFile) ? resolve3(rawBaseFile) : resolve3(root, rawBaseFile);
+      await this.verifyWorkspacePathContainment(root, baseCandidate, "workspaceFiles/stat");
+      const target2 = isAbsolute4(path) ? resolve3(path) : resolve3(dirname6(baseCandidate), path);
+      await this.verifyWorkspacePathContainment(root, target2, endpoint);
+      return payload;
+    }
+    const safeRel = await this.verifyWorkspacePathContainment(root, path, endpoint);
+    const nextArgs = isRecord14(rootPayload.args) ? { ...rootPayload.args, path: safeRel } : { ...rootPayload, path: safeRel };
+    return isRecord14(rootPayload.args) ? { ...rootPayload, args: nextArgs } : nextArgs;
+  }
+  async verifyWorkspacePathContainment(root, path, endpoint) {
+    const candidate = isAbsolute4(path) ? resolve3(path) : resolve3(root, path);
+    if (process.platform === "win32" && parse2(root).root.toLowerCase() !== parse2(candidate).root.toLowerCase()) {
+      throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is outside the workspace.");
+    }
+    const relativeToRoot = relative2(root, candidate);
+    if (isPathOutside(relativeToRoot)) {
+      throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is outside the workspace.");
+    }
+    try {
+      const rootInfo = await lstat(root);
+      if (rootInfo.isSymbolicLink() || !rootInfo.isDirectory()) {
+        throw new RpcError("WORKSPACE_PATH_DENIED", "The workspace root is invalid or a symlink.");
+      }
+      const segments = relativeToRoot.split(sep).filter((segment) => segment.length > 0 && segment !== ".");
+      let current = root;
+      for (const segment of segments.slice(0, -1)) {
+        current = join10(current, segment);
+        if (isPathOutside(relative2(root, current))) {
+          throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is outside the workspace.");
+        }
+        const info2 = await lstat(current);
+        if (info2.isSymbolicLink() || !info2.isDirectory()) {
+          throw new RpcError("WORKSPACE_PATH_DENIED", "An ancestor directory is invalid or a symlink.");
+        }
+      }
+      const target2 = await lstat(candidate);
+      if (target2.isSymbolicLink()) {
+        throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is not a regular file.");
+      }
+      const canonical = await realpath2(candidate);
+      if (isPathOutside(relative2(root, canonical))) {
+        throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is outside the workspace.");
+      }
+      const info = await stat6(canonical);
+      const directoryAllowed = endpoint === "workspaceFiles/stat" || endpoint === "workspaceFiles/list";
+      if (!directoryAllowed && !info.isFile()) {
+        throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is not a regular file.");
+      }
+      if (endpoint === "workspaceFiles/readAll" && info.size > MAX_WORKSPACE_READ_BYTES) {
+        throw new RpcError("WORKSPACE_TOO_LARGE", "The requested workspace file is too large.");
+      }
+      const safeRel = relativeToRoot === "" ? "." : relativeToRoot;
+      return process.platform === "win32" ? safeRel.replaceAll("\\", "/") : safeRel;
+    } catch (error) {
+      if (error instanceof RpcError) throw error;
+      throw new RpcError("WORKSPACE_PATH_DENIED", "The requested workspace path is unavailable.");
+    }
+  }
+  /**
+   * Resolve an existing Workspace when `workspace/create` cannot realpath a
+   * deleted directory.
+   *
+   * DSH keeps a registered Workspace open after its directory disappears, but
+   * `workspace/create` canonicalizes the path first and fails with ENOENT. The
+   * Client can still open the Workspace it sees in the Host's list; resolve that
+   * list by lexical path and return the existing row instead of failing.
+   * @param payload - workspace/create request payload.
+   * @param signal - call lifetime.
+   * @returns an existing-workspace result, or undefined when none matches.
+   */
+  async recoverWorkspaceCreate(payload, signal) {
+    const path = requestArgs(payload).path;
+    if (typeof path !== "string" || path === "") return void 0;
+    let source;
+    try {
+      source = await this.gateway.open("workspace/follow", { args: {} }, signal);
+    } catch {
+      return void 0;
+    }
+    const iterator = source[Symbol.asyncIterator]();
+    let first;
+    try {
+      first = await iterator.next();
+    } catch {
+      return void 0;
+    } finally {
+      await iterator.return?.().catch(() => void 0);
+    }
+    const frame = isRecord14(first.value) ? first.value : {};
+    const baseline = isRecord14(frame.value) ? frame.value : frame;
+    const items = Array.isArray(baseline.items) ? baseline.items : [];
+    const target2 = workspacePathIdentity(path);
+    const workspace = items.find((item) => isRecord14(item) && typeof item.path === "string" && workspacePathIdentity(item.path) === target2);
+    return workspace === void 0 ? void 0 : { ok: true, value: { workspace, created: false } };
   }
   openTransfer(input2) {
     this.pruneTransfers();
@@ -28487,22 +29199,22 @@ var HarnessRemoteBridge = class {
       throw new RpcError("INVALID_MESSAGE", "The Harness Remote transfer does not contain a valid request.");
     }
     const response = await this.call(callSchema3.parse(request));
-    const responseBytes = new TextEncoder().encode(JSON.stringify(response));
-    if (responseBytes.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES3) return { kind: "inline", response };
-    if (responseBytes.byteLength > MAX_HARNESS_API_TRANSFER_BYTES) {
+    const responseBytes2 = new TextEncoder().encode(JSON.stringify(response));
+    if (responseBytes2.byteLength <= INLINE_TRANSFER_RESPONSE_BYTES3) return { kind: "inline", response };
+    if (responseBytes2.byteLength > MAX_HARNESS_API_TRANSFER_BYTES) {
       throw new RpcError("RESPONSE_TOO_LARGE", "The Harness Remote response exceeds the bounded transfer limit.");
     }
     if (this.outgoingTransfers.size >= MAX_ACTIVE_TRANSFERS2) {
       throw new RpcError("RATE_LIMITED", "Too many Harness Remote response transfers are active.", void 0, true);
     }
-    const totalChunks = Math.ceil(responseBytes.byteLength / HARNESS_API_TRANSFER_CHUNK_BYTES);
+    const totalChunks = Math.ceil(responseBytes2.byteLength / HARNESS_API_TRANSFER_CHUNK_BYTES);
     this.outgoingTransfers.set(params.transferId, {
-      bytes: responseBytes,
+      bytes: responseBytes2,
       totalChunks,
       nextIndex: 0,
       touchedAt: Date.now()
     });
-    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes.byteLength, totalChunks };
+    return { kind: "chunked", transferId: params.transferId, totalBytes: responseBytes2.byteLength, totalChunks };
   }
   readTransfer(input2) {
     this.pruneTransfers();
@@ -28520,7 +29232,7 @@ var HarnessRemoteBridge = class {
     return {
       transferId: params.transferId,
       index: params.index,
-      data: Buffer.from(transfer.bytes.subarray(start, end)).toString("base64")
+      data: Buffer5.from(transfer.bytes.subarray(start, end)).toString("base64")
     };
   }
   closeTransfer(input2) {
@@ -28540,17 +29252,197 @@ var HarnessRemoteBridge = class {
     }
     const controller = new AbortController();
     this.streams.set(params.streamId, { controller });
-    let source;
     try {
-      source = (this.codexWorkspace === void 0 ? void 0 : await this.codexWorkspace.open(params.endpoint, params.payload, controller.signal)) ?? await this.gateway.open(params.endpoint, normalizeWorkspaceChangesPayload(params.endpoint, params.payload, this.harnessVersion), controller.signal);
+      const nativePayload = normalizeWorkspaceChangesPayload(params.endpoint, params.payload, this.harnessVersion);
+      if (REMOTE_HISTORY_STREAM_ENDPOINTS.has(params.endpoint)) {
+        const opened = await this.openHistoryStream(params, nativePayload, controller.signal);
+        void this.pump(params.streamId, opened.source, controller.signal, opened.frame);
+        return { opened: true, streamId: params.streamId };
+      }
+      const source = (this.codexWorkspace === void 0 ? void 0 : await this.codexWorkspace.open(params.endpoint, params.payload, controller.signal)) ?? await this.gateway.open(params.endpoint, nativePayload, controller.signal);
       controller.signal.throwIfAborted();
+      void this.pump(params.streamId, source, controller.signal);
+      return { opened: true, streamId: params.streamId };
     } catch (error) {
       this.streams.delete(params.streamId);
       controller.abort();
+      this.logger?.warn("harness remote stream open failed", {
+        endpoint: params.endpoint,
+        message: error instanceof Error ? error.message : String(error)
+      });
       throw error;
     }
-    void this.pump(params.streamId, source, controller.signal);
-    return { opened: true, streamId: params.streamId };
+  }
+  /**
+   * Open a history stream with its opening page chosen by byte budget.
+   *
+   * `session/follow` yields one snapshot page and then live events. The snapshot cannot be
+   * retried after the stream is handed to the client, so each attempt is pulled here, measured,
+   * and closed again when it would not fit one secure message. The accepted iterator continues
+   * after that first frame, which the pump publishes before the live tail.
+   * @param params - the validated stream-open request.
+   * @param payload - the request payload after endpoint normalization.
+   * @param signal - the stream's cancellation signal.
+   * @returns the remaining source and the measured first frame.
+   */
+  async openHistoryStream(params, payload, signal) {
+    const { key, sizes } = this.historyPageSizesFor(payload);
+    for (const size of sizes) {
+      const source = await this.gateway.open(params.endpoint, withHistoryWindow(payload, size), signal);
+      const iterator = source[Symbol.asyncIterator]();
+      let first;
+      try {
+        first = await iterator.next();
+      } catch (error) {
+        await iterator.return?.();
+        throw error;
+      }
+      if (first.done === true) {
+        await iterator.return?.();
+        return { source: EMPTY_ASYNC_ITERABLE };
+      }
+      const frame = {
+        streamId: params.streamId,
+        hasValue: true,
+        ...first.value === void 0 ? {} : { value: collectRpcAttachments(first.value) }
+      };
+      const bytes = streamFrameBytes(frame);
+      this.logger?.debug("history stream attempt", { endpoint: params.endpoint, size, bytes });
+      if (bytes <= MAX_SECURE_MESSAGE_BYTES - STREAM_FRAME_ENVELOPE_BYTES) {
+        this.rememberHistoryPageSize(key, size);
+        return { source: remainingIterable(iterator), frame };
+      }
+      await iterator.return?.();
+    }
+    throw new RpcError(
+      "RESPONSE_TOO_LARGE",
+      "The Harness history page is too large for the secure Remote channel. Request a smaller page.",
+      { maxBytes: MAX_SECURE_MESSAGE_BYTES },
+      true
+    );
+  }
+  /**
+   * Answer one unary history page with the largest window that still fits.
+   *
+   * DSH's client asks for 500 messages; a session whose only Turn is long answers that with
+   * its whole log, which the 4 MiB secure-message limit cannot carry. Each page is measured
+   * after attachment tagging (the form the wire carries) and the request steps down through
+   * {@link HISTORY_PAGE_SIZES} until it fits. Only a size overflow retries: a business failure
+   * is returned immediately.
+   * @param endpoint - the history endpoint being called.
+   * @param payload - the request payload after endpoint normalization.
+   * @param signal - the call's timeout signal.
+   * @returns the page, or `RESPONSE_TOO_LARGE` when even one message cannot cross.
+   */
+  async dispatchHistoryPage(endpoint, payload, signal) {
+    const { key, sizes } = this.historyPageSizesFor(payload);
+    for (const size of sizes) {
+      const startedAt = performance.now();
+      const result = await this.gateway.dispatch(endpoint, withHistoryWindow(payload, size), signal);
+      if (!result.ok) return result;
+      const value = result.value;
+      const wire = collectRpcAttachments(result);
+      const bytes = responseBytes(wire);
+      this.logger?.debug("history page attempt", {
+        endpoint,
+        size,
+        durationMs: Math.round(performance.now() - startedAt),
+        ok: result.ok,
+        records: Array.isArray(value?.records) ? value.records.length : void 0,
+        hasMore: value?.hasMore,
+        bytes
+      });
+      if (bytes <= MAX_SECURE_MESSAGE_BYTES - RESPONSE_ENVELOPE_BYTES2) {
+        this.rememberHistoryPageSize(key, size);
+        return wire;
+      }
+    }
+    return {
+      ok: false,
+      error: {
+        code: "RESPONSE_TOO_LARGE",
+        message: "The Harness history page is too large for the secure Remote channel. Request a smaller page.",
+        details: { maxBytes: MAX_SECURE_MESSAGE_BYTES }
+      }
+    };
+  }
+  /** The ladder for one history request, starting from what last fit for this session. */
+  historyPageSizesFor(payload) {
+    const key = historyPageKey(payload);
+    const requested = requestedMaxMessages(payload) ?? HISTORY_PAGE_SIZES[0];
+    const remembered = this.historyPageSizes.get(key);
+    const start = Math.max(1, Math.min(requested, HISTORY_PAGE_SIZES[0], remembered ?? requested));
+    this.logger?.debug("history window", { key: key.slice(0, 120), requested, remembered, start });
+    return { key, sizes: historyPageSizes(start) };
+  }
+  rememberHistoryPageSize(key, size) {
+    if (this.historyPageSizes.size >= MAX_CACHED_HISTORY_PAGES && !this.historyPageSizes.has(key)) {
+      const oldest = this.historyPageSizes.keys().next().value;
+      if (oldest !== void 0) this.historyPageSizes.delete(oldest);
+    }
+    this.historyPageSizes.set(key, size);
+  }
+  /**
+   * Dispatch a workspace-file call, re-rooting a path written against the Session's current
+   * directory onto the header root the Host resolves against.
+   *
+   * DSH names the workspace root from the Session header, so a Session that changed its working
+   * directory mid-run resolves relative links (and deliverables built from the root) against the
+   * stale header. The live `workingDirectory` projection is the correction; when the re-rooted
+   * path misses, the original path is tried so a file created before the change still opens.
+   */
+  async dispatchWorkspaceFile(endpoint, payload, signal) {
+    if (!WORKSPACE_FILE_ENDPOINTS.has(endpoint) || this.sessionHeaderCwd === void 0) {
+      return this.gateway.dispatch(endpoint, payload, signal);
+    }
+    const location = workspaceFileLocation(payload);
+    if (location === void 0) return this.gateway.dispatch(endpoint, payload, signal);
+    const headerCwd = this.sessionHeaderCwd(location.sessionId);
+    if (headerCwd === void 0) return this.gateway.dispatch(endpoint, payload, signal);
+    const liveCwd = await this.sessionWorkingDirectory(location.sessionId, signal);
+    if (liveCwd === void 0) return this.gateway.dispatch(endpoint, payload, signal);
+    const nextPath = rerootWorkspacePath(headerCwd, liveCwd, location.path);
+    if (nextPath === void 0 || nextPath === location.path) return this.gateway.dispatch(endpoint, payload, signal);
+    const rewritten = replaceWorkspaceFilePath(payload, nextPath);
+    if (rewritten === payload) return this.gateway.dispatch(endpoint, payload, signal);
+    const rerooted = await this.gateway.dispatch(endpoint, rewritten, signal);
+    if (!workspaceFileMiss(endpoint, rerooted)) {
+      this.logger?.debug("workspace file path re-rooted", {
+        endpoint,
+        headerCwd,
+        liveCwd,
+        path: location.path,
+        nextPath
+      });
+      return rerooted;
+    }
+    this.logger?.debug("workspace file path re-root missed; using the original path", {
+      endpoint,
+      path: location.path,
+      nextPath
+    });
+    return this.gateway.dispatch(endpoint, payload, signal);
+  }
+  /** Read the Session's live working directory from its projections, cached briefly. */
+  async sessionWorkingDirectory(sessionId, signal) {
+    const cached = this.sessionWorkingDirectories.get(sessionId);
+    if (cached !== void 0 && Date.now() - cached.at < 5e3) return cached.cwd;
+    let cwd;
+    try {
+      const result = await this.gateway.dispatch("session/projections", { args: { request: { sessionId } } }, signal);
+      const value = result.ok ? result.value : void 0;
+      const values = isRecord14(value) && isRecord14(value.values) ? value.values : void 0;
+      const raw = values?.workingDirectory;
+      if (typeof raw === "string" && raw.length > 0) cwd = raw;
+    } catch {
+      cwd = void 0;
+    }
+    if (this.sessionWorkingDirectories.size >= MAX_CACHED_HISTORY_PAGES && !this.sessionWorkingDirectories.has(sessionId)) {
+      const oldest = this.sessionWorkingDirectories.keys().next().value;
+      if (oldest !== void 0) this.sessionWorkingDirectories.delete(oldest);
+    }
+    this.sessionWorkingDirectories.set(sessionId, { cwd, at: Date.now() });
+    return cwd;
   }
   closeStream(input2) {
     const params = streamCloseSchema3.parse(input2);
@@ -28566,6 +29458,7 @@ var HarnessRemoteBridge = class {
     this.streams.clear();
     this.incomingTransfers.clear();
     this.outgoingTransfers.clear();
+    this.historyPageSizes.clear();
     for (const [, stream] of streams) stream.controller.abort(reason);
     await this.codexWorkspace?.closeAll();
   }
@@ -28577,17 +29470,28 @@ var HarnessRemoteBridge = class {
       throw new RpcError("FEATURE_NOT_SUPPORTED", "This Harness version does not support Remote event transport.");
     }
   }
-  async pump(streamId, source, signal) {
+  async pump(streamId, source, signal, initialFrame) {
     let reason = "completed";
     let failure2;
     try {
+      if (initialFrame !== void 0 && !signal.aborted) await this.publish("harness.remote.frame", initialFrame);
       for await (const value of source) {
         if (signal.aborted) break;
-        await this.publish("harness.remote.frame", {
+        const frame = {
           streamId,
           hasValue: true,
           ...value === void 0 ? {} : { value: collectRpcAttachments(value) }
-        });
+        };
+        if (streamFrameBytes(frame) > MAX_SECURE_MESSAGE_BYTES - STREAM_FRAME_ENVELOPE_BYTES) {
+          failure2 = {
+            code: "RESPONSE_TOO_LARGE",
+            message: "The Harness stream frame is too large for the secure Remote channel.",
+            details: { maxBytes: MAX_SECURE_MESSAGE_BYTES }
+          };
+          reason = "failed";
+          break;
+        }
+        await this.publish("harness.remote.frame", frame);
       }
       if (signal.aborted) reason = "cancelled";
     } catch (error) {
@@ -28608,6 +29512,130 @@ var HarnessRemoteBridge = class {
     for (const [id4, transfer] of this.outgoingTransfers) if (transfer.touchedAt < cutoff) this.outgoingTransfers.delete(id4);
   }
 };
+function withHistoryWindow(payload, maxMessages) {
+  if (!isRecord14(payload)) return payload;
+  if (Array.isArray(payload.args)) {
+    const [first, ...rest] = payload.args;
+    return isRecord14(first) ? { ...payload, args: [windowedParams(first, maxMessages), ...rest] } : payload;
+  }
+  if (isRecord14(payload.args)) return { ...payload, args: windowedParams(payload.args, maxMessages) };
+  return windowedParams(payload, maxMessages);
+}
+function windowedParams(params, maxMessages) {
+  return isRecord14(params.request) ? { ...params, request: windowedRequest(params.request, maxMessages) } : windowedRequest(params, maxMessages);
+}
+function windowedRequest(request, maxMessages) {
+  const turnWindow = isRecord14(request.turnWindow) ? request.turnWindow : void 0;
+  const next = { ...request, maxMessages };
+  if (turnWindow !== void 0) {
+    next.turnWindow = typeof turnWindow.minMessages === "number" && Number.isFinite(turnWindow.minMessages) ? { ...turnWindow, minMessages: Math.min(turnWindow.minMessages, maxMessages) } : turnWindow;
+  }
+  return next;
+}
+function historyRequestOf(payload) {
+  let node = payload;
+  for (let depth = 0; depth < 4; depth += 1) {
+    if (!isRecord14(node)) return void 0;
+    if (Array.isArray(node.args)) {
+      node = node.args[0];
+      continue;
+    }
+    if (isRecord14(node.args)) {
+      node = node.args;
+      continue;
+    }
+    if (isRecord14(node.request)) {
+      node = node.request;
+      continue;
+    }
+    return node;
+  }
+  return void 0;
+}
+function requestedMaxMessages(payload) {
+  const value = historyRequestOf(payload)?.maxMessages;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : void 0;
+}
+function workspaceFileLocation(payload) {
+  if (!isRecord14(payload)) return void 0;
+  if (Array.isArray(payload.args)) {
+    if (payload.args.length >= 2 && typeof payload.args[0] === "string" && typeof payload.args[1] === "string") {
+      return { sessionId: payload.args[0], path: payload.args[1] };
+    }
+    const first = payload.args[0];
+    if (isRecord14(first)) return workspaceFileLocation(first);
+    return void 0;
+  }
+  const candidate = isRecord14(payload.args) ? payload.args : isRecord14(payload.request) ? payload.request : payload;
+  const sessionId = [candidate.workspaceFileScopeId, candidate.workspaceFileScope, candidate.sessionId].find((value) => typeof value === "string" && value.length > 0);
+  const path = candidate.path;
+  if (typeof sessionId !== "string" || typeof path !== "string" || path.length === 0) return void 0;
+  return { sessionId, path };
+}
+function replaceWorkspaceFilePath(payload, nextPath) {
+  if (!isRecord14(payload)) return payload;
+  if (Array.isArray(payload.args)) {
+    if (payload.args.length >= 2 && typeof payload.args[0] === "string" && typeof payload.args[1] === "string") {
+      const args = [...payload.args];
+      args[1] = nextPath;
+      return { ...payload, args };
+    }
+    const first = payload.args[0];
+    if (!isRecord14(first)) return payload;
+    return { ...payload, args: [{ ...first, path: nextPath }, ...payload.args.slice(1)] };
+  }
+  if (isRecord14(payload.args)) return { ...payload, args: { ...payload.args, path: nextPath } };
+  if (isRecord14(payload.request)) return { ...payload, request: { ...payload.request, path: nextPath } };
+  return { ...payload, path: nextPath };
+}
+function workspaceFileMiss(endpoint, result) {
+  if (!result.ok) return true;
+  if (endpoint !== "workspaceFiles/stat") return false;
+  const value = result.value;
+  return isRecord14(value) && value.exists === false;
+}
+function rerootWorkspacePath(headerCwd, liveCwd, target2) {
+  if (samePath(headerCwd, liveCwd)) return void 0;
+  if (isAbsolute4(target2)) {
+    const suffix = relative2(headerCwd, target2);
+    if (suffix === "" || suffix === "." || isAbsolute4(suffix) || suffix.startsWith(`..${sep}`) || suffix === "..") return void 0;
+    return join10(liveCwd, suffix);
+  }
+  const prefix = relative2(headerCwd, liveCwd);
+  if (prefix !== "" && prefix !== "." && !isAbsolute4(prefix) && !prefix.startsWith(`..${sep}`) && prefix !== "..") {
+    return join10(prefix, target2);
+  }
+  return join10(liveCwd, target2);
+}
+function samePath(left, right) {
+  const normalize = (value) => {
+    const trimmed = value.replace(/[\\/]+$/u, "");
+    return process.platform === "win32" ? trimmed.toLowerCase() : trimmed;
+  };
+  return normalize(left) === normalize(right);
+}
+function historyPageKey(payload) {
+  const request = historyRequestOf(payload);
+  if (request === void 0) return "default";
+  const address = request.address ?? request.request ?? request.threadId ?? request.sessionId;
+  if (address === void 0) return "default";
+  try {
+    return JSON.stringify(address);
+  } catch {
+    return "default";
+  }
+}
+function responseBytes(result) {
+  return Buffer5.byteLength(JSON.stringify(result), "utf8");
+}
+function streamFrameBytes(frame) {
+  return Buffer5.byteLength(JSON.stringify(frame), "utf8");
+}
+function remainingIterable(iterator) {
+  return { [Symbol.asyncIterator]: () => iterator };
+}
+var EMPTY_ASYNC_ITERABLE = { async *[Symbol.asyncIterator]() {
+} };
 function normalizeWorkspaceChangesPayload(endpoint, payload, harnessVersion) {
   if (endpoint !== "workspaceFiles/changes" || !requiresWorkspaceChangePath(harnessVersion)) return payload;
   if (!isRecord14(payload) || !isRecord14(payload.args) || Object.hasOwn(payload.args, "path")) return payload;
@@ -28661,7 +29689,7 @@ async function dispatchCommandForHost(gateway, payload, signal, harnessVersion) 
   );
 }
 function decodeCanonicalBase643(value) {
-  const bytes = Buffer.from(value, "base64");
+  const bytes = Buffer5.from(value, "base64");
   if (bytes.toString("base64") !== value) throw new RpcError("INVALID_MESSAGE", "The Harness Remote transfer chunk is invalid.");
   return bytes;
 }
@@ -28690,6 +29718,20 @@ function record6(value) {
 }
 function isRecord14(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isPathOutside(relativePath) {
+  return relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute4(relativePath);
+}
+function workspacePathIdentity(path) {
+  const normalized = resolve3(path).replace(/[\\/]+$/, "");
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
+}
+function isInvalidWorkspacePath(input2) {
+  const error = isRecord14(input2) && input2.ok === false && isRecord14(input2.error) ? input2.error : input2;
+  if (!isRecord14(error)) return false;
+  const code = typeof error.code === "string" ? error.code : "";
+  const message = typeof error.message === "string" ? error.message : "";
+  return code === "workspace/invalid-path" || message.includes("cannot create a Workspace at") && message.includes("ENOENT");
 }
 
 // src/acp.ts
@@ -28780,7 +29822,7 @@ var StdioAcpAdapter = class {
     const c = this.ensure();
     const id4 = this.nextId++;
     c.stdin.write(JSON.stringify({ jsonrpc: "2.0", id: id4, method, params }) + "\n");
-    return new Promise((resolve4, reject) => {
+    return new Promise((resolve5, reject) => {
       let buf = "";
       const onData = async (d) => {
         buf += d;
@@ -28791,7 +29833,7 @@ var StdioAcpAdapter = class {
             const m = JSON.parse(l);
             if (m.id === id4) {
               c.stdout.off("data", onData);
-              m.error ? reject(new Error(m.error.message ?? "ACP error")) : resolve4(m.result);
+              m.error ? reject(new Error(m.error.message ?? "ACP error")) : resolve5(m.result);
             } else if (m.method && onNotification) await onNotification(m.params);
           } catch {
           }
@@ -28808,8 +29850,8 @@ import { execFileSync as execFileSync2 } from "node:child_process";
 
 // src/codex-workspace-bridge.ts
 import { spawn as spawn4 } from "node:child_process";
-import { realpath as realpath2, lstat, readdir as readdir4, readFile as readFile5, stat as stat6, watch } from "node:fs/promises";
-import { isAbsolute as isAbsolute4, join as join8, relative as relative2, resolve as resolve3 } from "node:path";
+import { realpath as realpath3, lstat as lstat2, readdir as readdir4, readFile as readFile5, stat as stat7, watch } from "node:fs/promises";
+import { isAbsolute as isAbsolute5, join as join11, relative as relative3, resolve as resolve4 } from "node:path";
 var MAX_READ_BYTES = 4 * 1024 * 1024;
 var MAX_INPUT_BYTES = 64 * 1024;
 var MAX_COLS = 240;
@@ -28840,7 +29882,7 @@ var AsyncQueue = class {
     const value = this.values.shift();
     if (value !== void 0) return Promise.resolve({ done: false, value });
     if (this.ended) return Promise.resolve({ done: true, value: void 0 });
-    return new Promise((resolve4) => this.waiters.push(resolve4));
+    return new Promise((resolve5) => this.waiters.push(resolve5));
   }
   [Symbol.asyncIterator]() {
     return this;
@@ -28896,14 +29938,14 @@ var CodexWorkspaceBridge = class {
         const entries = await readdir4(target2, { withFileTypes: true });
         const result = [];
         for (const entry of entries.slice(0, 500)) {
-          const item = join8(target2, entry.name);
-          const info2 = await lstat(item);
+          const item = join11(target2, entry.name);
+          const info2 = await lstat2(item);
           if (info2.isSymbolicLink()) continue;
           result.push({ name: entry.name, type: info2.isDirectory() ? "directory" : info2.isFile() ? "file" : "other", ...info2.isFile() ? { size: info2.size } : {} });
         }
         return { ok: true, value: { path, entries: result, truncated: entries.length > 500 } };
       }
-      const info = await stat6(target2);
+      const info = await stat7(target2);
       const absolutePath = target2;
       const version = `${info.mtimeMs}:${info.size}`;
       if (endpoint === "workspaceFiles/stat") {
@@ -29109,8 +30151,8 @@ var CodexWorkspaceBridge = class {
     const cwd = await this.resolveCwd(parsed.threadId, signal);
     if (!cwd) throw new RpcError("CODEX_WORKSPACE_UNAVAILABLE", "The CodeX thread has no available workspace.");
     try {
-      const root = await realpath2(cwd);
-      const info = await stat6(root);
+      const root = await realpath3(cwd);
+      const info = await stat7(root);
       if (!info.isDirectory()) throw new Error();
       return root;
     } catch {
@@ -29118,15 +30160,15 @@ var CodexWorkspaceBridge = class {
     }
   }
   async safePath(root, path, directory) {
-    const candidate = isAbsolute4(path) ? resolve3(path) : resolve3(root, path);
-    const rel = relative2(root, candidate);
-    if (rel.startsWith("..") || isAbsolute4(rel)) throw new RpcError("CODEX_WORKSPACE_PATH_DENIED", "The requested workspace path is outside the CodeX workspace.");
+    const candidate = isAbsolute5(path) ? resolve4(path) : resolve4(root, path);
+    const rel = relative3(root, candidate);
+    if (rel.startsWith("..") || isAbsolute5(rel)) throw new RpcError("CODEX_WORKSPACE_PATH_DENIED", "The requested workspace path is outside the CodeX workspace.");
     try {
-      const info = await lstat(candidate);
+      const info = await lstat2(candidate);
       if (info.isSymbolicLink()) throw new Error();
-      const canonical = await realpath2(candidate);
-      const canonicalRel = relative2(root, canonical);
-      if (canonicalRel.startsWith("..") || isAbsolute4(canonicalRel)) throw new Error();
+      const canonical = await realpath3(candidate);
+      const canonicalRel = relative3(root, canonical);
+      if (canonicalRel.startsWith("..") || isAbsolute5(canonicalRel)) throw new Error();
       if (directory && !info.isDirectory()) throw new Error();
       return canonical;
     } catch {
@@ -29169,14 +30211,14 @@ function pipeTerminalSpawner() {
     child.stdout.on("data", (data2) => queue.push(Buffer.from(data2).toString("utf8")));
     child.stderr.on("data", (data2) => queue.push(Buffer.from(data2).toString("utf8")));
     child.on("error", () => queue.end());
-    const completed = new Promise((resolve4) => {
+    const completed = new Promise((resolve5) => {
       child.on("error", () => {
         queue.end();
-        resolve4({ exitCode: null });
+        resolve5({ exitCode: null });
       });
       child.on("exit", (code) => {
         queue.end();
-        resolve4({ exitCode: code });
+        resolve5({ exitCode: code });
       });
     });
     return {
@@ -29267,7 +30309,7 @@ function readLimit(args) {
 
 // src/service.ts
 var HostPluginRuntime = class {
-  constructor(config, identities, apiProxy, logger, localGateway, fileViewerHost, terminalSpawner) {
+  constructor(config, identities, apiProxy, logger, localGateway, fileViewerHost, terminalSpawner, sessionSource) {
     this.config = config;
     this.identities = identities;
     this.apiProxy = apiProxy;
@@ -29275,6 +30317,7 @@ var HostPluginRuntime = class {
     this.localGateway = localGateway;
     this.fileViewerHost = fileViewerHost;
     this.terminalSpawner = terminalSpawner;
+    this.sessionSource = sessionSource;
     this.terminalEnabled = config.terminal.enabled;
     this.loopbackPorts = [...config.loopback.ports];
     this.paused = config.hostControl?.paused === true;
@@ -29299,7 +30342,8 @@ var HostPluginRuntime = class {
           () => this.terminalEnabled,
           this.codexWorkspaceState,
           this.terminalSpawner
-        )
+        ),
+        this.sessionSource === void 0 ? void 0 : (sessionId) => this.sessionSource?.()?.get?.(sessionId)?.header?.cwd
       ) : void 0;
       const fileViewer = new RemoteFileViewerBridge(
         () => this.fileViewerHost?.(),
@@ -29548,7 +30592,12 @@ var HostPluginRuntime = class {
       throw new ServerApiError("SERVER_NOT_CONFIGURED", "Configure serverUrl before signing in.", false);
     }
     const result = await this.serverApi.authorizeWithAccount(this.currentIdentity(), email, password);
-    if (!this.paused) this.serverConnection?.resume();
+    this.serverApi.reloadCredentials();
+    await this.serverConnection?.stop();
+    if (this.identity !== void 0) {
+      this.serverConnection = this.createServerConnection(this.identity);
+      if (!this.paused) this.serverConnection.start();
+    }
     this.logger.info("Host account authorized");
     return result;
   }
@@ -29557,7 +30606,11 @@ var HostPluginRuntime = class {
       throw new ServerApiError("SERVER_NOT_CONFIGURED", "Configure serverUrl before entering a Host registration code.", false);
     }
     const result = await this.serverApi.authorizeHostWithCode(this.currentIdentity(), code);
-    if (!this.paused) this.serverConnection?.resume();
+    this.serverApi.reloadCredentials();
+    if (!this.paused) {
+      this.serverConnection?.resume();
+      this.serverConnection?.reconnect();
+    }
     this.logger.info("Host registration code authorized");
     return result;
   }
@@ -29719,9 +30772,9 @@ function isPlainRecord(value) {
 }
 
 // src/cli.ts
-import { stat as stat7 } from "node:fs/promises";
+import { stat as stat8 } from "node:fs/promises";
 import { hostname as hostname3 } from "node:os";
-import { join as join9 } from "node:path";
+import { join as join12 } from "node:path";
 var QR_POLL_INTERVAL_MS = 2e3;
 var TERMINAL_QR_MARGIN = 4;
 async function runCli(args = process.argv.slice(2), dependencies = {}) {
@@ -29809,7 +30862,7 @@ async function status(args, runtime) {
     `Server: ${serverUrl}`,
     "Host control: enabled (dsh-TUI default)"
   ];
-  if (!await exists3(join9(directory, "device.json"))) {
+  if (!await exists3(join12(directory, "device.json"))) {
     lines.push("Device: not initialized", "Authorization: logged out", "Credential: unavailable");
     write(runtime.stdout, `${lines.join("\n")}
 
@@ -29853,7 +30906,7 @@ async function logout(args, runtime) {
   const serverUrl = selectedServer();
   const root = new IdentityStore({ env: runtime.env }).directory;
   const directory = serverStorageDirectory(root, serverUrl, "host");
-  if (!await exists3(join9(directory, "device.json"))) {
+  if (!await exists3(join12(directory, "device.json"))) {
     await new ServerCredentialStore(directory).clear();
     write(runtime.stdout, "This Host is already logged out.\n");
     return 0;
@@ -29884,7 +30937,7 @@ function resolveDependencies(input2) {
     stdout: input2.stdout ?? process.stdout,
     stderr: input2.stderr ?? process.stderr,
     now: input2.now ?? Date.now,
-    wait: input2.wait ?? ((milliseconds) => new Promise((resolve4) => setTimeout(resolve4, milliseconds))),
+    wait: input2.wait ?? ((milliseconds) => new Promise((resolve5) => setTimeout(resolve5, milliseconds))),
     renderQr: input2.renderQr ?? renderTerminalQr,
     createIdentityStore: input2.createIdentityStore ?? ((options) => new IdentityStore(options)),
     createHostApi: input2.createHostApi ?? ((serverUrl, store) => new HostServerApi(serverUrl, store))
@@ -29973,7 +31026,7 @@ function terminalLink(url, target2) {
 }
 async function exists3(path) {
   try {
-    await stat7(path);
+    await stat8(path);
     return true;
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") return false;
@@ -30333,7 +31386,7 @@ function errorCode6(error) {
   return "CONNECTION_FAILED";
 }
 function wait(milliseconds) {
-  return new Promise((resolve4) => setTimeout(resolve4, milliseconds));
+  return new Promise((resolve5) => setTimeout(resolve5, milliseconds));
 }
 
 // src/remote-file-content-provider.ts
@@ -30518,6 +31571,7 @@ async function activate(ctx, readConfig, entryId, tuiBinding) {
   const nativeTypertGateway = ctx.get("typertGateway");
   const localTypertGateway = new TypertGatewaySwitch(nativeTypertGateway, { peer: peerFor }).local();
   const subprocess = ctx.get("subprocess", false);
+  const sessionSource = () => ctx.get("sessions", false);
   const deepseekAccount = ctx.get("deepseekAccount", false);
   const deepseekSession = deepseekAccount === void 0 ? void 0 : {
     read: async () => {
@@ -30549,7 +31603,8 @@ async function activate(ctx, readConfig, entryId, tuiBinding) {
     logger,
     localTypertGateway,
     () => ctx.get("fileViewerHost"),
-    subprocess === void 0 ? void 0 : subprocessTerminalSpawner(subprocess)
+    subprocess === void 0 ? void 0 : subprocessTerminalSpawner(subprocess),
+    sessionSource
   );
   let clientRuntime;
   const hostControl = runtime;

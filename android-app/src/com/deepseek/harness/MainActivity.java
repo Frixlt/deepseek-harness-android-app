@@ -228,6 +228,38 @@ public class MainActivity extends Activity {
         // v1.15.9：dsh-app-boot 打了「插件 warn 落盘」补丁（$DSH_HOME/logs/plugins.log）。
         // 必须加白名单，否则同内核版本下 fast 同步不会覆盖它，补丁形同没打。
         "dshroot/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-app-boot/lib/index.js",
+
+        // ── v1.29（真机血泪教训二）：上面的补丁面路径全是**嵌套布局**
+        //    （dshroot/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/…），
+        //    而 0.2.1 起 npm 改成 hoisted 扁平安装 —— 那些路径在设备上**根本不存在**，
+        //    于是"补丁随 APK 覆盖"全部静默失效：升级后设备仍是旧文件，
+        //    表现就是"升级到 0.2.2 后插件被判定 incompatible / 改了补丁没效果"。
+        //    这里补齐 hoisted 的真实路径（目录前缀，覆盖包内所有文件）。
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-attachment-local/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-subprocess-local/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-bash-local/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-session-persistence-jsonl/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-fs-local/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-ptc-runtime-node/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-llm-deepseek/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-accessibility/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-android/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-browser/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-shizuku/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-vscreen/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-fs-search/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-storage-json/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-app-boot/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-client-ui-layout/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-client-ui-cordis/",
+        // v1.33：懒加载补丁的两个包（否则老设备升级后仍用旧文件 → 优化不生效）
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-web/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-office-kit/",  // rc5 起由 office-to-pdf 改名
+        // rc5 其余 overlay 补丁包：同内核升级时确保不被旧副本挡住
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-util-ripgrep/",
+        "dshroot/lib/node_modules/@deepseek-ai/libreoffice-kit/",
+        "dshroot/lib/node_modules/@deepseek-ai/node-addon-system/",
+        "dshroot/lib/node_modules/@deepseek-ai/dsh-tool-bash/",
         "dshroot/lib/node_modules/@deepseek-ai/dsh/package.json"
     };
     // 外部 dshroot 解压完成标记（App 在 dshroot 补齐后写入；清空/重置时随目录删除）。
@@ -247,7 +279,7 @@ public class MainActivity extends Activity {
     private static final int REQ_MIC = 201;
     /** v1.22.16：WebView 里等麦克风授权的请求（用户在系统框里点完再回填）。 */
     private android.webkit.PermissionRequest pendingMicRequest = null;
-    private static final int REQ_NOTIFICATION = 201;
+    private static final int REQ_NOTIFICATION = 202;
     private static final int REQ_SHIZUKU = 300;
     /** v1.13：已发出 Shizuku 授权请求、等待结果（用于超时傅底判断）。 */
     private volatile boolean pendingShizukuReq = false;
@@ -2516,8 +2548,8 @@ public class MainActivity extends Activity {
         guidePages.add(p10);
 
         GuidePage p11 = new GuidePage();
-        p11.title = "Shizuku / Root 特权（可选）"; p11.actionLabel = "去配置";
-        p11.desc = "授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击等。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。";
+        p11.title = "Shizuku 或 Root 特权（可选，二选一）"; p11.actionLabel = "去配置";
+        p11.desc = "Shizuku 或 root 任一即可（不必两个都给）：授权后 AI 可以执行系统级操作：安装/卸载应用、改系统设置、模拟点击、创建虚拟屏等。\n\nroot 走 su，用于命令行与虚拟屏核心；Shizuku 走官方 API，免 root 设备也能用。\n\n不给也完全能用 —— 文件读写、预览、编辑只需要上面的「所有文件访问」。";
         p11.provider = new StatusProvider() { @Override public boolean granted() {
             // 只读缓存：root 探测在后台线程执行（probeShizuku），不在主线程跑 su
             return (shizukuOk != null && shizukuOk) || (rootOk != null && rootOk);
@@ -3368,10 +3400,10 @@ public class MainActivity extends Activity {
         if (installed) {
             msg = I18n.tr("Shizuku 服务未运行。\n\n请先打开 Shizuku 应用并启动服务，然后回来点击「重新检测」；服务启动后本应用会自动弹出授权对话框。");
         } else {
-            msg = I18n.tr("未检测到 Shizuku 应用。请先安装 Shizuku（官方版），再回来授权。");
+            msg = uiPlain("未检测到 Shizuku 应用，也未检测到 root。\n\n两者**任选其一**即可：\n· 已 root：直接选「重新检测」（App 会用 su 执行特权命令，虚拟屏核心也会用 su 拉起）；\n· 未 root：安装 Shizuku（官方版）并启动，然后回来授权。");
         }
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        b.setTitle(I18n.tr("Shizuku 特权"));
+        b.setTitle(I18n.tr("Shizuku / Root 特权"));
         b.setMessage(msg);
         if (installed) {
             b.setPositiveButton(I18n.tr("去启动 Shizuku"), new DialogInterface.OnClickListener() {
@@ -3408,46 +3440,9 @@ public class MainActivity extends Activity {
         }, "shizuku-probe").start();
     }
 
-    /**
-     * 用 Shizuku newProcess 启动 vscreen server：
-     * 之前用 rish -c 后台 & 启动，Shizuku 命令会话结束会杀子进程（用户 Android 15 实测 server 消失）——
-     * newProcess 创建的是独立进程（App 持有 IRemoteProcess），不被会话清理，这是 Operit 验证过的存活方案。
-     */
-    private void ensureVscreenServer() {
-        try {
-            long now = System.currentTimeMillis();
-            if (now - lastVscreenEnsureTs < 5000) return;  // 5 秒频率限制
-            lastVscreenEnsureTs = now;
-            if (vscreenAlive()) return;  // server 已在监听
-            File src = vscreenDex;
-            if (src == null || !src.exists()) return;
-            if (!shizukuAvailable()) return;
-            android.os.IBinder binder = Shizuku.getBinder();
-            if (binder == null) return;
-            IShizukuService svc = IShizukuService.Stub.asInterface(binder);
-            if (svc == null) return;
-            // 1) 特权拷贝 jar 到 /data/local/tmp（App uid 写不了该目录；等待完成）
-            IRemoteProcess cp = svc.newProcess(new String[]{ "/system/bin/cp", "-f", src.getAbsolutePath(), "/data/local/tmp/vscreen_shizuku.jar" }, null, null);
-            if (cp != null) { cp.waitFor(); }
-            // 2) chmod 644（保证可读）
-            IRemoteProcess ch = svc.newProcess(new String[]{ "/system/bin/chmod", "644", "/data/local/tmp/vscreen_shizuku.jar" }, null, null);
-            if (ch != null) { ch.waitFor(); }
-            // 3) 启动 server（长驻；保存引用防 GC）—— Operit 同款启动方式：
-            //    CLASSPATH=... app_process / <Main>（cmd-dir 用 /，不用 /system/bin；Operit 实测在这类设备可用）
-            // v1.18（B12）：主类与端口随变体（原为硬编码 "…vscreen.VirtualScreenServer"，与
-            // vscreen/Main.java 的真实类名 com.deepseek.harness.vscreen.Main 不符，是一条死路径）。
-            String[] env = new String[]{ "CLASSPATH=/data/local/tmp/vscreen_shizuku.jar" };
-            vscreenProc = svc.newProcess(new String[]{
-                    "/system/bin/app_process",
-                    "/",
-                    BuildVariant.APP_ID + ".vscreen.Main",
-                    "--port", String.valueOf(BuildVariant.VS_CORE_PORT)
-            }, env, null);
-            Log.i(TAG, "vscreen server start issued via Shizuku newProcess");
-        } catch (Throwable t) {
-            Log.w(TAG, "ensureVscreenServer failed", t);
-        }
-    }
+    // v1.35：删掉这里的 ensureVscreenServer() 死代码（唯一调用早已被注释）。
+    // 虚拟屏核心的真实启动逻辑在 VsreenBridgeService.ensureCoreServer()，
+    // 并且已支持「Shizuku 优先、root 兜底」，此处再留一份只会误导排查。
 
     private boolean vscreenAlive() {
         try {
@@ -6342,6 +6337,15 @@ public class MainActivity extends Activity {
         env.put("DSH_EXT_ROOT_NAME", pkgRoot());
         env.put("DSH_VS_BRIDGE_PORT", String.valueOf(BuildVariant.VS_BRIDGE_PORT));
         env.put("DSH_VS_CORE_PORT", String.valueOf(BuildVariant.VS_CORE_PORT));
+        // v1.32（冷启动优化）：开启 node 的磁盘字节码缓存（NODE_COMPILE_CACHE）。
+        // 实测（模拟器，0.2.2）：import zod 2.68→2.39 s、dsh-app-boot 1.93→1.65 s、
+        // cordis 162→71 ms —— 整体约 −10~15%（省的是“解析+编译”，省不掉顶层求值）。
+        // 缓存目录放应用私有 files/ 下（随 App 卸载清理，不占用户存储），并限制大小防止无限增长。
+        try {
+            File ccDir = new File(getFilesDir(), "node-compile-cache");
+            if (!ccDir.exists()) ccDir.mkdirs();
+            env.put("NODE_COMPILE_CACHE", ccDir.getAbsolutePath());
+        } catch (Throwable ignored) {}
         pb.redirectErrorStream(true);
 
         final Process proc = pb.start();
@@ -8070,9 +8074,9 @@ public class MainActivity extends Activity {
      */
     private static final String[][] SIMPLE_GROUPS = {
         {"", "extract"},
-        // v1.25（维护者要求）：功能组独立出来 —— 浏览器 / 悬浮窗 / 虚拟屏，全部移出「系统」
-        {"group.features", "browser", "overlaymsg", "vscreen"},
         {"group.system", "env", "perm", "plugins", "log", "theme"},
+        // v1.30（维护者要求）：功能组移到「系统」下方 —— 浏览器 / 悬浮窗 / 虚拟屏，全部移出「系统」
+        {"group.features", "browser", "overlaymsg", "vscreen"},
         {"group.diagnose", "selfcheck"},
         // v1.21（用户要求）：会话两行移到最后 —— 它们不是日常高频操作，
         // 原来排在最上面会挡住「启动引擎 / 权限 / 日志」这些常用入口。
@@ -8322,11 +8326,31 @@ public class MainActivity extends Activity {
         box.setOrientation(LinearLayout.VERTICAL);
         box.addView(cText(t("card.rescueDesc", "引擎起不来时，用安全模式跳过用户层启动（不丢数据）；也可以随时导出全部数据做备份。"),
                 11f, cSub(), false));
+        // v1.30（维护者要求）：页面与引擎的控制流断开后（前端不自动重连），
+        // 这里给一个手动兜底：重载 WebView 即可重新握手，会话/消息都不丢。
+        Button reconnect = cButton("重连页面", false);
+        reconnect.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                closeDialogOverlay();
+                try {
+                    if (webView != null) {
+                        webView.reload();          // 保留 token/会话，只重建页面与 WebSocket
+                        conToast("已重新加载页面");
+                    } else {
+                        loadHome();
+                        conToast("已重新打开主界面");
+                    }
+                } catch (Throwable th) {
+                    conToast(I18n.tr("重连失败：") + th.getMessage());
+                }
+            }
+        });
+        box.addView(reconnect, cTop(cGap(12)));
         Button safe = cButton("安全模式启动", false);
         safe.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { closeDialogOverlay(); conSafeMode(); }
         });
-        box.addView(safe, cTop(cGap(12)));
+        box.addView(safe, cTop(cGap(8)));
         Button exp = cButton("导出全部数据", false);
         exp.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { closeDialogOverlay(); conBackupExport(); }
@@ -13038,10 +13062,10 @@ public class MainActivity extends Activity {
         Button sDef = cButton(t("ovl.avatar.sizeDef", "恢复默认值"), false);
         relaxButtonMin(sDef);
         sDef.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) {
-            int defSize = OverlayService.defaultAvatarSize();
+            int defSize = Math.min(maxSize, OverlayService.defaultAvatarSize());
             curSize[0] = defSize;
             sbSize.setProgress(defSize - minSize);
-            OverlayService.setAvatarSize(MainActivity.this, defSize);
+            OverlayService.setAvatarSize(MainActivity.this, -1);
         }});
         Button sSave = cButton(t("ovl.avatar.sizeSave", "保存"), true);
         relaxButtonMin(sSave);
